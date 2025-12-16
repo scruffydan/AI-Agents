@@ -4,12 +4,12 @@ A collection of specialized code review agents and commands for Claude Code.
 
 ## What's Included
 
-| Agent/Command | Purpose |
-|---------------|---------|
-| `code-security` | Security vulnerability detection, OWASP Top 10 compliance |
-| `code-readability` | Code clarity, naming, structure, documentation review |
-| `code-performance` | Performance bottlenecks, algorithm optimization |
-| `code-full-review` | Orchestrates all three specialists with trade-off analysis |
+| Name | Type | Purpose |
+|------|------|---------|
+| `code-security` | Agent + Command | Security vulnerability detection, OWASP Top 10 compliance |
+| `code-readability` | Agent + Command | Code clarity, naming, structure, documentation review |
+| `code-performance` | Agent + Command | Performance bottlenecks, algorithm optimization |
+| `code-full-review` | Command only | Spawns all 3 agents in parallel, synthesizes trade-offs |
 
 ## Directory Structure
 
@@ -91,7 +91,8 @@ Claude will automatically invoke these agents when relevant. For example:
 - "Review this code for security issues" → triggers `code-security` agent
 - "Is this code readable?" → triggers `code-readability` agent
 - "Optimize this function" → triggers `code-performance` agent
-- "Do a full code review" → triggers `code-full-review` agent
+
+Note: `code-full-review` is command-only (`/code-full-review`) - it spawns the 3 specialist agents in parallel.
 
 ## Customization
 

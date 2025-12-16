@@ -69,18 +69,27 @@ Use this to guide recommendations:
 
 ## Workflow
 
-### Step 1: Gather Agent Analyses
+### Step 1: Spawn Specialist Agents
 
-First, read and apply the criteria from each specialist agent file:
+Use the Task tool to spawn all three specialist agents **in parallel** (in a single message with multiple Task tool calls):
 
-1. **Read** `.claude/commands/code-readability.md` and analyze code for readability issues
-2. **Read** `.claude/commands/code-performance.md` and analyze code for performance issues
-3. **Read** `.claude/commands/code-security.md` and analyze code for security issues
+```
+Task 1 - Security Agent:
+  prompt: "Run a security review on [TARGET_FILES]. Apply the instructions from .claude/prompts/code-security.md. Return a structured report with findings, severity, and file:line references. Do NOT apply fixes - report only."
+  subagent_type: "general-purpose"
 
-For each issue found:
-- Note which agent identified it
-- Assess severity using that agent's criteria
-- Flag potential conflicts with other agents' concerns
+Task 2 - Readability Agent:
+  prompt: "Run a readability review on [TARGET_FILES]. Apply the instructions from .claude/prompts/code-readability.md. Return a structured report with findings, severity, and file:line references. Do NOT apply fixes - report only."
+  subagent_type: "general-purpose"
+
+Task 3 - Performance Agent:
+  prompt: "Run a performance review on [TARGET_FILES]. Apply the instructions from .claude/prompts/code-performance.md. Return a structured report with findings, severity, and file:line references. Do NOT apply fixes - report only."
+  subagent_type: "general-purpose"
+```
+
+Replace `[TARGET_FILES]` with the files/directories specified by the user.
+
+Wait for all three agents to complete, then collect their findings.
 
 ### Step 2: Present the Debate
 
