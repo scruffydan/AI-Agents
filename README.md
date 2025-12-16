@@ -60,14 +60,20 @@ mv .claude-temp/claude .claude
 rm -rf .claude-temp
 ```
 
-### Option 3: Symlink (Stay Updated)
+### Option 3: Symlink (Stay Updated - Recommended)
 
 Symlink to this repo so updates are automatic:
 
 ```bash
-# From the root of this repo, symlink to global config
-ln -s "$(pwd)/claude/agents/"* ~/.claude/agents/
-ln -s "$(pwd)/claude/commands/"* ~/.claude/commands/
+# Quick install: Run the install script
+./install.sh
+```
+
+Or manually:
+```bash
+# From the root of this repo, symlink directories to global config
+ln -s "$(pwd)/claude/agents" ~/.claude/agents
+ln -s "$(pwd)/claude/commands" ~/.claude/commands
 ln -s "$(pwd)/claude/prompts" ~/.claude/prompts
 ln -s "$(pwd)/claude/CLAUDE.md" ~/.claude/CLAUDE.md
 ```
