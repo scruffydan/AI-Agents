@@ -5,6 +5,6 @@ tools: Read, Glob, Grep
 model: opus
 ---
 
-Read and apply the instructions from `.claude/prompts/code-security.md`.
+Read and apply the instructions from `~/.claude/prompts/code-security.md`.
 
 $ARGUMENTS
