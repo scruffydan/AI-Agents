@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Installation script for Claude Code AI Agents
-# Creates necessary directories and symlinks to ~/.claude/
+# Copies files to ~/.claude/
 
 set -e
 
@@ -42,73 +42,107 @@ ask_user_action() {
     esac
 }
 
-# Symlink agents directory
-echo "Symlinking agents directory..."
-if [ -L "$CLAUDE_DIR/agents" ] || [ -d "$CLAUDE_DIR/agents" ]; then
-    if ask_user_action "$CLAUDE_DIR/agents" "agents/"; then
-        ln -s "$REPO_ROOT/claude/agents" "$CLAUDE_DIR/agents"
-    fi
-else
-    ln -s "$REPO_ROOT/claude/agents" "$CLAUDE_DIR/agents"
-fi
+# Create target directories
+echo "Creating directories..."
+mkdir -p "$CLAUDE_DIR/agents"
+mkdir -p "$CLAUDE_DIR/commands"
+mkdir -p "$CLAUDE_DIR/prompts"
 
-# Symlink commands directory
+# Copy agent files
 echo ""
-echo "Symlinking commands directory..."
-if [ -L "$CLAUDE_DIR/commands" ] || [ -d "$CLAUDE_DIR/commands" ]; then
-    if ask_user_action "$CLAUDE_DIR/commands" "commands/"; then
-        ln -s "$REPO_ROOT/claude/commands" "$CLAUDE_DIR/commands"
-    fi
-else
-    ln -s "$REPO_ROOT/claude/commands" "$CLAUDE_DIR/commands"
-fi
+echo "Copying agent files..."
+for agent in "$REPO_ROOT/claude/agents/"*.md; do
+    if [ -f "$agent" ]; then
+        agent_name=$(basename "$agent")
+        target="$CLAUDE_DIR/agents/$agent_name"
 
-# Symlink prompts directory
-echo ""
-echo "Symlinking prompts directory..."
-if [ -L "$CLAUDE_DIR/prompts" ] || [ -d "$CLAUDE_DIR/prompts" ]; then
-    if ask_user_action "$CLAUDE_DIR/prompts" "prompts/"; then
-        ln -s "$REPO_ROOT/claude/prompts" "$CLAUDE_DIR/prompts"
-    fi
-else
-    ln -s "$REPO_ROOT/claude/prompts" "$CLAUDE_DIR/prompts"
-fi
+        # Check if target exists
+        if [ -f "$target" ] || [ -L "$target" ]; then
+            if ! ask_user_action "$target" "agents/$agent_name"; then
+                continue
+            fi
+        fi
 
-# Symlink CLAUDE.md
+        echo "  Copying: $agent_name"
+        cp "$agent" "$target"
+    fi
+done
+
+# Copy command files
 echo ""
-echo "Symlinking CLAUDE.md..."
-if [ -L "$CLAUDE_DIR/CLAUDE.md" ] || [ -f "$CLAUDE_DIR/CLAUDE.md" ]; then
+echo "Copying command files..."
+for command in "$REPO_ROOT/claude/commands/"*.md; do
+    if [ -f "$command" ]; then
+        command_name=$(basename "$command")
+        target="$CLAUDE_DIR/commands/$command_name"
+
+        # Check if target exists
+        if [ -f "$target" ] || [ -L "$target" ]; then
+            if ! ask_user_action "$target" "commands/$command_name"; then
+                continue
+            fi
+        fi
+
+        echo "  Copying: $command_name"
+        cp "$command" "$target"
+    fi
+done
+
+# Copy prompt files
+echo ""
+echo "Copying prompt files..."
+for prompt in "$REPO_ROOT/claude/prompts/"*.md; do
+    if [ -f "$prompt" ]; then
+        prompt_name=$(basename "$prompt")
+        target="$CLAUDE_DIR/prompts/$prompt_name"
+
+        # Check if target exists
+        if [ -f "$target" ] || [ -L "$target" ]; then
+            if ! ask_user_action "$target" "prompts/$prompt_name"; then
+                continue
+            fi
+        fi
+
+        echo "  Copying: $prompt_name"
+        cp "$prompt" "$target"
+    fi
+done
+
+# Copy CLAUDE.md
+echo ""
+echo "Copying CLAUDE.md..."
+if [ -f "$CLAUDE_DIR/CLAUDE.md" ] || [ -L "$CLAUDE_DIR/CLAUDE.md" ]; then
     if ask_user_action "$CLAUDE_DIR/CLAUDE.md" "CLAUDE.md"; then
-        ln -s "$REPO_ROOT/claude/CLAUDE.md" "$CLAUDE_DIR/CLAUDE.md"
+        cp "$REPO_ROOT/claude/CLAUDE.md" "$CLAUDE_DIR/CLAUDE.md"
     fi
 else
-    ln -s "$REPO_ROOT/claude/CLAUDE.md" "$CLAUDE_DIR/CLAUDE.md"
+    cp "$REPO_ROOT/claude/CLAUDE.md" "$CLAUDE_DIR/CLAUDE.md"
 fi
 
 echo ""
 echo "✅ Installation complete!"
 echo ""
-if [ -L "$CLAUDE_DIR/agents" ]; then
-    echo "Agents directory: $CLAUDE_DIR/agents/ → $(readlink "$CLAUDE_DIR/agents")"
-    echo "  Available agents:"
-    ls -1 "$CLAUDE_DIR/agents/" | sed 's/^/    - /'
+if [ -d "$CLAUDE_DIR/agents" ]; then
+    echo "Available agents:"
+    ls -1 "$CLAUDE_DIR/agents/" | sed 's/^/  - /'
 fi
 echo ""
-if [ -L "$CLAUDE_DIR/commands" ]; then
-    echo "Commands directory: $CLAUDE_DIR/commands/ → $(readlink "$CLAUDE_DIR/commands")"
-    echo "  Available commands:"
-    ls -1 "$CLAUDE_DIR/commands/" | sed 's/^/    - /'
+if [ -d "$CLAUDE_DIR/commands" ]; then
+    echo "Available commands:"
+    ls -1 "$CLAUDE_DIR/commands/" | sed 's/^/  - /'
 fi
 echo ""
-if [ -L "$CLAUDE_DIR/prompts" ]; then
-    echo "Prompts directory: $CLAUDE_DIR/prompts/ → $(readlink "$CLAUDE_DIR/prompts")"
+if [ -d "$CLAUDE_DIR/prompts" ]; then
+    echo "Prompts installed: $(ls -1 "$CLAUDE_DIR/prompts/" | wc -l | tr -d ' ') files"
 fi
 echo ""
-if [ -L "$CLAUDE_DIR/CLAUDE.md" ]; then
-    echo "Global instructions: $CLAUDE_DIR/CLAUDE.md → $(readlink "$CLAUDE_DIR/CLAUDE.md")"
+if [ -f "$CLAUDE_DIR/CLAUDE.md" ]; then
+    echo "Global instructions: $CLAUDE_DIR/CLAUDE.md"
 fi
 echo ""
 echo "Usage:"
 echo "  - Agents auto-invoke when Claude detects relevant tasks"
 echo "  - Commands: /code-security, /code-readability, /code-performance, /code-full-review"
+echo ""
+echo "Note: Files are copied (not symlinked). Run ./install.sh again to update."
 echo ""
