@@ -7,10 +7,42 @@ set -e
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CLAUDE_DIR="$HOME/.claude"
+FORCE=false
+
+# Parse command-line arguments
+show_help() {
+    echo "Usage: ./install.sh [OPTIONS]"
+    echo ""
+    echo "Options:"
+    echo "  -y, --yes      Automatically answer yes to all prompts (force overwrite)"
+    echo "  -h, --help     Show this help message"
+    echo ""
+}
+
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        -y|--yes)
+            FORCE=true
+            shift
+            ;;
+        -h|--help)
+            show_help
+            exit 0
+            ;;
+        *)
+            echo "Unknown option: $1"
+            show_help
+            exit 1
+            ;;
+    esac
+done
 
 echo "Installing Claude Code AI Agents..."
 echo "Repository root: $REPO_ROOT"
 echo "Target directory: $CLAUDE_DIR"
+if [ "$FORCE" = true ]; then
+    echo "Mode: Force overwrite enabled"
+fi
 echo ""
 
 # Helper function to ask user what to do with existing file
@@ -58,7 +90,9 @@ for agent in "$REPO_ROOT/claude/agents/"*.md; do
 
         # Check if target exists
         if [ -f "$target" ] || [ -L "$target" ]; then
-            if ! ask_user_action "$target" "agents/$agent_name"; then
+            if [ "$FORCE" = true ]; then
+                rm -rf "$target"
+            elif ! ask_user_action "$target" "agents/$agent_name"; then
                 continue
             fi
         fi
@@ -78,7 +112,9 @@ for command in "$REPO_ROOT/claude/commands/"*.md; do
 
         # Check if target exists
         if [ -f "$target" ] || [ -L "$target" ]; then
-            if ! ask_user_action "$target" "commands/$command_name"; then
+            if [ "$FORCE" = true ]; then
+                rm -rf "$target"
+            elif ! ask_user_action "$target" "commands/$command_name"; then
                 continue
             fi
         fi
@@ -98,7 +134,9 @@ for prompt in "$REPO_ROOT/claude/prompts/"*.md; do
 
         # Check if target exists
         if [ -f "$target" ] || [ -L "$target" ]; then
-            if ! ask_user_action "$target" "prompts/$prompt_name"; then
+            if [ "$FORCE" = true ]; then
+                rm -rf "$target"
+            elif ! ask_user_action "$target" "prompts/$prompt_name"; then
                 continue
             fi
         fi
@@ -112,7 +150,10 @@ done
 echo ""
 echo "Copying CLAUDE.md..."
 if [ -f "$CLAUDE_DIR/CLAUDE.md" ] || [ -L "$CLAUDE_DIR/CLAUDE.md" ]; then
-    if ask_user_action "$CLAUDE_DIR/CLAUDE.md" "CLAUDE.md"; then
+    if [ "$FORCE" = true ]; then
+        rm -rf "$CLAUDE_DIR/CLAUDE.md"
+        cp "$REPO_ROOT/claude/CLAUDE.md" "$CLAUDE_DIR/CLAUDE.md"
+    elif ask_user_action "$CLAUDE_DIR/CLAUDE.md" "CLAUDE.md"; then
         cp "$REPO_ROOT/claude/CLAUDE.md" "$CLAUDE_DIR/CLAUDE.md"
     fi
 else
@@ -145,4 +186,5 @@ echo "  - Agents auto-invoke when Claude detects relevant tasks"
 echo "  - Commands: /code-security, /code-readability, /code-performance, /code-full-review"
 echo ""
 echo "Note: Files are copied (not symlinked). Run ./install.sh again to update."
+echo "      Use ./install.sh -y to force overwrite without prompts."
 echo ""
