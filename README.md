@@ -21,28 +21,19 @@ claude/
 └── prompts/           # Shared instructions (source of truth)
 ```
 
-## Deployment
+## Installation
 
-### Option 1: Global (All Projects)
+### Quick Install (Recommended)
 
-Copy to your home directory for use across all projects:
+Run the install script to copy all files to your global config:
 
 ```bash
-# Copy agents (available globally)
-cp -r claude/agents/* ~/.claude/agents/
-
-# Copy commands (available globally)
-cp -r claude/commands/* ~/.claude/commands/
-
-# Copy prompts (required for agents/commands to work)
-mkdir -p ~/.claude/prompts
-cp -r claude/prompts/* ~/.claude/prompts/
-
-# Optionally copy CLAUDE.md for global instructions
-cp claude/CLAUDE.md ~/.claude/CLAUDE.md
+./install.sh
 ```
 
-### Option 2: Project-Level (Single Project)
+This copies all agents, commands, prompts, and CLAUDE.md to `~/.claude/` for use across all projects. Run it again to update when pulling new changes.
+
+### Project-Level Install
 
 Copy the `claude` folder to your project root and rename it to `.claude`:
 
@@ -51,24 +42,13 @@ Copy the `claude` folder to your project root and rename it to `.claude`:
 cp -r claude /path/to/your/project/.claude
 ```
 
-Or using git:
+Or clone directly into your project:
 ```bash
-# Clone directly into your project
 cd /path/to/your/project
 git clone https://github.com/YOUR_USERNAME/AI-Agents.git .claude-temp
 mv .claude-temp/claude .claude
 rm -rf .claude-temp
 ```
-
-### Quick Install (Recommended)
-
-Run the install script to copy files to your global config:
-
-```bash
-./install.sh
-```
-
-This will copy all agents, commands, prompts, and CLAUDE.md to `~/.claude/`. Run it again to update when pulling new changes from this repo.
 
 ## Usage
 
