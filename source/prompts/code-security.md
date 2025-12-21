@@ -3,7 +3,7 @@ description: Security review specialist for identifying vulnerabilities and ensu
 type: agent+command
 claude:
   tools: Read, Glob, Grep
-  model: opus
+  model: claude-opus-4-0-20250514
 opencode:
   mode: subagent
   model: anthropic/claude-opus-4-20250514
