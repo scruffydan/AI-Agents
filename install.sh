@@ -11,8 +11,9 @@ BUILD_DIR="$REPO_ROOT/build"
 CLAUDE_DIR="$HOME/.claude"
 OPENCODE_DIR="$HOME/.config/opencode"
 FORCE=false
-INSTALL_CLAUDE=true
-INSTALL_OPENCODE=true
+INSTALL_CLAUDE=false
+INSTALL_OPENCODE=false
+TARGET_SPECIFIED=false
 
 # Colors
 GREEN='\033[0;32m'
@@ -26,10 +27,18 @@ show_help() {
     echo ""
     echo "Options:"
     echo "  -y, --yes          Automatically answer yes to all prompts (force overwrite)"
-    echo "  --claude-only      Only install Claude Code configs"
-    echo "  --opencode-only    Only install OpenCode configs"
+    echo "  --claude           Install Claude Code configs"
+    echo "  --opencode         Install OpenCode configs"
+    echo "  --all              Install both Claude Code and OpenCode (default if no target specified)"
     echo "  --skip-build       Skip running build.sh (use existing build/)"
     echo "  -h, --help         Show this help message"
+    echo ""
+    echo "Examples:"
+    echo "  ./install.sh                    # Interactive: prompts which to install"
+    echo "  ./install.sh --claude           # Install only Claude Code"
+    echo "  ./install.sh --opencode         # Install only OpenCode"
+    echo "  ./install.sh --all              # Install both without prompting"
+    echo "  ./install.sh --claude -y        # Install Claude Code, force overwrite"
     echo ""
 }
 
@@ -41,12 +50,20 @@ while [[ $# -gt 0 ]]; do
             FORCE=true
             shift
             ;;
-        --claude-only)
-            INSTALL_OPENCODE=false
+        --claude)
+            INSTALL_CLAUDE=true
+            TARGET_SPECIFIED=true
             shift
             ;;
-        --opencode-only)
-            INSTALL_CLAUDE=false
+        --opencode)
+            INSTALL_OPENCODE=true
+            TARGET_SPECIFIED=true
+            shift
+            ;;
+        --all)
+            INSTALL_CLAUDE=true
+            INSTALL_OPENCODE=true
+            TARGET_SPECIFIED=true
             shift
             ;;
         --skip-build)
@@ -64,6 +81,30 @@ while [[ $# -gt 0 ]]; do
             ;;
     esac
 done
+
+# Interactive selection if no target specified
+if [ "$TARGET_SPECIFIED" = false ]; then
+    echo -e "${YELLOW}Select what to install:${NC}"
+    echo "  1) Claude Code only"
+    echo "  2) OpenCode only"
+    echo "  3) Both (default)"
+    echo ""
+    read -p "Choice [1/2/3]: " choice
+    
+    case "$choice" in
+        1)
+            INSTALL_CLAUDE=true
+            ;;
+        2)
+            INSTALL_OPENCODE=true
+            ;;
+        *)
+            INSTALL_CLAUDE=true
+            INSTALL_OPENCODE=true
+            ;;
+    esac
+    echo ""
+fi
 
 # Run build.sh first
 if [ "$SKIP_BUILD" = false ]; then
