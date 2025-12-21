@@ -15,7 +15,7 @@ A collection of specialized code review agents and commands for **Claude Code** 
 
 ```
 AI-Agents/
-├── shared/prompts/        # Source of truth (combined frontmatter)
+├── source/prompts/        # Source of truth (combined frontmatter)
 │   ├── base-instructions.md
 │   ├── code-security.md
 │   ├── code-readability.md
@@ -30,7 +30,7 @@ AI-Agents/
 │       ├── agent/
 │       ├── command/
 │       └── AGENTS.md
-├── build.sh               # Generates build/ from shared/
+├── build.sh               # Generates build/ from source/
 └── install.sh             # Installs to ~/.claude and ~/.config/opencode
 ```
 
@@ -100,7 +100,7 @@ This will:
 
 ### Editing Instructions
 
-All agent/command logic lives in `shared/prompts/`. Edit these files to customize behavior, then run `./install.sh` to rebuild and reinstall.
+All agent/command logic lives in `source/prompts/`. Edit these files to customize behavior, then run `./install.sh` to rebuild and reinstall.
 
 Each prompt file uses **combined frontmatter**:
 
@@ -129,12 +129,12 @@ The `build.sh` script parses this and generates the appropriate format for each 
 
 ### Adding New Agents
 
-1. Create `shared/prompts/my-agent.md` with combined frontmatter
+1. Create `source/prompts/my-agent.md` with combined frontmatter
 2. Run `./install.sh` to rebuild and install
 
 ### Base Instructions
 
-`shared/prompts/base-instructions.md` generates:
+`source/prompts/base-instructions.md` generates:
 - Claude Code: `~/.claude/CLAUDE.md` (global instructions)
 - OpenCode: `~/.config/opencode/AGENTS.md` (global instructions)
 
@@ -142,7 +142,7 @@ The `build.sh` script parses this and generates the appropriate format for each 
 
 ### Build Process
 
-`build.sh` reads each prompt in `shared/prompts/` and generates:
+`build.sh` reads each prompt in `source/prompts/` and generates:
 
 **For Claude Code:**
 - `build/claude/agents/{name}.md` - Agent with Claude-specific frontmatter

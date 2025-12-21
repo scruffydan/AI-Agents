@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 
 # Build script for AI-Agents
-# Generates Claude Code and OpenCode configs from shared prompts
+# Generates Claude Code and OpenCode configs from source prompts
 
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-SHARED_DIR="$SCRIPT_DIR/shared/prompts"
+SHARED_DIR="$SCRIPT_DIR/source/prompts"
 BUILD_DIR="$SCRIPT_DIR/build"
 
 # Colors for output
