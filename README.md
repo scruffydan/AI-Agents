@@ -81,20 +81,19 @@ This will:
 
 ### OpenCode
 
+**Agents** (via @ mentions):
+```
+@code-security src/auth/login.ts
+@code-readability src/utils/
+@code-performance src/data-processor.ts
+```
+
 **Commands**:
 ```
-/code-security src/auth/login.ts
-/code-readability src/utils/
-/code-performance src/data-processor.ts
 /code-full-review src/api/
 ```
 
-**Agents** (via @ mentions):
-```
-@code-security review this file for vulnerabilities
-@code-readability check naming conventions
-@code-performance find bottlenecks
-```
+Note: In OpenCode, the individual review agents are invoked via `@` mentions. Only `code-full-review` is a slash command since it orchestrates all 3 agents.
 
 ## Customization
 

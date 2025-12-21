@@ -188,25 +188,20 @@ for prompt_file in "$SHARED_DIR"/*.md; do
         echo "  Created: opencode/agent/$filename.md"
     fi
     
-    # OpenCode Command (always created)
-    opencode_command_file="$BUILD_DIR/opencode/command/$filename.md"
-    {
-        echo "---"
-        echo "description: $description"
-        if has_agent "$type"; then
-            echo "agent: $filename"
-        fi
-        [ -n "$opencode_subtask" ] && echo "subtask: $opencode_subtask"
-        [ -n "$opencode_model" ] && ! has_agent "$type" && echo "model: $opencode_model"
-        echo "---"
-        echo ""
-        if has_agent "$type"; then
-            echo "\$ARGUMENTS"
-        else
+    # OpenCode Command (only for command-only types - agents are invoked via @mention)
+    if is_command_only "$type"; then
+        opencode_command_file="$BUILD_DIR/opencode/command/$filename.md"
+        {
+            echo "---"
+            echo "description: $description"
+            [ -n "$opencode_subtask" ] && echo "subtask: $opencode_subtask"
+            [ -n "$opencode_model" ] && echo "model: $opencode_model"
+            echo "---"
+            echo ""
             echo "$content"
-        fi
-    } > "$opencode_command_file"
-    echo "  Created: opencode/command/$filename.md"
+        } > "$opencode_command_file"
+        echo "  Created: opencode/command/$filename.md"
+    fi
     
     echo ""
 done

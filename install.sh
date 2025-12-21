@@ -232,17 +232,19 @@ if [ "$INSTALL_OPENCODE" = true ]; then
     
     # Create target directories
     mkdir -p "$OPENCODE_DIR/agent"
-    mkdir -p "$OPENCODE_DIR/command"
     
     # Copy agent files
     echo ""
     echo "Copying agent files..."
     copy_files "$BUILD_DIR/opencode/agent" "$OPENCODE_DIR/agent" "agent"
     
-    # Copy command files
-    echo ""
-    echo "Copying command files..."
-    copy_files "$BUILD_DIR/opencode/command" "$OPENCODE_DIR/command" "command"
+    # Copy command files (if any exist)
+    if [ -d "$BUILD_DIR/opencode/command" ] && [ "$(ls -A "$BUILD_DIR/opencode/command" 2>/dev/null)" ]; then
+        mkdir -p "$OPENCODE_DIR/command"
+        echo ""
+        echo "Copying command files..."
+        copy_files "$BUILD_DIR/opencode/command" "$OPENCODE_DIR/command" "command"
+    fi
     
     # Copy AGENTS.md
     echo ""
@@ -253,13 +255,13 @@ if [ "$INSTALL_OPENCODE" = true ]; then
     echo -e "${GREEN}OpenCode installation complete!${NC}"
     echo ""
     if [ -d "$OPENCODE_DIR/agent" ]; then
-        echo "Available agents:"
-        ls -1 "$OPENCODE_DIR/agent/" 2>/dev/null | sed 's/^/  - /' || echo "  (none)"
+        echo "Available agents (invoke with @name):"
+        ls -1 "$OPENCODE_DIR/agent/" 2>/dev/null | sed 's/\.md$//' | sed 's/^/  @/' || echo "  (none)"
     fi
-    echo ""
-    if [ -d "$OPENCODE_DIR/command" ]; then
+    if [ -d "$OPENCODE_DIR/command" ] && [ "$(ls -A "$OPENCODE_DIR/command" 2>/dev/null)" ]; then
+        echo ""
         echo "Available commands:"
-        ls -1 "$OPENCODE_DIR/command/" 2>/dev/null | sed 's/^/  - /' || echo "  (none)"
+        ls -1 "$OPENCODE_DIR/command/" 2>/dev/null | sed 's/\.md$//' | sed 's/^/  \//' || echo "  (none)"
     fi
     echo ""
     if [ -f "$OPENCODE_DIR/AGENTS.md" ]; then
@@ -284,7 +286,7 @@ fi
 if [ "$INSTALL_OPENCODE" = true ]; then
     echo "  OpenCode:"
     echo "    - Agents: @code-security, @code-readability, @code-performance"
-    echo "    - Commands: /code-security, /code-readability, /code-performance, /code-full-review"
+    echo "    - Command: /code-full-review (orchestrates all 3 agents)"
 fi
 echo ""
 echo "Note: Files are copied (not symlinked). Run ./install.sh again to update."
