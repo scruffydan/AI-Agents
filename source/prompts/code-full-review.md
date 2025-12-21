@@ -3,7 +3,6 @@ description: Full code review orchestrating security, readability, and performan
 type: command-only
 claude: {}
 opencode:
-  model: anthropic/claude-opus-4-20250514
   subtask: true
 ---
 
