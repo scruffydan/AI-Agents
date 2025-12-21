@@ -1,6 +1,6 @@
-# Claude Code AI Agents
+# AI-Agents
 
-A collection of specialized code review agents and commands for Claude Code.
+A collection of specialized code review agents and commands for **Claude Code** and **OpenCode**.
 
 ## What's Included
 
@@ -9,53 +9,64 @@ A collection of specialized code review agents and commands for Claude Code.
 | `code-security` | Agent + Command | Security vulnerability detection, OWASP Top 10 compliance |
 | `code-readability` | Agent + Command | Code clarity, naming, structure, documentation review |
 | `code-performance` | Agent + Command | Performance bottlenecks, algorithm optimization |
-| `code-full-review` | Command only | Spawns all 3 agents in parallel, synthesizes trade-offs |
+| `code-full-review` | Command only | Orchestrates all 3 agents, synthesizes findings with trade-off debates |
 
 ## Directory Structure
 
 ```
-claude/
-├── CLAUDE.md          # Base instructions for Claude
-├── agents/            # Auto-invoked agents (Claude decides when to use)
-├── commands/          # Manual slash commands (/code-security, etc.)
-└── prompts/           # Shared instructions (source of truth)
+AI-Agents/
+├── shared/prompts/        # Source of truth (combined frontmatter)
+│   ├── base-instructions.md
+│   ├── code-security.md
+│   ├── code-readability.md
+│   ├── code-performance.md
+│   └── code-full-review.md
+├── build/                 # GITIGNORED - generated output
+│   ├── claude/
+│   │   ├── agents/
+│   │   ├── commands/
+│   │   └── CLAUDE.md
+│   └── opencode/
+│       ├── agent/
+│       ├── command/
+│       └── rules/
+├── build.sh               # Generates build/ from shared/
+└── install.sh             # Installs to ~/.claude and ~/.config/opencode
 ```
 
 ## Installation
 
-### Quick Install (Recommended)
-
-Run the install script to copy all files to your global config:
+### Quick Install
 
 ```bash
 ./install.sh
 ```
 
-This copies all agents, commands, prompts, and CLAUDE.md to `~/.claude/` for use across all projects. Run it again to update when pulling new changes.
+This will:
+1. Run `build.sh` to generate tool-specific configs
+2. Install Claude Code configs to `~/.claude/`
+3. Install OpenCode configs to `~/.config/opencode/`
 
-### Project-Level Install
-
-Copy the `claude` folder to your project root and rename it to `.claude`:
+### Options
 
 ```bash
-# From this repo
-cp -r claude /path/to/your/project/.claude
+./install.sh -y              # Force overwrite without prompts
+./install.sh --claude-only   # Only install Claude Code
+./install.sh --opencode-only # Only install OpenCode
+./install.sh --skip-build    # Use existing build/ (skip regeneration)
 ```
 
-Or clone directly into your project:
+### Manual Build Only
+
 ```bash
-cd /path/to/your/project
-git clone https://github.com/YOUR_USERNAME/AI-Agents.git .claude-temp
-mv .claude-temp/claude .claude
-rm -rf .claude-temp
+./build.sh                   # Just generate configs without installing
 ```
 
 ## Usage
 
-### Slash Commands (Manual)
+### Claude Code
 
-Invoke manually with a file or directory as argument:
-
+**Commands** (manual):
 ```bash
 /code-security src/auth/login.ts
 /code-readability src/utils/
@@ -63,72 +74,109 @@ Invoke manually with a file or directory as argument:
 /code-full-review src/api/
 ```
 
-### Agents (Automatic)
+**Agents** (automatic):
+- "Review this code for security issues" → triggers `code-security`
+- "Is this code readable?" → triggers `code-readability`
+- "Optimize this function" → triggers `code-performance`
 
-Claude will automatically invoke these agents when relevant. For example:
-- "Review this code for security issues" → triggers `code-security` agent
-- "Is this code readable?" → triggers `code-readability` agent
-- "Optimize this function" → triggers `code-performance` agent
+### OpenCode
 
-Note: `code-full-review` is command-only (`/code-full-review`) - it spawns the 3 specialist agents in parallel.
+**Commands**:
+```
+/code-security src/auth/login.ts
+/code-readability src/utils/
+/code-performance src/data-processor.ts
+/code-full-review src/api/
+```
+
+**Agents** (via @ mentions):
+```
+@code-security review this file for vulnerabilities
+@code-readability check naming conventions
+@code-performance find bottlenecks
+```
 
 ## Customization
 
 ### Editing Instructions
 
-All agent/command logic lives in `prompts/`. Edit these files to customize behavior:
+All agent/command logic lives in `shared/prompts/`. Edit these files to customize behavior, then run `./install.sh` to rebuild and reinstall.
 
-- `prompts/code-security.md` - Security review criteria
-- `prompts/code-readability.md` - Readability standards
-- `prompts/code-performance.md` - Performance guidelines
-- `prompts/code-full-review.md` - Orchestration logic
+Each prompt file uses **combined frontmatter**:
 
-Changes apply to both agents and commands automatically.
+```yaml
+---
+description: What this agent does...
+type: agent+command    # or "command-only"
+claude:
+  tools: Read, Glob, Grep
+  model: opus
+opencode:
+  mode: subagent
+  model: anthropic/claude-opus-4-20250514
+  tools:
+    write: false
+    edit: false
+    bash: false
+---
+
+# Prompt content here...
+
+$ARGUMENTS
+```
+
+The `build.sh` script parses this and generates the appropriate format for each tool.
 
 ### Adding New Agents
 
-1. Create the prompt in `prompts/my-agent.md`
-2. Create the agent wrapper in `agents/my-agent.md`:
-   ```markdown
-   ---
-   name: my-agent
-   description: When this agent should be invoked
-   tools: Read, Glob, Grep
-   ---
+1. Create `shared/prompts/my-agent.md` with combined frontmatter
+2. Run `./install.sh` to rebuild and install
 
-   Read and apply the instructions from `.claude/prompts/my-agent.md`.
+### Base Instructions
 
-   $ARGUMENTS
-   ```
-3. Create the command wrapper in `commands/my-agent.md`:
-   ```markdown
-   Read and apply the instructions from `.claude/prompts/my-agent.md`.
+`shared/prompts/base-instructions.md` generates:
+- Claude Code: `~/.claude/CLAUDE.md` (global instructions)
+- OpenCode: `~/.config/opencode/rules/base.md` (global rules)
 
-   $ARGUMENTS
-   ```
+## How It Works
 
-### Available Tools for Agents
+### Build Process
 
-| Tool | Purpose |
-|------|---------|
-| `Read` | Read file contents |
-| `Write` | Create/overwrite files |
-| `Edit` | Modify existing files |
-| `Glob` | Find files by pattern |
-| `Grep` | Search file contents |
-| `Bash` | Run shell commands |
+`build.sh` reads each prompt in `shared/prompts/` and generates:
 
-Read-only agents (reviewers) should use: `Read, Glob, Grep`
-Write agents (fixers) should add: `Write, Edit, Bash`
+**For Claude Code:**
+- `build/claude/agents/{name}.md` - Agent with Claude-specific frontmatter
+- `build/claude/commands/{name}.md` - Raw prompt for slash commands
+- `build/claude/CLAUDE.md` - From `base-instructions.md`
 
-## Precedence
+**For OpenCode:**
+- `build/opencode/agent/{name}.md` - Agent with OpenCode-specific frontmatter
+- `build/opencode/command/{name}.md` - Command that references the agent
+- `build/opencode/rules/base.md` - From `base-instructions.md`
 
-Claude Code loads instructions in this order (later overrides earlier):
+### Agent vs Command
 
-1. `~/.claude/CLAUDE.md` (global)
-2. `.claude/CLAUDE.md` (project)
-3. `CLAUDE.md` (project root)
-4. `claude.md` (project root)
+| Type | Claude Code | OpenCode |
+|------|-------------|----------|
+| Agent | Auto-invoked when relevant | Called via `@agent-name` |
+| Command | Manual via `/command-name` | Manual via `/command-name` |
+
+Commands with type `agent+command` create both. Commands with type `command-only` create only commands (like `code-full-review` which orchestrates sub-agents).
+
+## Workflow
+
+All review agents use a hybrid workflow:
+
+1. **Analyze** - Read target files and identify issues
+2. **Report** - Present findings with severity and recommendations
+3. **Get Approval** - Ask user which fixes to apply
+4. **Apply Fixes** - Only after user approval
+
+The `code-full-review` command:
+1. Spawns all 3 specialists in parallel
+2. Collects their findings
+3. Presents debates where recommendations conflict
+4. Helps user make informed trade-off decisions
 
 ## License
 

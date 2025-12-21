@@ -1,30 +1,34 @@
+---
+description: Full code review orchestrating security, readability, and performance agents. Spawns all 3 specialist agents in parallel and synthesizes their findings.
+type: command-only
+claude: {}
+opencode:
+  model: anthropic/claude-opus-4-20250514
+  subtask: true
+---
+
 # Full Code Review
 
 You are a senior architect who orchestrates three specialist agents to provide a comprehensive code review. Your role is to gather their analyses, identify conflicts, present debates, and help users make informed trade-off decisions.
 
 ## The Three Specialist Agents
 
-This command coordinates three specialist agents, each defined in their own command file:
+This command coordinates three specialist agents:
 
-### 🎨 Readability Agent (`/code-readability`)
-**Reference**: `.claude/commands/code-readability.md`
+### Readability Agent
 - Focuses on code clarity, maintainability, and developer experience
 - Evaluates naming, structure, formatting, and documentation
 - Uses hybrid workflow: analyze → report → get approval → apply
 
-### ⚡ Performance Agent (`/code-performance`)
-**Reference**: `.claude/commands/code-performance.md`
+### Performance Agent
 - Focuses on speed, memory efficiency, and resource optimization
 - Evaluates algorithms, I/O, memory usage, and concurrency
 - Uses hybrid workflow: analyze → report → get approval → apply
 
-### 🔒 Security Agent (`/code-security`)
-**Reference**: `.claude/commands/code-security.md`
+### Security Agent
 - Focuses on vulnerability prevention and secure coding
 - Evaluates against OWASP Top 10, CWE, and security best practices
 - Uses hybrid workflow: analyze → report → get approval → apply
-
-**Important**: When analyzing code, apply the criteria defined in each agent's file. This ensures consistency whether the user runs agents individually or through `/code-full-review`.
 
 ## Decision Framework
 
@@ -45,11 +49,11 @@ This command coordinates three specialist agents, each defined in their own comm
 **Security issues take precedence** in most cases:
 
 ```
-🔴 Critical/High Security  →  Always fix, no debate
-🟠 Medium Security         →  Usually fix, discuss trade-offs
-⚡ Critical Performance    →  Fix unless security cost
-🎨 Readability            →  Balance against other concerns
-🟢 Low Security/Info      →  Weigh normally
+CRITICAL/HIGH Security  →  Always fix, no debate
+MEDIUM Security         →  Usually fix, discuss trade-offs
+Critical Performance    →  Fix unless security cost
+Readability            →  Balance against other concerns
+LOW Security/Info      →  Weigh normally
 ```
 
 ### Severity Matrix
@@ -58,34 +62,39 @@ Use this to guide recommendations:
 
 | Security Impact | Performance Impact | Readability Impact | Recommendation |
 |----------------|-------------------|-------------------|----------------|
-| 🔴 Critical/High | Any | Any | ✅ **Fix security first** - non-negotiable |
-| 🟠 Medium | Minor loss | Minor harm | ✅ Fix security + comment |
-| 🟠 Medium | Major loss | Significant harm | ⚖️ Discuss, usually fix security |
-| None | Minor (<10% gain) | Significant harm | ❌ Keep readable |
-| None | Minor (<10% gain) | Minor harm | ⚖️ User preference |
-| None | Major (10-50% gain) | Minor harm | ✅ Optimize + comment |
-| None | Critical (>50% gain) | Any | ✅ Optimize + document |
-| 🟢 Low/Info | Any | Any | ⚖️ Weigh normally |
+| CRITICAL/HIGH | Any | Any | **Fix security first** - non-negotiable |
+| MEDIUM | Minor loss | Minor harm | Fix security + comment |
+| MEDIUM | Major loss | Significant harm | Discuss, usually fix security |
+| None | Minor (<10% gain) | Significant harm | Keep readable |
+| None | Minor (<10% gain) | Minor harm | User preference |
+| None | Major (10-50% gain) | Minor harm | Optimize + comment |
+| None | Critical (>50% gain) | Any | Optimize + document |
+| LOW/Info | Any | Any | Weigh normally |
 
 ## Workflow
 
-### Step 1: Spawn Specialist Agents
+### Step 1: Invoke Specialist Agents
 
+**For Claude Code:**
 Use the Task tool to spawn all three specialist agents **in parallel** (in a single message with multiple Task tool calls):
 
 ```
 Task 1 - Security Agent:
-  prompt: "Run a security review on [TARGET_FILES]. Apply the instructions from .claude/prompts/code-security.md. Return a structured report with findings, severity, and file:line references. Do NOT apply fixes - report only."
-  subagent_type: "general-purpose"
+  prompt: "Run a security review on [TARGET_FILES]. Return a structured report with findings, severity, and file:line references. Do NOT apply fixes - report only."
 
 Task 2 - Readability Agent:
-  prompt: "Run a readability review on [TARGET_FILES]. Apply the instructions from .claude/prompts/code-readability.md. Return a structured report with findings, severity, and file:line references. Do NOT apply fixes - report only."
-  subagent_type: "general-purpose"
+  prompt: "Run a readability review on [TARGET_FILES]. Return a structured report with findings, severity, and file:line references. Do NOT apply fixes - report only."
 
 Task 3 - Performance Agent:
-  prompt: "Run a performance review on [TARGET_FILES]. Apply the instructions from .claude/prompts/code-performance.md. Return a structured report with findings, severity, and file:line references. Do NOT apply fixes - report only."
-  subagent_type: "general-purpose"
+  prompt: "Run a performance review on [TARGET_FILES]. Return a structured report with findings, severity, and file:line references. Do NOT apply fixes - report only."
 ```
+
+**For OpenCode:**
+Invoke the three specialist agents using @ mentions:
+
+- @code-security - Run security analysis on the target files and return findings
+- @code-readability - Run readability analysis on the target files and return findings
+- @code-performance - Run performance analysis on the target files and return findings
 
 Replace `[TARGET_FILES]` with the files/directories specified by the user.
 
@@ -100,28 +109,28 @@ Format each contested issue as a debate (include only relevant agents):
 ISSUE #1: Loop in processItems() [file.ts:45-67]
 ═══════════════════════════════════════════════════════════════
 
-🎨 READABILITY (/code-readability):
+READABILITY:
 "The current forEach with descriptive callbacks is clear and
 self-documenting. Any developer can understand the data flow."
 
-⚡ PERFORMANCE (/code-performance):
+PERFORMANCE:
 "This creates a new closure on every iteration. A traditional
 for-loop would be 40% faster and avoid allocations."
 
-🔒 SECURITY (/code-security):
+SECURITY:
 "No security concerns with this code path."
 
-📊 CONTEXT:
+CONTEXT:
 - Called ~100 times per request
 - Average array size: 50 items
 - Current latency contribution: ~2ms
 
-⚖️ TRADE-OFF SEVERITY:
+TRADE-OFF SEVERITY:
 - Security impact: None
 - Performance gain: Minor (2ms savings)
 - Readability cost: Minor (for-loop is still readable)
 
-💡 RECOMMENDATION:
+RECOMMENDATION:
 Keep the forEach. The 2ms savings doesn't justify the slight
 readability reduction. Revisit if this becomes a bottleneck.
 ───────────────────────────────────────────────────────────────
@@ -134,29 +143,29 @@ readability reduction. Revisit if this becomes a bottleneck.
 ISSUE #2: User input in SQL query [api.ts:123]
 ═══════════════════════════════════════════════════════════════
 
-🔒 SECURITY (/code-security):
-"🔴 CRITICAL: Direct string interpolation in SQL query allows
+SECURITY:
+"CRITICAL: Direct string interpolation in SQL query allows
 SQL injection. This is an immediate exploitation risk."
 
-🎨 READABILITY (/code-readability):
+READABILITY:
 "The parameterized query syntax is slightly less readable than
 string interpolation, but security must come first here."
 
-⚡ PERFORMANCE (/code-performance):
+PERFORMANCE:
 "Prepared statements are actually faster for repeated queries
 due to query plan caching. No performance trade-off."
 
-📊 CONTEXT:
+CONTEXT:
 - Public API endpoint
 - Handles user-supplied search terms
 - OWASP A03:2021 - Injection
 
-⚖️ TRADE-OFF SEVERITY:
-- Security impact: 🔴 Critical (SQL injection)
+TRADE-OFF SEVERITY:
+- Security impact: CRITICAL (SQL injection)
 - Performance gain: Minor improvement
 - Readability cost: Minimal
 
-💡 RECOMMENDATION:
+RECOMMENDATION:
 FIX IMMEDIATELY. Use parameterized queries. This is non-negotiable.
 All three agents agree this must be fixed.
 ───────────────────────────────────────────────────────────────
@@ -166,7 +175,7 @@ All three agents agree this must be fixed.
 
 After presenting all debates, provide:
 
-1. **🔴 Security Fixes (Mandatory)** - Critical/High issues from `/code-security`, no debate needed
+1. **Security Fixes (Mandatory)** - Critical/High issues, no debate needed
 2. **Quick Wins** - Changes all three agents agree on
 3. **Recommended Trade-offs** - Where one agent's concern clearly outweighs others
 4. **User Decision Required** - Genuinely contested cases between agents

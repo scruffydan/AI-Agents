@@ -1,0 +1,5 @@
+# Build output - generated from shared/prompts/
+build/
+
+# OS files
+.DS_Store
