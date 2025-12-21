@@ -29,7 +29,7 @@ AI-Agents/
 │   └── opencode/
 │       ├── agent/
 │       ├── command/
-│       └── rules/
+│       └── AGENTS.md
 ├── build.sh               # Generates build/ from shared/
 └── install.sh             # Installs to ~/.claude and ~/.config/opencode
 ```
@@ -136,7 +136,7 @@ The `build.sh` script parses this and generates the appropriate format for each 
 
 `shared/prompts/base-instructions.md` generates:
 - Claude Code: `~/.claude/CLAUDE.md` (global instructions)
-- OpenCode: `~/.config/opencode/rules/base.md` (global rules)
+- OpenCode: `~/.config/opencode/AGENTS.md` (global instructions)
 
 ## How It Works
 
@@ -152,7 +152,7 @@ The `build.sh` script parses this and generates the appropriate format for each 
 **For OpenCode:**
 - `build/opencode/agent/{name}.md` - Agent with OpenCode-specific frontmatter
 - `build/opencode/command/{name}.md` - Command that references the agent
-- `build/opencode/rules/base.md` - From `base-instructions.md`
+- `build/opencode/AGENTS.md` - From `base-instructions.md`
 
 ### Agent vs Command
 

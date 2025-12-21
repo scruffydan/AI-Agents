@@ -233,7 +233,6 @@ if [ "$INSTALL_OPENCODE" = true ]; then
     # Create target directories
     mkdir -p "$OPENCODE_DIR/agent"
     mkdir -p "$OPENCODE_DIR/command"
-    mkdir -p "$OPENCODE_DIR/rules"
     
     # Copy agent files
     echo ""
@@ -245,10 +244,10 @@ if [ "$INSTALL_OPENCODE" = true ]; then
     echo "Copying command files..."
     copy_files "$BUILD_DIR/opencode/command" "$OPENCODE_DIR/command" "command"
     
-    # Copy rules files
+    # Copy AGENTS.md
     echo ""
-    echo "Copying rules files..."
-    copy_files "$BUILD_DIR/opencode/rules" "$OPENCODE_DIR/rules" "rules"
+    echo "Copying AGENTS.md..."
+    copy_file "$BUILD_DIR/opencode/AGENTS.md" "$OPENCODE_DIR/AGENTS.md" "AGENTS.md"
     
     echo ""
     echo -e "${GREEN}OpenCode installation complete!${NC}"
@@ -263,9 +262,8 @@ if [ "$INSTALL_OPENCODE" = true ]; then
         ls -1 "$OPENCODE_DIR/command/" 2>/dev/null | sed 's/^/  - /' || echo "  (none)"
     fi
     echo ""
-    if [ -d "$OPENCODE_DIR/rules" ]; then
-        echo "Global rules:"
-        ls -1 "$OPENCODE_DIR/rules/" 2>/dev/null | sed 's/^/  - /' || echo "  (none)"
+    if [ -f "$OPENCODE_DIR/AGENTS.md" ]; then
+        echo "Global instructions: $OPENCODE_DIR/AGENTS.md"
     fi
 fi
 

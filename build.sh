@@ -218,11 +218,11 @@ if [ -f "$SHARED_DIR/base-instructions.md" ]; then
     echo "  Created: claude/CLAUDE.md"
 fi
 
-# Generate OpenCode rules from base-instructions.md
-echo -e "${YELLOW}Generating:${NC} OpenCode rules"
+# Generate OpenCode AGENTS.md from base-instructions.md
+echo -e "${YELLOW}Generating:${NC} OpenCode AGENTS.md"
 if [ -f "$SHARED_DIR/base-instructions.md" ]; then
-    cp "$SHARED_DIR/base-instructions.md" "$BUILD_DIR/opencode/rules/base.md"
-    echo "  Created: opencode/rules/base.md"
+    cp "$SHARED_DIR/base-instructions.md" "$BUILD_DIR/opencode/AGENTS.md"
+    echo "  Created: opencode/AGENTS.md"
 fi
 
 echo ""
