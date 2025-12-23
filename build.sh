@@ -30,6 +30,7 @@ mkdir -p "$BUILD_DIR/opencode/rules"
 
 # Function to extract YAML value from frontmatter
 # Usage: get_yaml_value "$frontmatter" "key"
+# Matches lines like "key: value" and extracts the value
 get_yaml_value() {
     local content="$1"
     local key="$2"
@@ -38,10 +39,18 @@ get_yaml_value() {
 
 # Function to extract nested YAML value
 # Usage: get_nested_yaml "$frontmatter" "parent" "child"
+# Matches YAML like:
+#   parent:
+#     child: value
+# Returns the value after "child:"
 get_nested_yaml() {
     local content="$1"
     local parent="$2"
     local child="$3"
+    # Awk logic:
+    # 1. Find line starting with "parent:" -> enter parent block
+    # 2. Exit parent block when hitting another top-level key (no indent)
+    # 3. Within parent block, find "  child:" and extract value after it
     echo "$content" | awk -v parent="$parent" -v child="$child" '
         $0 ~ "^"parent":" { in_parent=1; next }
         in_parent && /^[a-z]/ { in_parent=0 }
@@ -54,8 +63,13 @@ get_nested_yaml() {
 }
 
 # Function to extract Claude tools (handles "tools: Read, Glob, Grep" format)
+# Looks within the "claude:" block for a "tools:" line
 get_claude_tools() {
     local content="$1"
+    # Awk logic:
+    # 1. Enter claude block when seeing "claude:"
+    # 2. Exit when hitting another top-level key
+    # 3. Find "  tools:" line and return everything after it
     echo "$content" | awk '
         /^claude:/ { in_claude=1; next }
         in_claude && /^[a-z]/ { in_claude=0 }
@@ -68,6 +82,7 @@ get_claude_tools() {
 }
 
 # Function to extract Claude model
+# Same pattern as get_claude_tools but for "model:" line
 get_claude_model() {
     local content="$1"
     echo "$content" | awk '
@@ -81,7 +96,8 @@ get_claude_model() {
     '
 }
 
-# Function to extract OpenCode config block
+# Function to extract the entire OpenCode config block
+# Returns all lines under "opencode:" until the next top-level key
 get_opencode_block() {
     local content="$1"
     echo "$content" | awk '
