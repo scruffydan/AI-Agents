@@ -26,6 +26,7 @@ mkdir -p "$BUILD_DIR/claude/agents"
 mkdir -p "$BUILD_DIR/claude/commands"
 mkdir -p "$BUILD_DIR/opencode/agent"
 mkdir -p "$BUILD_DIR/opencode/command"
+mkdir -p "$BUILD_DIR/opencode/mode"
 mkdir -p "$BUILD_DIR/opencode/rules"
 
 # Function to extract YAML value from frontmatter
@@ -107,6 +108,20 @@ get_opencode_block() {
     '
 }
 
+# Function to extract OpenCode temperature
+get_opencode_temperature() {
+    local content="$1"
+    echo "$content" | awk '
+        /^opencode:/ { in_oc=1; next }
+        in_oc && /^[a-z]/ { in_oc=0 }
+        in_oc && /^  temperature:/ { 
+            sub(/^  temperature:[[:space:]]*/, ""); 
+            print; 
+            exit 
+        }
+    '
+}
+
 # Function to check if type includes "agent"
 has_agent() {
     local type="$1"
@@ -117,6 +132,12 @@ has_agent() {
 is_command_only() {
     local type="$1"
     [[ "$type" == "command-only" ]]
+}
+
+# Function to check if type is mode-only
+is_mode_only() {
+    local type="$1"
+    [[ "$type" == "mode-only" ]]
 }
 
 # Process each prompt file
@@ -152,6 +173,7 @@ for prompt_file in "$SHARED_DIR"/*.md; do
     opencode_mode=$(echo "$opencode_block" | grep -E "^  mode:" | sed 's/^  mode:[[:space:]]*//')
     opencode_model=$(echo "$opencode_block" | grep -E "^  model:" | sed 's/^  model:[[:space:]]*//')
     opencode_subtask=$(echo "$opencode_block" | grep -E "^  subtask:" | sed 's/^  subtask:[[:space:]]*//')
+    opencode_temperature=$(get_opencode_temperature "$frontmatter")
     
     # Extract OpenCode tools block
     opencode_tools=$(echo "$opencode_block" | awk '
@@ -217,6 +239,24 @@ for prompt_file in "$SHARED_DIR"/*.md; do
             echo "$content"
         } > "$opencode_command_file"
         echo "  Created: opencode/command/$filename.md"
+    fi
+    
+    # OpenCode Mode (for mode-only types)
+    if is_mode_only "$type"; then
+        opencode_mode_file="$BUILD_DIR/opencode/mode/$filename.md"
+        {
+            echo "---"
+            [ -n "$opencode_model" ] && echo "model: $opencode_model"
+            [ -n "$opencode_temperature" ] && echo "temperature: $opencode_temperature"
+            if [ -n "$opencode_tools" ]; then
+                echo "tools:"
+                echo "$opencode_tools"
+            fi
+            echo "---"
+            echo ""
+            echo "$content"
+        } > "$opencode_mode_file"
+        echo "  Created: opencode/mode/$filename.md"
     fi
     
     echo ""

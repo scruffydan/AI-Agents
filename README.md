@@ -10,6 +10,7 @@ A collection of specialized code review agents and commands for **Claude Code** 
 | `code-readability` | Agent + Command | Code clarity, naming, structure, documentation review |
 | `code-performance` | Agent + Command | Performance bottlenecks, algorithm optimization |
 | `code-full-review` | Command only | Orchestrates all 3 agents, synthesizes findings with trade-off debates |
+| `brainstorm` | Mode (OpenCode) / Command (Claude) | High-temperature creative mode for generating diverse ideas |
 
 ## Directory Structure
 
@@ -29,6 +30,7 @@ AI-Agents/
 │   └── opencode/
 │       ├── agent/
 │       ├── command/
+│       ├── mode/
 │       └── AGENTS.md
 ├── build.sh               # Generates build/ from source/
 └── install.sh             # Installs to ~/.claude and ~/.config/opencode
@@ -93,7 +95,12 @@ This will:
 /code-full-review src/api/
 ```
 
-Note: In OpenCode, the individual review agents are invoked via `@` mentions. Only `code-full-review` is a slash command since it orchestrates all 3 agents.
+**Modes** (switch with Tab):
+```
+brainstorm    # High-temperature creative mode
+```
+
+Note: In OpenCode, the individual review agents are invoked via `@` mentions. Only `code-full-review` is a slash command since it orchestrates all 3 agents. Modes change the AI's behavior and are switched using the Tab key.
 
 ## Customization
 
@@ -106,13 +113,14 @@ Each prompt file uses **combined frontmatter**:
 ```yaml
 ---
 description: What this agent does...
-type: agent+command    # or "command-only"
+type: agent+command    # or "command-only" or "mode-only"
 claude:
   tools: Read, Glob, Grep
   model: opus
 opencode:
   mode: subagent
   model: anthropic/claude-opus-4-20250514
+  temperature: 0.8     # For modes: controls creativity (0.0-1.0)
   tools:
     write: false
     edit: false
@@ -151,16 +159,18 @@ The `build.sh` script parses this and generates the appropriate format for each 
 **For OpenCode:**
 - `build/opencode/agent/{name}.md` - Agent with OpenCode-specific frontmatter
 - `build/opencode/command/{name}.md` - Command that references the agent
+- `build/opencode/mode/{name}.md` - Mode with temperature and tool settings
 - `build/opencode/AGENTS.md` - From `base-instructions.md`
 
-### Agent vs Command
+### Agent vs Command vs Mode
 
 | Type | Claude Code | OpenCode |
 |------|-------------|----------|
 | Agent | Auto-invoked when relevant | Called via `@agent-name` |
 | Command | Manual via `/command-name` | Manual via `/command-name` |
+| Mode | N/A | Switch via Tab key, changes behavior |
 
-Commands with type `agent+command` create both. Commands with type `command-only` create only commands (like `code-full-review` which orchestrates sub-agents).
+Commands with type `agent+command` create both. Commands with type `command-only` create only commands (like `code-full-review` which orchestrates sub-agents). Commands with type `mode-only` create OpenCode modes only (like `brainstorm` for creative exploration).
 
 ## Workflow
 
