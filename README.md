@@ -33,7 +33,8 @@ AI-Agents/
 │       ├── mode/
 │       └── AGENTS.md
 ├── build.sh               # Generates build/ from source/
-└── install.sh             # Installs to ~/.claude and ~/.config/opencode
+├── install.sh             # Installs to ~/.claude and ~/.config/opencode
+└── opencode-init.sh       # Installs opencode.json config with secure defaults
 ```
 
 ## Installation
@@ -57,6 +58,15 @@ This will:
 ./install.sh --opencode-only # Only install OpenCode
 ./install.sh --skip-build    # Use existing build/ (skip regeneration)
 ```
+
+### OpenCode Config (Optional)
+
+```bash
+./opencode-init.sh           # Install opencode.json with secure permission defaults
+./opencode-init.sh -y        # Force overwrite without prompts
+```
+
+This installs a `opencode.json` to `~/.config/opencode/` with sensible security defaults (sharing disabled, dangerous commands require approval, etc.).
 
 ### Manual Build Only
 
