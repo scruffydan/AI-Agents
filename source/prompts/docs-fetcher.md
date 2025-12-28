@@ -3,7 +3,7 @@ description: Fetch and extract relevant documentation from URLs. Use this agent 
 type: agent-only
 claude:
   tools: WebFetch
-  model: sonnet
+  model: claude-sonnet-4-5@20250929
 opencode:
   mode: subagent
   model: github-copilot/claude-sonnet-4.5
