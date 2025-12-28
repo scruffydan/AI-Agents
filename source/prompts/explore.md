@@ -3,7 +3,7 @@ description: Explore and answer questions about the codebase. Use this agent to 
 type: agent-only
 claude:
   tools: Glob, Grep, Read, List
-  model: opus
+  model: claude-opus-4-5-20251101
 opencode:
   mode: subagent
 ---

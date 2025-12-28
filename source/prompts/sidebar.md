@@ -3,7 +3,7 @@ description: Answer general questions unrelated to the current coding session. U
 type: agent-only
 claude:
   tools: WebFetch
-  model: opus
+  model: claude-opus-4-5-20251101
 opencode:
   mode: subagent
 ---
