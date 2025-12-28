@@ -1,6 +1,6 @@
 ---
 description: Answer general questions unrelated to the current coding session. Use this agent to handle tangential questions without consuming main conversation context.
-type: agent+command
+type: agent-only
 claude:
   tools: WebFetch
   model: claude-4-5-sonnet
