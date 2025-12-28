@@ -161,64 +161,50 @@ ask_user_action() {
     esac
 }
 
-# Helper function to copy files with overwrite handling
+# Copy a single file with overwrite handling
+# Returns 0 if copied, 1 if skipped
+copy_with_overwrite() {
+    local src="$1"
+    local dest="$2"
+    local label="$3"
+    
+    if [ -f "$dest" ] || [ -L "$dest" ]; then
+        if [ "$FORCE" = true ]; then
+            rm -rf "$dest"
+        elif ! ask_user_action "$dest" "$label"; then
+            return 1
+        fi
+    fi
+    
+    cp "$src" "$dest"
+    echo "  Copied: $label"
+    return 0
+}
+
+# Copy all .md files from src_dir to dest_dir
 copy_files() {
     local src_dir="$1"
     local dest_dir="$2"
     local label="$3"
     
-    if [ ! -d "$src_dir" ]; then
-        return
-    fi
-    
+    [ ! -d "$src_dir" ] && return
     mkdir -p "$dest_dir"
     
     for file in "$src_dir"/*.md; do
-        if [ -f "$file" ]; then
-            file_name=$(basename "$file")
-            target="$dest_dir/$file_name"
-
-            # Check if target exists
-            if [ -f "$target" ] || [ -L "$target" ]; then
-                if [ "$FORCE" = true ]; then
-                    rm -rf "$target"
-                elif ! ask_user_action "$target" "$label/$file_name"; then
-                    continue
-                fi
-            fi
-
-            echo "  Copying: $file_name"
-            cp "$file" "$target"
-        fi
+        [ -f "$file" ] || continue
+        copy_with_overwrite "$file" "$dest_dir/$(basename "$file")" "$label/$(basename "$file")"
     done
 }
 
-# Helper function to copy single file with overwrite handling
+# Copy a single file to destination
 copy_file() {
     local src="$1"
     local dest="$2"
     local label="$3"
     
-    if [ ! -f "$src" ]; then
-        return
-    fi
-    
-    # Ensure parent directory exists
+    [ ! -f "$src" ] && return
     mkdir -p "$(dirname "$dest")"
-    
-    if [ -f "$dest" ] || [ -L "$dest" ]; then
-        if [ "$FORCE" = true ]; then
-            rm -rf "$dest"
-            cp "$src" "$dest"
-            echo "  Copied: $label"
-        elif ask_user_action "$dest" "$label"; then
-            cp "$src" "$dest"
-            echo "  Copied: $label"
-        fi
-    else
-        cp "$src" "$dest"
-        echo "  Copied: $label"
-    fi
+    copy_with_overwrite "$src" "$dest" "$label"
 }
 
 # ============================================================
