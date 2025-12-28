@@ -134,8 +134,8 @@ has_command() {
     [[ "$type" == *"command"* ]]
 }
 
-# Function to check if type is mode-only
-is_mode_only() {
+# Function to check if type includes "mode"
+has_mode() {
     local type="$1"
     [[ "$type" == "mode-only" ]]
 }
@@ -243,8 +243,8 @@ for prompt_file in "$SHARED_DIR"/*.md; do
         echo "  Created: opencode/command/$filename.md"
     fi
     
-    # OpenCode Mode (for mode-only types)
-    if is_mode_only "$type"; then
+    # OpenCode Mode (if type includes "mode")
+    if has_mode "$type"; then
         opencode_mode_file="$BUILD_DIR/opencode/mode/$filename.md"
         {
             echo "---"
