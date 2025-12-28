@@ -27,7 +27,6 @@ mkdir -p "$BUILD_DIR/claude/agents"
 mkdir -p "$BUILD_DIR/claude/commands"
 mkdir -p "$BUILD_DIR/opencode/agent"
 mkdir -p "$BUILD_DIR/opencode/command"
-mkdir -p "$BUILD_DIR/opencode/mode"
 mkdir -p "$BUILD_DIR/opencode/rules"
 
 # Function to extract YAML value from frontmatter
@@ -135,8 +134,8 @@ has_command() {
     [[ "$type" == *"command"* ]]
 }
 
-# Function to check if type includes "mode"
-has_mode() {
+# Function to check if type is "mode-only" (now treated as primary agent)
+is_mode_only() {
     local type="$1"
     [[ "$type" == "mode-only" ]]
 }
@@ -244,12 +243,15 @@ generate_opencode_command() {
     echo "  Created: opencode/command/$filename.md"
 }
 
-# Generate OpenCode mode file
-generate_opencode_mode() {
+# Generate OpenCode primary agent file (for mode-only types)
+# These are placed in agent/ with mode: primary so they appear in Tab switcher
+generate_opencode_primary_agent() {
     local filename="$1"
-    local output_file="$BUILD_DIR/opencode/mode/$filename.md"
+    local output_file="$BUILD_DIR/opencode/agent/$filename.md"
     {
         echo "---"
+        echo "description: $description"
+        echo "mode: primary"
         [ -n "$opencode_model" ] && echo "model: $opencode_model"
         [ -n "$opencode_temperature" ] && echo "temperature: $opencode_temperature"
         if [ -n "$opencode_tools" ]; then
@@ -260,7 +262,7 @@ generate_opencode_mode() {
         echo ""
         echo "$content"
     } > "$output_file"
-    echo "  Created: opencode/mode/$filename.md"
+    echo "  Created: opencode/agent/$filename.md (primary)"
 }
 
 # =============================================================================
@@ -297,7 +299,7 @@ for prompt_file in "$SHARED_DIR"/*.md; do
     # Generate OpenCode files
     has_agent "$type" && generate_opencode_agent "$filename"
     has_command "$type" && ! has_agent "$type" && generate_opencode_command "$filename"
-    has_mode "$type" && generate_opencode_mode "$filename"
+    is_mode_only "$type" && generate_opencode_primary_agent "$filename"
     
     echo ""
 done

@@ -273,14 +273,6 @@ if [ "$INSTALL_OPENCODE" = true ]; then
         copy_files "$BUILD_DIR/opencode/command" "$OPENCODE_DIR/command" "command"
     fi
     
-    # Copy mode files (if any exist)
-    if [ -d "$BUILD_DIR/opencode/mode" ] && [ "$(ls -A "$BUILD_DIR/opencode/mode" 2>/dev/null)" ]; then
-        mkdir -p "$OPENCODE_DIR/mode"
-        echo ""
-        echo "Copying mode files..."
-        copy_files "$BUILD_DIR/opencode/mode" "$OPENCODE_DIR/mode" "mode"
-    fi
-    
     # Copy AGENTS.md
     echo ""
     echo "Copying AGENTS.md..."
@@ -297,11 +289,6 @@ if [ "$INSTALL_OPENCODE" = true ]; then
         echo ""
         echo "Available commands:"
         ls -1 "$OPENCODE_DIR/command/" 2>/dev/null | sed 's/\.md$//' | sed 's/^/  \//' || echo "  (none)"
-    fi
-    if [ -d "$OPENCODE_DIR/mode" ] && [ "$(ls -A "$OPENCODE_DIR/mode" 2>/dev/null)" ]; then
-        echo ""
-        echo "Available modes (switch with Tab):"
-        ls -1 "$OPENCODE_DIR/mode/" 2>/dev/null | sed 's/\.md$//' | sed 's/^/  /' || echo "  (none)"
     fi
     echo ""
     if [ -f "$OPENCODE_DIR/AGENTS.md" ]; then
@@ -326,8 +313,8 @@ fi
 if [ "$INSTALL_OPENCODE" = true ]; then
     echo "  OpenCode:"
     echo "    - Agents: @code-security, @code-readability, @code-performance"
+    echo "    - Primary agents (Tab to switch): brainstorm"
     echo "    - Command: /code-full-review (orchestrates all 3 agents)"
-    echo "    - Modes: Switch with Tab key (e.g., brainstorm)"
 fi
 echo ""
 echo "Note: Files are copied (not symlinked). Run ./install.sh again to update."
