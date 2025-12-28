@@ -6,9 +6,9 @@ A collection of specialized code review agents and commands for **Claude Code** 
 
 | Name | Type | Purpose |
 |------|------|---------|
-| `code-security` | Agent + Command | Security vulnerability detection, OWASP Top 10 compliance |
-| `code-readability` | Agent + Command | Code clarity, naming, structure, documentation review |
-| `code-performance` | Agent + Command | Performance bottlenecks, algorithm optimization |
+| `code-security` | Agent only | Security vulnerability detection, OWASP Top 10 compliance |
+| `code-readability` | Agent only | Code clarity, naming, structure, documentation review |
+| `code-performance` | Agent only | Performance bottlenecks, algorithm optimization |
 | `code-full-review` | Command only | Orchestrates all 3 agents, synthesizes findings with trade-off debates |
 | `brainstorm` | Mode (OpenCode) / Command (Claude) | High-temperature creative mode for generating diverse ideas |
 
@@ -113,7 +113,7 @@ Each prompt file uses **combined frontmatter**:
 ```yaml
 ---
 description: What this agent does...
-type: agent+command    # or "command-only" or "mode-only"
+type: agent+command    # or "agent-only", "command-only", or "mode-only"
 claude:
   tools: Read, Glob, Grep
   model: opus

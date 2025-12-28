@@ -1,6 +1,6 @@
 ---
 description: Code readability and maintainability specialist. Invoke for reviewing naming conventions, code structure, formatting, and documentation quality.
-type: agent+command
+type: agent-only
 claude:
   tools: Read, Glob, Grep
   model: claude-opus-4-0-20250514

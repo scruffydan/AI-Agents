@@ -1,6 +1,6 @@
 ---
 description: Performance optimization specialist. Invoke for identifying bottlenecks, optimizing algorithms, memory usage, I/O operations, and concurrency patterns.
-type: agent+command
+type: agent-only
 claude:
   tools: Read, Glob, Grep
   model: claude-opus-4-0-20250514

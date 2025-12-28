@@ -128,10 +128,10 @@ has_agent() {
     [[ "$type" == *"agent"* ]]
 }
 
-# Function to check if type is command-only
-is_command_only() {
+# Function to check if type includes "command"
+has_command() {
     local type="$1"
-    [[ "$type" == "command-only" ]]
+    [[ "$type" == *"command"* ]]
 }
 
 # Function to check if type is mode-only
@@ -200,10 +200,12 @@ for prompt_file in "$SHARED_DIR"/*.md; do
         echo "  Created: claude/agents/$filename.md"
     fi
     
-    # Claude Command (always created)
-    claude_command_file="$BUILD_DIR/claude/commands/$filename.md"
-    echo "$content" > "$claude_command_file"
-    echo "  Created: claude/commands/$filename.md"
+    # Claude Command (if type includes "command")
+    if has_command "$type"; then
+        claude_command_file="$BUILD_DIR/claude/commands/$filename.md"
+        echo "$content" > "$claude_command_file"
+        echo "  Created: claude/commands/$filename.md"
+    fi
     
     # === Generate OpenCode Files ===
     
@@ -227,7 +229,7 @@ for prompt_file in "$SHARED_DIR"/*.md; do
     fi
     
     # OpenCode Command (only for command-only types - agents are invoked via @mention)
-    if is_command_only "$type"; then
+    if has_command "$type" && ! has_agent "$type"; then
         opencode_command_file="$BUILD_DIR/opencode/command/$filename.md"
         {
             echo "---"
