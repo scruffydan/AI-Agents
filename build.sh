@@ -140,35 +140,26 @@ has_mode() {
     [[ "$type" == "mode-only" ]]
 }
 
-# Process each prompt file
-for prompt_file in "$SHARED_DIR"/*.md; do
-    filename=$(basename "$prompt_file" .md)
-    
-    # Skip base-instructions (handled separately)
-    if [ "$filename" = "base-instructions" ]; then
-        continue
-    fi
-    
-    echo -e "${YELLOW}Processing:${NC} $filename"
-    
-    # Read the file
-    file_content=$(cat "$prompt_file")
+# =============================================================================
+# Parsing Functions
+# =============================================================================
+
+# Parse a prompt file and extract frontmatter and content into global variables
+# Sets: file_content, frontmatter, content
+parse_prompt_file() {
+    local file="$1"
+    file_content=$(cat "$file")
     
     # Extract frontmatter (between first two ---)
     frontmatter=$(echo "$file_content" | awk '/^---$/{p=!p; if(p) next; else exit} p')
     
     # Extract content (everything after the second ---)
     content=$(echo "$file_content" | awk 'BEGIN{p=0} /^---$/{p++; if(p==2) {getline; p=3}} p==3{print}')
-    
-    # Get common values
-    description=$(get_yaml_value "$frontmatter" "description")
-    type=$(get_yaml_value "$frontmatter" "type")
-    
-    # Get Claude-specific values
-    claude_tools=$(get_claude_tools "$frontmatter")
-    claude_model=$(get_claude_model "$frontmatter")
-    
-    # Get OpenCode-specific values
+}
+
+# Parse OpenCode-specific values from frontmatter
+# Sets: opencode_block, opencode_mode, opencode_model, opencode_subtask, opencode_temperature, opencode_tools
+parse_opencode_values() {
     opencode_block=$(get_opencode_block "$frontmatter")
     opencode_mode=$(echo "$opencode_block" | grep -E "^  mode:" | sed 's/^  mode:[[:space:]]*//')
     opencode_model=$(echo "$opencode_block" | grep -E "^  model:" | sed 's/^  model:[[:space:]]*//')
@@ -181,85 +172,131 @@ for prompt_file in "$SHARED_DIR"/*.md; do
         in_tools && /^  [a-z]/ && !/^    / { exit }
         in_tools { print }
     ')
+}
+
+# =============================================================================
+# Claude Generation Functions
+# =============================================================================
+
+# Generate Claude agent file
+generate_claude_agent() {
+    local filename="$1"
+    local output_file="$BUILD_DIR/claude/agents/$filename.md"
+    {
+        echo "---"
+        echo "name: $filename"
+        echo "description: $description"
+        [ -n "$claude_tools" ] && echo "tools: $claude_tools"
+        [ -n "$claude_model" ] && echo "model: $claude_model"
+        echo "---"
+        echo ""
+        echo "$content"
+    } > "$output_file"
+    echo "  Created: claude/agents/$filename.md"
+}
+
+# Generate Claude command file
+generate_claude_command() {
+    local filename="$1"
+    local output_file="$BUILD_DIR/claude/commands/$filename.md"
+    echo "$content" > "$output_file"
+    echo "  Created: claude/commands/$filename.md"
+}
+
+# =============================================================================
+# OpenCode Generation Functions
+# =============================================================================
+
+# Generate OpenCode agent file
+generate_opencode_agent() {
+    local filename="$1"
+    local output_file="$BUILD_DIR/opencode/agent/$filename.md"
+    {
+        echo "---"
+        echo "description: $description"
+        [ -n "$opencode_mode" ] && echo "mode: $opencode_mode"
+        [ -n "$opencode_model" ] && echo "model: $opencode_model"
+        if [ -n "$opencode_tools" ]; then
+            echo "tools:"
+            echo "$opencode_tools"
+        fi
+        echo "---"
+        echo ""
+        echo "$content"
+    } > "$output_file"
+    echo "  Created: opencode/agent/$filename.md"
+}
+
+# Generate OpenCode command file (for command-only types)
+generate_opencode_command() {
+    local filename="$1"
+    local output_file="$BUILD_DIR/opencode/command/$filename.md"
+    {
+        echo "---"
+        echo "description: $description"
+        [ -n "$opencode_subtask" ] && echo "subtask: $opencode_subtask"
+        [ -n "$opencode_model" ] && echo "model: $opencode_model"
+        echo "---"
+        echo ""
+        echo "$content"
+    } > "$output_file"
+    echo "  Created: opencode/command/$filename.md"
+}
+
+# Generate OpenCode mode file
+generate_opencode_mode() {
+    local filename="$1"
+    local output_file="$BUILD_DIR/opencode/mode/$filename.md"
+    {
+        echo "---"
+        [ -n "$opencode_model" ] && echo "model: $opencode_model"
+        [ -n "$opencode_temperature" ] && echo "temperature: $opencode_temperature"
+        if [ -n "$opencode_tools" ]; then
+            echo "tools:"
+            echo "$opencode_tools"
+        fi
+        echo "---"
+        echo ""
+        echo "$content"
+    } > "$output_file"
+    echo "  Created: opencode/mode/$filename.md"
+}
+
+# =============================================================================
+# Main Processing
+# =============================================================================
+
+# Process each prompt file
+for prompt_file in "$SHARED_DIR"/*.md; do
+    filename=$(basename "$prompt_file" .md)
     
-    # === Generate Claude Files ===
+    # Skip base-instructions (handled separately)
+    [ "$filename" = "base-instructions" ] && continue
     
-    # Claude Agent (if type includes "agent")
-    if has_agent "$type"; then
-        claude_agent_file="$BUILD_DIR/claude/agents/$filename.md"
-        {
-            echo "---"
-            echo "name: $filename"
-            echo "description: $description"
-            [ -n "$claude_tools" ] && echo "tools: $claude_tools"
-            [ -n "$claude_model" ] && echo "model: $claude_model"
-            echo "---"
-            echo ""
-            echo "$content"
-        } > "$claude_agent_file"
-        echo "  Created: claude/agents/$filename.md"
-    fi
+    echo -e "${YELLOW}Processing:${NC} $filename"
     
-    # Claude Command (if type includes "command")
-    if has_command "$type"; then
-        claude_command_file="$BUILD_DIR/claude/commands/$filename.md"
-        echo "$content" > "$claude_command_file"
-        echo "  Created: claude/commands/$filename.md"
-    fi
+    # Parse the file
+    parse_prompt_file "$prompt_file"
     
-    # === Generate OpenCode Files ===
+    # Get common values
+    description=$(get_yaml_value "$frontmatter" "description")
+    type=$(get_yaml_value "$frontmatter" "type")
     
-    # OpenCode Agent (if type includes "agent")
-    if has_agent "$type"; then
-        opencode_agent_file="$BUILD_DIR/opencode/agent/$filename.md"
-        {
-            echo "---"
-            echo "description: $description"
-            [ -n "$opencode_mode" ] && echo "mode: $opencode_mode"
-            [ -n "$opencode_model" ] && echo "model: $opencode_model"
-            if [ -n "$opencode_tools" ]; then
-                echo "tools:"
-                echo "$opencode_tools"
-            fi
-            echo "---"
-            echo ""
-            echo "$content"
-        } > "$opencode_agent_file"
-        echo "  Created: opencode/agent/$filename.md"
-    fi
+    # Get Claude-specific values
+    claude_tools=$(get_claude_tools "$frontmatter")
+    claude_model=$(get_claude_model "$frontmatter")
     
-    # OpenCode Command (only for command-only types - agents are invoked via @mention)
-    if has_command "$type" && ! has_agent "$type"; then
-        opencode_command_file="$BUILD_DIR/opencode/command/$filename.md"
-        {
-            echo "---"
-            echo "description: $description"
-            [ -n "$opencode_subtask" ] && echo "subtask: $opencode_subtask"
-            [ -n "$opencode_model" ] && echo "model: $opencode_model"
-            echo "---"
-            echo ""
-            echo "$content"
-        } > "$opencode_command_file"
-        echo "  Created: opencode/command/$filename.md"
-    fi
+    # Get OpenCode-specific values
+    parse_opencode_values
     
-    # OpenCode Mode (if type includes "mode")
-    if has_mode "$type"; then
-        opencode_mode_file="$BUILD_DIR/opencode/mode/$filename.md"
-        {
-            echo "---"
-            [ -n "$opencode_model" ] && echo "model: $opencode_model"
-            [ -n "$opencode_temperature" ] && echo "temperature: $opencode_temperature"
-            if [ -n "$opencode_tools" ]; then
-                echo "tools:"
-                echo "$opencode_tools"
-            fi
-            echo "---"
-            echo ""
-            echo "$content"
-        } > "$opencode_mode_file"
-        echo "  Created: opencode/mode/$filename.md"
-    fi
+    # Generate Claude files
+    has_agent "$type" && generate_claude_agent "$filename"
+    has_command "$type" && generate_claude_command "$filename"
+    
+    # Generate OpenCode files
+    has_agent "$type" && generate_opencode_agent "$filename"
+    has_command "$type" && ! has_agent "$type" && generate_opencode_command "$filename"
+    has_mode "$type" && generate_opencode_mode "$filename"
     
     echo ""
 done
