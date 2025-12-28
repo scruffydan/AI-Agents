@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Installation script for AI Agents
 # Supports Claude Code and OpenCode

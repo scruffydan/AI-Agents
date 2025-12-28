@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # OpenCode configuration initializer
 # Copies opencode.json from source/ to ~/.config/opencode/
