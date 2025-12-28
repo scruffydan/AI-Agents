@@ -151,7 +151,7 @@ ask_user_action() {
     case "$choice" in
         y|Y)
             echo "   Removing existing"
-            rm -rf "$target"
+            [[ -n "$target" ]] && rm -rf "$target"
             return 0
             ;;
         *)
@@ -170,7 +170,7 @@ copy_with_overwrite() {
     
     if [ -f "$dest" ] || [ -L "$dest" ]; then
         if [ "$FORCE" = true ]; then
-            rm -rf "$dest"
+            [[ -n "$dest" ]] && rm -rf "$dest"
         elif ! ask_user_action "$dest" "$label"; then
             return 1
         fi

@@ -21,6 +21,7 @@ echo "Output: $BUILD_DIR"
 echo ""
 
 # Clean and create build directories
+[[ -z "$BUILD_DIR" ]] && { echo "Error: BUILD_DIR is empty"; exit 1; }
 rm -rf "$BUILD_DIR"
 mkdir -p "$BUILD_DIR/claude/agents"
 mkdir -p "$BUILD_DIR/claude/commands"
