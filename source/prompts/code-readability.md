@@ -3,7 +3,7 @@ description: Code readability and maintainability specialist. Invoke for reviewi
 type: agent-only
 claude:
   tools: Read, Glob, Grep
-  model: claude-opus-4-5-20251101
+  model: claude-opus-4-5
 opencode:
   mode: subagent
   tools:

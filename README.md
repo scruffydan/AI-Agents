@@ -120,7 +120,7 @@ claude:
   model: opus
 opencode:
   mode: subagent
-  model: anthropic/claude-opus-4-20250514
+  model: anthropic/claude-opus-4
   temperature: 0.8     # For modes: controls creativity (0.0-1.0)
   tools:
     write: false
