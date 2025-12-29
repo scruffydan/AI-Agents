@@ -1,40 +1,31 @@
 # AI-Agents
 
-A collection of specialized code review agents and commands for **Claude Code** and **OpenCode**.
+A collection of specialized agents, commands, and modes for **Claude Code** and **OpenCode**.
 
 ## What's Included
 
 | Name | Type | Purpose |
 |------|------|---------|
-| `code-security` | Agent only | Security vulnerability detection, OWASP Top 10 compliance |
-| `code-readability` | Agent only | Code clarity, naming, structure, documentation review |
-| `code-performance` | Agent only | Performance bottlenecks, algorithm optimization |
-| `code-full-review` | Command only | Orchestrates all 3 agents, synthesizes findings with trade-off debates |
+| `code-security` | Agent | Security vulnerability detection, OWASP Top 10 compliance |
+| `code-readability` | Agent | Code clarity, naming, structure, documentation review |
+| `code-performance` | Agent | Performance bottlenecks, algorithm optimization |
+| `code-redundancy` | Agent | Duplicate code, repeated patterns, DRY improvements |
+| `code-full-review` | Command | Orchestrates all review agents, synthesizes findings with trade-off debates |
+| `explore` | Agent | Codebase exploration, file search, dependency tracing |
+| `docs-fetcher` | Agent | Fetch and extract relevant documentation from URLs |
+| `sidebar` | Agent | Answer general questions unrelated to coding session |
 | `brainstorm` | Mode (OpenCode) / Command (Claude) | High-temperature creative mode for generating diverse ideas |
+| `thorough-plan` | Mode (OpenCode only) | Planning mode that asks clarifying questions before proceeding |
 
 ## Directory Structure
 
 ```
 AI-Agents/
-├── source/prompts/        # Source of truth (combined frontmatter)
-│   ├── base-instructions.md
-│   ├── code-security.md
-│   ├── code-readability.md
-│   ├── code-performance.md
-│   └── code-full-review.md
-├── build/                 # GITIGNORED - generated output
-│   ├── claude/
-│   │   ├── agents/
-│   │   ├── commands/
-│   │   └── CLAUDE.md
-│   └── opencode/
-│       ├── agent/
-│       ├── command/
-│       ├── mode/
-│       └── AGENTS.md
-├── build.sh               # Generates build/ from source/
-├── install.sh             # Installs to ~/.claude and ~/.config/opencode
-└── opencode-init.sh       # Installs opencode.json config with secure defaults
+├── source/            # Source of truth (combined frontmatter)
+├── build/             # GITIGNORED - generated output for claude/ and opencode/
+├── build.sh           # Generates build/ from source/
+├── install.sh         # Installs to ~/.claude and ~/.config/opencode
+└── opencode-init.sh   # Installs opencode.json config with secure defaults
 ```
 
 ## Installation
@@ -192,7 +183,7 @@ All review agents use a hybrid workflow:
 4. **Apply Fixes** - Only after user approval
 
 The `code-full-review` command:
-1. Spawns all 3 specialists in parallel
+1. Spawns all review specialists in parallel
 2. Collects their findings
 3. Presents debates where recommendations conflict
 4. Helps user make informed trade-off decisions
