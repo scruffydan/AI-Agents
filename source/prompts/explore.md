@@ -6,6 +6,7 @@ claude:
   model: claude-opus-4-5-20251101
 opencode:
   mode: subagent
+  model: github-copilot/claude-sonnet-4.5
 ---
 
 # Codebase Explorer Agent
