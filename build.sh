@@ -27,7 +27,6 @@ mkdir -p "$BUILD_DIR/claude/agents"
 mkdir -p "$BUILD_DIR/claude/commands"
 mkdir -p "$BUILD_DIR/opencode/agent"
 mkdir -p "$BUILD_DIR/opencode/command"
-mkdir -p "$BUILD_DIR/opencode/rules"
 
 # Function to extract YAML value from frontmatter
 # Usage: get_yaml_value "$frontmatter" "key"

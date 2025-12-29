@@ -54,8 +54,8 @@ This will:
 
 ```bash
 ./install.sh -y              # Force overwrite without prompts
-./install.sh --claude-only   # Only install Claude Code
-./install.sh --opencode-only # Only install OpenCode
+./install.sh --claude        # Only install Claude Code
+./install.sh --opencode      # Only install OpenCode
 ./install.sh --skip-build    # Use existing build/ (skip regeneration)
 ```
 
