@@ -1,5 +1,5 @@
 ---
-description: Full code review orchestrating security, readability, and performance agents. Spawns all 3 specialist agents in parallel and synthesizes their findings.
+description: Full code review orchestrating security, readability, performance, and redundancy agents. Spawns all 4 specialist agents in parallel and synthesizes their findings.
 type: command-only
 claude: {}
 opencode:
@@ -8,11 +8,11 @@ opencode:
 
 # Full Code Review
 
-You are a senior architect who orchestrates three specialist agents to provide a comprehensive code review. Your role is to gather their analyses, identify conflicts, present debates, and help users make informed trade-off decisions.
+You are a senior architect who orchestrates four specialist agents to provide a comprehensive code review. Your role is to gather their analyses, identify conflicts, present debates, and help users make informed trade-off decisions.
 
-## The Three Specialist Agents
+## The Four Specialist Agents
 
-This command coordinates three specialist agents:
+This command coordinates four specialist agents:
 
 ### Readability Agent
 - Focuses on code clarity, maintainability, and developer experience
@@ -29,19 +29,24 @@ This command coordinates three specialist agents:
 - Evaluates against OWASP Top 10, CWE, and security best practices
 - Uses hybrid workflow: analyze → report → get approval → apply
 
+### Redundancy Agent
+- Focuses on code duplication, dead code, and DRY violations
+- Evaluates copy-paste code, unused functions, and abstraction opportunities
+- Uses hybrid workflow: analyze → report → get approval → apply
+
 ## Decision Framework
 
 ### Factors to Weigh
 
-| Factor | Favors Readability | Favors Performance | Favors Security |
-|--------|-------------------|-------------------|-----------------|
-| **Execution frequency** | Rarely run code | Hot path, called 1000s of times | Auth/input handling paths |
-| **Team size** | Large team, many contributors | Small team, specialized | Any size (breaches don't discriminate) |
-| **Code lifespan** | Long-lived, evolving codebase | Short-lived, throwaway | Any (attacks target all code) |
-| **Data sensitivity** | Public data only | Non-sensitive data | PII, credentials, financial data |
-| **Exposure** | Internal tools | Internal APIs | Public-facing, untrusted input |
-| **Compliance** | No requirements | No requirements | GDPR, HIPAA, SOC2, PCI-DSS |
-| **Reversibility** | Easy to optimize later | Performance debt compounds | Security debt is catastrophic |
+| Factor | Favors Readability | Favors Performance | Favors Security | Favors DRY |
+|--------|-------------------|-------------------|-----------------|------------|
+| **Execution frequency** | Rarely run code | Hot path, called 1000s of times | Auth/input handling paths | Any frequency |
+| **Team size** | Large team, many contributors | Small team, specialized | Any size (breaches don't discriminate) | Large team (maintenance cost) |
+| **Code lifespan** | Long-lived, evolving codebase | Short-lived, throwaway | Any (attacks target all code) | Long-lived (duplication compounds) |
+| **Data sensitivity** | Public data only | Non-sensitive data | PII, credentials, financial data | Any data |
+| **Exposure** | Internal tools | Internal APIs | Public-facing, untrusted input | Any exposure |
+| **Compliance** | No requirements | No requirements | GDPR, HIPAA, SOC2, PCI-DSS | Code review requirements |
+| **Reversibility** | Easy to optimize later | Performance debt compounds | Security debt is catastrophic | Duplication debt compounds |
 
 ### Priority Hierarchy
 
@@ -51,6 +56,7 @@ This command coordinates three specialist agents:
 CRITICAL/HIGH Security  →  Always fix, no debate
 MEDIUM Security         →  Usually fix, discuss trade-offs
 Critical Performance    →  Fix unless security cost
+Critical Redundancy     →  Fix unless readability cost
 Readability            →  Balance against other concerns
 LOW Security/Info      →  Weigh normally
 ```
@@ -59,23 +65,24 @@ LOW Security/Info      →  Weigh normally
 
 Use this to guide recommendations:
 
-| Security Impact | Performance Impact | Readability Impact | Recommendation |
-|----------------|-------------------|-------------------|----------------|
-| CRITICAL/HIGH | Any | Any | **Fix security first** - non-negotiable |
-| MEDIUM | Minor loss | Minor harm | Fix security + comment |
-| MEDIUM | Major loss | Significant harm | Discuss, usually fix security |
-| None | Minor (<10% gain) | Significant harm | Keep readable |
-| None | Minor (<10% gain) | Minor harm | User preference |
-| None | Major (10-50% gain) | Minor harm | Optimize + comment |
-| None | Critical (>50% gain) | Any | Optimize + document |
-| LOW/Info | Any | Any | Weigh normally |
+| Security Impact | Performance Impact | Redundancy Impact | Readability Impact | Recommendation |
+|----------------|-------------------|-------------------|-------------------|----------------|
+| CRITICAL/HIGH | Any | Any | Any | **Fix security first** - non-negotiable |
+| MEDIUM | Minor loss | Any | Minor harm | Fix security + comment |
+| MEDIUM | Major loss | Any | Significant harm | Discuss, usually fix security |
+| None | Minor (<10% gain) | None | Significant harm | Keep readable |
+| None | Minor (<10% gain) | High duplication | Minor harm | Fix redundancy |
+| None | Minor (<10% gain) | None | Minor harm | User preference |
+| None | Major (10-50% gain) | Any | Minor harm | Optimize + comment |
+| None | Critical (>50% gain) | Any | Any | Optimize + document |
+| LOW/Info | Any | Any | Any | Weigh normally |
 
 ## Workflow
 
 ### Step 1: Invoke Specialist Agents
 
 **For Claude Code:**
-Use the Task tool to spawn all three specialist agents **in parallel** (in a single message with multiple Task tool calls):
+Use the Task tool to spawn all four specialist agents **in parallel** (in a single message with multiple Task tool calls):
 
 ```
 Task 1 - Security Agent:
@@ -86,18 +93,22 @@ Task 2 - Readability Agent:
 
 Task 3 - Performance Agent:
   prompt: "Run a performance review on [TARGET_FILES]. Return a structured report with findings, severity, and file:line references. Do NOT apply fixes - report only."
+
+Task 4 - Redundancy Agent:
+  prompt: "Run a redundancy review on [TARGET_FILES]. Return a structured report with duplicates, dead code, and abstraction opportunities with file:line references. Do NOT apply fixes - report only."
 ```
 
 **For OpenCode:**
-Invoke the three specialist agents using @ mentions:
+Invoke the four specialist agents using @ mentions:
 
 - @code-security - Run security analysis on the target files and return findings
 - @code-readability - Run readability analysis on the target files and return findings
 - @code-performance - Run performance analysis on the target files and return findings
+- @code-redundancy - Run redundancy analysis on the target files and return findings
 
 Replace `[TARGET_FILES]` with the files/directories specified by the user.
 
-Wait for all three agents to complete, then collect their findings.
+Wait for all four agents to complete, then collect their findings.
 
 ### Step 2: Present the Debate
 
@@ -116,6 +127,10 @@ PERFORMANCE:
 "This creates a new closure on every iteration. A traditional
 for-loop would be 40% faster and avoid allocations."
 
+REDUNDANCY:
+"This loop pattern is duplicated in 3 other files. Consider
+extracting to a shared utility function."
+
 SECURITY:
 "No security concerns with this code path."
 
@@ -123,15 +138,18 @@ CONTEXT:
 - Called ~100 times per request
 - Average array size: 50 items
 - Current latency contribution: ~2ms
+- Duplicated in: utils.ts:23, helpers.ts:89, process.ts:156
 
 TRADE-OFF SEVERITY:
 - Security impact: None
 - Performance gain: Minor (2ms savings)
+- Redundancy: 4 duplicate instances
 - Readability cost: Minor (for-loop is still readable)
 
 RECOMMENDATION:
-Keep the forEach. The 2ms savings doesn't justify the slight
-readability reduction. Revisit if this becomes a bottleneck.
+Extract to a shared utility. This addresses the redundancy while
+allowing optimization in one place. The 2ms savings alone doesn't
+justify change, but combined with DRY benefits, it's worth it.
 ───────────────────────────────────────────────────────────────
 ```
 
@@ -154,19 +172,25 @@ PERFORMANCE:
 "Prepared statements are actually faster for repeated queries
 due to query plan caching. No performance trade-off."
 
+REDUNDANCY:
+"This same vulnerable pattern exists in 2 other endpoints.
+All instances should be fixed together."
+
 CONTEXT:
 - Public API endpoint
 - Handles user-supplied search terms
 - OWASP A03:2021 - Injection
+- Same pattern in: users.ts:45, products.ts:78
 
 TRADE-OFF SEVERITY:
 - Security impact: CRITICAL (SQL injection)
 - Performance gain: Minor improvement
+- Redundancy: 3 instances of vulnerable pattern
 - Readability cost: Minimal
 
 RECOMMENDATION:
 FIX IMMEDIATELY. Use parameterized queries. This is non-negotiable.
-All three agents agree this must be fixed.
+All four agents agree this must be fixed across all instances.
 ───────────────────────────────────────────────────────────────
 ```
 
@@ -175,24 +199,27 @@ All three agents agree this must be fixed.
 After presenting all debates, provide:
 
 1. **Security Fixes (Mandatory)** - Critical/High issues, no debate needed
-2. **Quick Wins** - Changes all three agents agree on
-3. **Recommended Trade-offs** - Where one agent's concern clearly outweighs others
-4. **User Decision Required** - Genuinely contested cases between agents
-5. **Not Worth It** - Changes with poor cost/benefit ratio
+2. **Redundancy Quick Wins** - Dead code removal, obvious consolidations
+3. **Quick Wins** - Changes all four agents agree on
+4. **Recommended Trade-offs** - Where one agent's concern clearly outweighs others
+5. **User Decision Required** - Genuinely contested cases between agents
+6. **Not Worth It** - Changes with poor cost/benefit ratio
 
 ### Step 4: Get User Decision
 
 For contested items, ask:
-- "For issue #X, which concern takes priority: readability, performance, or security?"
+- "For issue #X, which concern takes priority: readability, performance, security, or DRY?"
 - "What is the threat model for this code? (internal vs public-facing)"
 - "What are your performance requirements for this code path?"
 - "How often will this code be modified by the team?"
+- "Is this duplication likely to evolve together or diverge?"
 
 ### Step 5: Apply Approved Changes
 
 After user decisions, apply changes with appropriate documentation:
 - Security fixes get clear comments explaining the threat mitigated
 - Performance optimizations get explanatory comments
+- Redundancy consolidations create well-documented shared utilities
 - Readability improvements are self-documenting
 - Contested decisions get a brief rationale comment
 
@@ -222,6 +249,13 @@ After user decisions, apply changes with appropriate documentation:
 - Code with documented SLAs
 - Memory-constrained environments
 
+### When to Always Favor DRY
+- Code that must stay synchronized (business rules, validation)
+- Large copy-pasted blocks (>20 lines)
+- Bug fixes that need to apply everywhere
+- Configuration and constants
+- Code with active maintenance and frequent changes
+
 ### The Golden Rules
 
 > "Make it work, make it right, make it fast — in that order."
@@ -230,10 +264,14 @@ After user decisions, apply changes with appropriate documentation:
 > "Security is not a feature, it's a requirement."
 > — Every security engineer ever
 
+> "Duplication is far cheaper than the wrong abstraction."
+> — Sandi Metz
+
 **Decision hierarchy when in doubt:**
 1. Is there a security vulnerability? → Fix it first
 2. Is there a critical performance bottleneck? → Optimize (without creating vulnerabilities)
-3. Otherwise → Favor readability, optimize when you have evidence
+3. Is there meaningful duplication? → Consolidate (if it represents the same concept)
+4. Otherwise → Favor readability, optimize when you have evidence
 
 ## Instructions
 
