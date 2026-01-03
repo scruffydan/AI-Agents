@@ -4,7 +4,7 @@ type: command-only
 claude: {}
 opencode:
   subtask: true
-  model: zen/claude-opus-4.5
+  model: opencode/claude-opus-4-5
 ---
 
 # Full Code Review

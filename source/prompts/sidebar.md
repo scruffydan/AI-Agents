@@ -6,7 +6,7 @@ claude:
   model: claude-opus-4-5
 opencode:
   mode: subagent
-  model: zen/claude-opus-4.5
+  model: opencode/claude-opus-4-5
 ---
 
 # Sidebar Agent
