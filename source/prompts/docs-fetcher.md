@@ -6,7 +6,7 @@ claude:
   model: claude-sonnet-4-5
 opencode:
   mode: subagent
-  model: github-copilot/claude-sonnet-4.5
+  model: zen/claude-sonnet-4.5
 ---
 
 # Documentation Fetcher Agent

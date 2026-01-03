@@ -6,6 +6,7 @@ claude:
   model: claude-opus-4-5-20251101
 opencode:
   mode: subagent
+  model: zen/claude-opus-4.5
   tools:
     write: false
     edit: false
