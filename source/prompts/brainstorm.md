@@ -3,6 +3,7 @@ description: Creative brainstorming mode with high temperature for generating di
 type: mode-only
 opencode:
   temperature: 0.8
+  model: zen/claude-opus-4.5
   tools:
     write: false
     edit: false
