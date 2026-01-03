@@ -6,7 +6,7 @@ claude:
   model: claude-sonnet-4-5
 opencode:
   mode: subagent
-  model: zen/claude-sonnet-4.5
+  model: opencode/claude-sonnet-4-5
 ---
 
 # Codebase Explorer Agent
