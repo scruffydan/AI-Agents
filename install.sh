@@ -308,13 +308,15 @@ echo "Usage:"
 if [ "$INSTALL_CLAUDE" = true ]; then
     echo "  Claude Code:"
     echo "    - Agents auto-invoke when Claude detects relevant tasks"
-    echo "    - Commands: /code-security, /code-readability, /code-performance, /code-full-review"
+    echo "    - Commands: /code-full-review (orchestrates all specialist agents)"
 fi
 if [ "$INSTALL_OPENCODE" = true ]; then
     echo "  OpenCode:"
-    echo "    - Agents: @code-security, @code-readability, @code-performance"
-    echo "    - Primary agents (Tab to switch): brainstorm"
-    echo "    - Command: /code-full-review (orchestrates all 3 agents)"
+    echo "    - Specialist agents: @code-security, @code-readability, @code-performance,"
+    echo "      @code-redundancy, @code-simplifier"
+    echo "    - Utility agents: @explore, @sidebar, @docs-fetcher"
+    echo "    - Primary agents (Tab to switch): brainstorm, thorough-plan"
+    echo "    - Command: /code-full-review (orchestrates all 5 specialist agents)"
 fi
 echo ""
 echo "Note: Files are copied (not symlinked). Run ./install.sh again to update."
