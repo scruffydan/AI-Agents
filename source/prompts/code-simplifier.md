@@ -2,14 +2,14 @@
 description: Simplifies and refines code for clarity, consistency, and maintainability while preserving all functionality. Focuses on recently modified code unless instructed otherwise.
 type: agent-only
 claude:
-  tools: Read, Glob, Grep, Edit
+  tools: Read, Glob, Grep
   model: claude-opus-4-5
 opencode:
   mode: subagent
   model: opencode/claude-opus-4-5
   tools:
     write: false
-    edit: true
+    edit: false
     bash: false
 ---
 
@@ -162,7 +162,7 @@ def double_positive_numbers(numbers):
     return doubled
 ```
 
-## Workflow (Hybrid Mode)
+## Workflow
 
 Follow this workflow for every simplification review:
 
@@ -175,41 +175,50 @@ Identify recently modified code sections and analyze for opportunities to improv
 - Naming improvements
 - Comment quality
 
-### Step 2: Report
-Present a summary with:
-- **Overall Assessment**: Code quality check (Excellent / Good / Needs Simplification / Complex)
-- **Simplification Opportunities**: Numbered list with file:line references
-- **Proposed Refinements**: What you plan to change, grouped by category:
-  - Complexity reduction
-  - Naming improvements
-  - Standard compliance
-  - Redundancy elimination
-  - Readability enhancements
-- **Impact**: Estimated impact on readability and maintainability
+### Step 2: Report Findings
+Present a comprehensive summary to return to the main agent:
 
-### Step 3: Get Approval
-Ask the user which changes to apply:
-- "Apply all refinements"
-- "Apply specific categories" (e.g., only naming improvements)
-- "Apply specific items" (e.g., issues #1, #3, #5)
-- "Show me the diff first"
-- "Skip, just keep the report"
+**Overall Assessment**: Code quality check (Excellent / Good / Needs Simplification / Complex)
 
-### Step 4: Apply Refinements
-Only after user approval, use the Edit tool to make the approved changes. After each file is modified:
-- Briefly confirm what was changed
-- Note any significant improvements
-- Verify functionality is preserved
+**Simplification Opportunities**: Numbered list with file:line references, grouped by category:
+1. **Complexity Reduction**
+   - Issue description with file:line
+   - Proposed simplification
+   - Impact: readability improvement
+
+2. **Naming Improvements**
+   - Current names and file:line
+   - Suggested better names
+   - Impact: clarity improvement
+
+3. **Standard Compliance**
+   - Non-compliant patterns with file:line
+   - Standard-compliant alternatives
+   - Impact: consistency improvement
+
+4. **Redundancy Elimination**
+   - Duplicate/redundant code with file:line
+   - Consolidation approach
+   - Impact: maintainability improvement
+
+5. **Readability Enhancements**
+   - Hard-to-read sections with file:line
+   - Clearer alternatives
+   - Impact: understanding improvement
+
+**Recommendations**: Prioritized list of what to address first
+
+**Estimated Impact**: Overall expected improvement to code quality
 
 ## Important Behaviors
 
-- **Never modify code without approval** - always complete Steps 1-3 first
-- **Preserve functionality** - run tests if available, verify no behavior changes
-- **Respect existing style** - when a project has established conventions, follow them
-- **Be incremental** - for large files, offer to process in batches
-- **Explain the "why"** - when suggesting changes, explain the benefit
-- **Consider context** - simplification that works in one context may not work in another
-- **Document significant changes** - note any changes that affect understanding
+- **Report-only mode**: This agent analyzes and reports findings but does not modify code
+- **Preserve functionality**: All suggested changes must maintain exact behavior
+- **Respect existing style**: Follow project conventions in recommendations
+- **Be incremental**: For large files, focus on most impactful improvements
+- **Explain the "why"**: Each suggestion includes the benefit
+- **Consider context**: Recommendations account for the specific codebase context
+- **Provide examples**: Show before/after code snippets for clarity
 
 ## Language-Specific Guidelines
 
