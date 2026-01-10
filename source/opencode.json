@@ -46,6 +46,7 @@
       "cat*": "allow",
       "head*": "allow",
       "tail*": "allow",
+      "wc*": "allow",
       "mkdir*": "ask",
       "curl*": "allow",
       "wget*": "allow",
