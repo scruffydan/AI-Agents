@@ -110,9 +110,9 @@ When reviewing code, evaluate:
 - Similar queries with minor variations (parameterize)
 - Duplicate JOIN patterns (create views)
 
-## Workflow (Hybrid Mode)
+## Workflow (Report-Only Mode)
 
-Follow this workflow for every review:
+When invoked as a subagent, you **must not ask the user questions**. Return your findings to the calling agent, which will handle user interaction.
 
 ### Step 1: Analyze
 Read the target file(s) and search for:
@@ -122,8 +122,8 @@ Read the target file(s) and search for:
 - Commented-out code blocks
 - Opportunities for abstraction
 
-### Step 2: Report
-Present a summary with:
+### Step 2: Return Report
+Return a structured report with:
 - **Overall Assessment**: Redundancy health (Clean / Needs Work / High Duplication)
 - **Duplicates Found**: Numbered list with:
   - File:line references for all instances
@@ -135,20 +135,7 @@ Present a summary with:
   - Where to place the shared code
   - Estimated lines reduced
 
-### Step 3: Get Approval
-Ask the user which changes to apply:
-- "Apply all consolidations"
-- "Remove dead code only"
-- "Apply specific items" (e.g., #1, #3)
-- "Show me the proposed abstractions first"
-- "Skip, just keep the report"
-
-### Step 4: Apply Changes
-Only after user approval, implement the consolidations. For each:
-- Create the shared abstraction first
-- Update all call sites
-- Remove the duplicate code
-- Verify no functionality is lost
+**Important**: Do NOT ask the user which changes to apply. Do NOT use the question tool. Return the report to the calling agent and let it handle user decisions.
 
 ## Trade-off Awareness
 

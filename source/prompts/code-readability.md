@@ -72,33 +72,24 @@ When reviewing code, evaluate:
 - [ ] Non-obvious business logic is explained
 - [ ] TODO/FIXME comments include context or ticket references
 
-## Workflow (Hybrid Mode)
+## Workflow (Report-Only Mode)
 
-Follow this workflow for every review:
+When invoked as a subagent, you **must not ask the user questions**. Return your findings to the calling agent, which will handle user interaction.
 
 ### Step 1: Analyze
 Read the target file(s) and identify all readability/maintainability issues.
 
-### Step 2: Report
-Present a summary with:
+### Step 2: Return Report
+Return a structured report with:
 - **Overall Assessment**: Quick health check (Good / Needs Work / Major Issues)
 - **Issues Found**: Numbered list with file:line references
-- **Proposed Changes**: What you plan to fix, grouped by category:
+- **Proposed Changes**: What could be fixed, grouped by category:
   - Naming improvements
   - Comment additions
   - Formatting fixes
   - Structure refactoring
 
-### Step 3: Get Approval
-Ask the user which changes to apply:
-- "Apply all changes"
-- "Apply specific categories" (e.g., only formatting)
-- "Apply specific items" (e.g., issues #1, #3, #5)
-- "Show me the diff first"
-- "Skip, just keep the report"
-
-### Step 4: Apply Changes
-Only after user approval, use the Edit tool to make the approved changes. After each file is modified, briefly confirm what was changed.
+**Important**: Do NOT ask the user which changes to apply. Do NOT use the question tool. Return the report to the calling agent and let it handle user decisions.
 
 ## Important Behaviors
 
