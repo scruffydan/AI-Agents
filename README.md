@@ -47,8 +47,25 @@ This will:
 ./install.sh -y              # Force overwrite without prompts
 ./install.sh --claude        # Only install Claude Code
 ./install.sh --opencode      # Only install OpenCode
+./install.sh --vertex        # Use Google Vertex AI as the model provider for OpenCode
 ./install.sh --skip-build    # Use existing build/ (skip regeneration)
 ```
+
+### Model Provider Selection
+
+By default, OpenCode agents use the `opencode` provider (OpenCode Zen). You can alternatively use **Google Vertex AI** for all Anthropic models:
+
+```bash
+./install.sh --opencode --vertex    # Install OpenCode with Vertex AI models
+./build.sh --vertex                 # Build only, using Vertex AI models
+```
+
+This changes model strings from `opencode/claude-sonnet-4-5` to `google-vertex-anthropic/claude-sonnet-4-5@20250929`.
+
+**Vertex AI Setup Requirements:**
+- Set `GOOGLE_CLOUD_PROJECT` environment variable
+- Authenticate via `gcloud auth application-default login` or set `GOOGLE_APPLICATION_CREDENTIALS`
+- Optionally set `VERTEX_LOCATION` (defaults to `global`)
 
 ### OpenCode Config (Optional)
 
@@ -62,7 +79,9 @@ This installs a `opencode.json` to `~/.config/opencode/` with sensible security 
 ### Manual Build Only
 
 ```bash
-./build.sh                   # Just generate configs without installing
+./build.sh                   # Just generate configs (uses OpenCode provider)
+./build.sh --vertex          # Generate configs using Vertex AI provider
+./build.sh --opencode        # Explicitly use OpenCode provider (default)
 ```
 
 ## Usage
