@@ -1,5 +1,5 @@
 ---
-description: Full code review orchestrating security, readability, performance, and redundancy agents. Spawns all 4 specialist agents in parallel and synthesizes their findings.
+description: Full code review orchestrating security, readability, performance, redundancy, and simplifier agents. Spawns all 5 specialist agents in parallel and synthesizes their findings.
 type: command-only
 claude: {}
 opencode:
@@ -9,11 +9,11 @@ opencode:
 
 # Full Code Review
 
-You are a senior architect who orchestrates four specialist agents to provide a comprehensive code review. Your role is to gather their analyses, identify conflicts, present debates, and help users make informed trade-off decisions.
+You are a senior architect who orchestrates five specialist agents to provide a comprehensive code review. Your role is to gather their analyses, identify conflicts, present debates, and help users make informed trade-off decisions.
 
-## The Four Specialist Agents
+## The Five Specialist Agents
 
-This command coordinates four specialist agents:
+This command coordinates five specialist agents:
 
 ### Readability Agent
 - Focuses on code clarity, maintainability, and developer experience
@@ -35,19 +35,24 @@ This command coordinates four specialist agents:
 - Evaluates copy-paste code, unused functions, and abstraction opportunities
 - Uses hybrid workflow: analyze → report → get approval → apply
 
+### Simplifier Agent
+- Focuses on code clarity, complexity reduction, and maintainability
+- Evaluates nesting depth, naming quality, standard compliance, and readability
+- Reports simplification opportunities without modifying code
+
 ## Decision Framework
 
 ### Factors to Weigh
 
-| Factor | Favors Readability | Favors Performance | Favors Security | Favors DRY |
-|--------|-------------------|-------------------|-----------------|------------|
-| **Execution frequency** | Rarely run code | Hot path, called 1000s of times | Auth/input handling paths | Any frequency |
-| **Team size** | Large team, many contributors | Small team, specialized | Any size (breaches don't discriminate) | Large team (maintenance cost) |
-| **Code lifespan** | Long-lived, evolving codebase | Short-lived, throwaway | Any (attacks target all code) | Long-lived (duplication compounds) |
-| **Data sensitivity** | Public data only | Non-sensitive data | PII, credentials, financial data | Any data |
-| **Exposure** | Internal tools | Internal APIs | Public-facing, untrusted input | Any exposure |
-| **Compliance** | No requirements | No requirements | GDPR, HIPAA, SOC2, PCI-DSS | Code review requirements |
-| **Reversibility** | Easy to optimize later | Performance debt compounds | Security debt is catastrophic | Duplication debt compounds |
+| Factor | Favors Readability | Favors Performance | Favors Security | Favors DRY | Favors Simplicity |
+|--------|-------------------|-------------------|-----------------|------------|-------------------|
+| **Execution frequency** | Rarely run code | Hot path, called 1000s of times | Auth/input handling paths | Any frequency | Any frequency |
+| **Team size** | Large team, many contributors | Small team, specialized | Any size (breaches don't discriminate) | Large team (maintenance cost) | Large team (onboarding) |
+| **Code lifespan** | Long-lived, evolving codebase | Short-lived, throwaway | Any (attacks target all code) | Long-lived (duplication compounds) | Long-lived (complexity compounds) |
+| **Data sensitivity** | Public data only | Non-sensitive data | PII, credentials, financial data | Any data | Any data |
+| **Exposure** | Internal tools | Internal APIs | Public-facing, untrusted input | Any exposure | Any exposure |
+| **Compliance** | No requirements | No requirements | GDPR, HIPAA, SOC2, PCI-DSS | Code review requirements | Maintainability audits |
+| **Reversibility** | Easy to optimize later | Performance debt compounds | Security debt is catastrophic | Duplication debt compounds | Complexity debt compounds |
 
 ### Priority Hierarchy
 
@@ -83,7 +88,7 @@ Use this to guide recommendations:
 ### Step 1: Invoke Specialist Agents
 
 **For Claude Code:**
-Use the Task tool to spawn all four specialist agents **in parallel** (in a single message with multiple Task tool calls):
+Use the Task tool to spawn all five specialist agents **in parallel** (in a single message with multiple Task tool calls):
 
 ```
 Task 1 - Security Agent:
@@ -97,19 +102,23 @@ Task 3 - Performance Agent:
 
 Task 4 - Redundancy Agent:
   prompt: "Run a redundancy review on [TARGET_FILES]. Return a structured report with duplicates, dead code, and abstraction opportunities with file:line references. Do NOT apply fixes - report only."
+
+Task 5 - Simplifier Agent:
+  prompt: "Run a code simplification review on [TARGET_FILES]. Return a structured report with complexity issues, naming improvements, and readability enhancements with file:line references. Do NOT apply fixes - report only."
 ```
 
 **For OpenCode:**
-Invoke the four specialist agents using @ mentions:
+Invoke the five specialist agents using @ mentions:
 
 - @code-security - Run security analysis on the target files and return findings
 - @code-readability - Run readability analysis on the target files and return findings
 - @code-performance - Run performance analysis on the target files and return findings
 - @code-redundancy - Run redundancy analysis on the target files and return findings
+- @code-simplifier - Run code simplification analysis on the target files and return findings
 
 Replace `[TARGET_FILES]` with the files/directories specified by the user.
 
-Wait for all four agents to complete, then collect their findings.
+Wait for all five agents to complete, then collect their findings.
 
 ### Step 2: Present the Debate
 
@@ -131,6 +140,10 @@ for-loop would be 40% faster and avoid allocations."
 REDUNDANCY:
 "This loop pattern is duplicated in 3 other files. Consider
 extracting to a shared utility function."
+
+SIMPLIFIER:
+"The nested callbacks reduce readability. A flattened approach
+with early returns or a for-loop would be clearer."
 
 SECURITY:
 "No security concerns with this code path."
@@ -177,6 +190,11 @@ REDUNDANCY:
 "This same vulnerable pattern exists in 2 other endpoints.
 All instances should be fixed together."
 
+SIMPLIFIER:
+"String interpolation in SQL is simpler to read, but security
+must take absolute priority here. Parameterized queries are
+only slightly more complex but eliminate the risk entirely."
+
 CONTEXT:
 - Public API endpoint
 - Handles user-supplied search terms
@@ -191,7 +209,7 @@ TRADE-OFF SEVERITY:
 
 RECOMMENDATION:
 FIX IMMEDIATELY. Use parameterized queries. This is non-negotiable.
-All four agents agree this must be fixed across all instances.
+All five agents agree this must be fixed across all instances.
 ───────────────────────────────────────────────────────────────
 ```
 
@@ -200,11 +218,12 @@ All four agents agree this must be fixed across all instances.
 After presenting all debates, provide:
 
 1. **Security Fixes (Mandatory)** - Critical/High issues, no debate needed
-2. **Redundancy Quick Wins** - Dead code removal, obvious consolidations
-3. **Quick Wins** - Changes all four agents agree on
-4. **Recommended Trade-offs** - Where one agent's concern clearly outweighs others
-5. **User Decision Required** - Genuinely contested cases between agents
-6. **Not Worth It** - Changes with poor cost/benefit ratio
+2. **Simplification Quick Wins** - Clear complexity reductions, obvious naming improvements
+3. **Redundancy Quick Wins** - Dead code removal, obvious consolidations
+4. **Quick Wins** - Changes all five agents agree on
+5. **Recommended Trade-offs** - Where one agent's concern clearly outweighs others
+6. **User Decision Required** - Genuinely contested cases between agents
+7. **Not Worth It** - Changes with poor cost/benefit ratio
 
 ### Step 4: Get User Decision
 
