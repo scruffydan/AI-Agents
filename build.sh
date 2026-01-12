@@ -69,6 +69,27 @@ mkdir -p "$BUILD_DIR/claude/commands"
 mkdir -p "$BUILD_DIR/opencode/agent"
 mkdir -p "$BUILD_DIR/opencode/command"
 
+# =============================================================================
+# YAML Frontmatter Parsing
+# =============================================================================
+# These functions parse YAML frontmatter from markdown files using awk/grep/sed.
+# 
+# Parsing approach:
+# 1. Top-level keys: Match "key: value" at start of line (no indentation)
+# 2. Nested keys: Find parent block, then match "  child: value" (2-space indent)
+# 3. Block extraction: Capture all lines under a key until next top-level key
+#
+# State machine pattern used in awk:
+# - in_parent/in_claude/in_oc flags track when we're inside a YAML block
+# - /^[a-z]/ pattern detects top-level keys (no leading whitespace)
+# - Block ends when another top-level key is encountered
+#
+# Limitations:
+# - Assumes 2-space indentation (standard YAML)
+# - Does not handle multi-line quoted strings
+# - Does not handle YAML anchors/aliases
+# =============================================================================
+
 # Function to extract YAML value from frontmatter
 # Usage: get_yaml_value "$frontmatter" "key"
 # Matches lines like "key: value" and extracts the value
