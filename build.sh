@@ -15,9 +15,50 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
+# Default provider for OpenCode models
+OPENCODE_PROVIDER="opencode"
+
+# Parse command-line arguments
+show_help() {
+    echo "Usage: ./build.sh [OPTIONS]"
+    echo ""
+    echo "Options:"
+    echo "  --opencode         Use OpenCode as the model provider (default)"
+    echo "  --vertex           Use Google Vertex AI Anthropic as the model provider"
+    echo "  -h, --help         Show this help message"
+    echo ""
+    echo "The provider selection affects OpenCode agent model strings:"
+    echo "  --opencode  ->  opencode/claude-sonnet-4-5"
+    echo "  --vertex    ->  google-vertex-anthropic/claude-sonnet-4-5@20250929"
+    echo ""
+}
+
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --opencode)
+            OPENCODE_PROVIDER="opencode"
+            shift
+            ;;
+        --vertex)
+            OPENCODE_PROVIDER="google-vertex-anthropic"
+            shift
+            ;;
+        -h|--help)
+            show_help
+            exit 0
+            ;;
+        *)
+            echo "Unknown option: $1"
+            show_help
+            exit 1
+            ;;
+    esac
+done
+
 echo -e "${GREEN}Building AI-Agents configs...${NC}"
 echo "Source: $SHARED_DIR"
 echo "Output: $BUILD_DIR"
+echo "OpenCode Provider: $OPENCODE_PROVIDER"
 echo ""
 
 # Clean and create build directories
@@ -139,6 +180,31 @@ is_mode_only() {
     [[ "$type" == "mode-only" ]]
 }
 
+# Function to transform OpenCode model string based on selected provider
+# Replaces "opencode/" prefix with the selected provider (e.g., "google-vertex-anthropic/")
+# For Vertex AI, adds @version suffix to model names
+transform_opencode_model() {
+    local model="$1"
+    if [ -n "$model" ]; then
+        # Replace "opencode/" with the selected provider prefix
+        local transformed=$(echo "$model" | sed "s|^opencode/|${OPENCODE_PROVIDER}/|")
+        
+        # For Vertex AI, add @version suffix to Anthropic model names
+        if [ "$OPENCODE_PROVIDER" = "google-vertex-anthropic" ]; then
+            transformed=$(echo "$transformed" | sed \
+                -e 's|claude-opus-4-5$|claude-opus-4-5@20251101|' \
+                -e 's|claude-sonnet-4-5$|claude-sonnet-4-5@20250929|' \
+                -e 's|claude-haiku-4-5$|claude-haiku-4-5@20251001|' \
+                -e 's|claude-opus-4-1$|claude-opus-4-1@20250805|' \
+                -e 's|claude-opus-4$|claude-opus-4@20250514|' \
+                -e 's|claude-sonnet-4$|claude-sonnet-4@20250514|' \
+                -e 's|claude-3-haiku$|claude-3-haiku@20240307|')
+        fi
+        
+        echo "$transformed"
+    fi
+}
+
 # =============================================================================
 # Parsing Functions
 # =============================================================================
@@ -210,11 +276,12 @@ generate_claude_command() {
 generate_opencode_agent() {
     local filename="$1"
     local output_file="$BUILD_DIR/opencode/agent/$filename.md"
+    local transformed_model=$(transform_opencode_model "$opencode_model")
     {
         echo "---"
         echo "description: $description"
         [ -n "$opencode_mode" ] && echo "mode: $opencode_mode"
-        [ -n "$opencode_model" ] && echo "model: $opencode_model"
+        [ -n "$transformed_model" ] && echo "model: $transformed_model"
         if [ -n "$opencode_tools" ]; then
             echo "tools:"
             echo "$opencode_tools"
@@ -230,11 +297,12 @@ generate_opencode_agent() {
 generate_opencode_command() {
     local filename="$1"
     local output_file="$BUILD_DIR/opencode/command/$filename.md"
+    local transformed_model=$(transform_opencode_model "$opencode_model")
     {
         echo "---"
         echo "description: $description"
         [ -n "$opencode_subtask" ] && echo "subtask: $opencode_subtask"
-        [ -n "$opencode_model" ] && echo "model: $opencode_model"
+        [ -n "$transformed_model" ] && echo "model: $transformed_model"
         echo "---"
         echo ""
         echo "$content"
@@ -247,11 +315,12 @@ generate_opencode_command() {
 generate_opencode_primary_agent() {
     local filename="$1"
     local output_file="$BUILD_DIR/opencode/agent/$filename.md"
+    local transformed_model=$(transform_opencode_model "$opencode_model")
     {
         echo "---"
         echo "description: $description"
         echo "mode: primary"
-        [ -n "$opencode_model" ] && echo "model: $opencode_model"
+        [ -n "$transformed_model" ] && echo "model: $transformed_model"
         [ -n "$opencode_temperature" ] && echo "temperature: $opencode_temperature"
         if [ -n "$opencode_tools" ]; then
             echo "tools:"
