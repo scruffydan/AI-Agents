@@ -28,6 +28,13 @@ AI-Agents/
 └── opencode-init.sh   # Installs opencode.json config with secure defaults
 ```
 
+## Requirements
+
+- **yq** (v4) - YAML processor for build script
+  ```bash
+  brew install yq
+  ```
+
 ## Installation
 
 ### Quick Install
