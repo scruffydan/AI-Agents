@@ -100,7 +100,9 @@ get_frontmatter() {
     sed -n '/^---$/,/^---$/p' "$1" | sed '1d;$d'
 }
 
-# Extract content after frontmatter
+# Extract content after frontmatter (everything after the closing --- of YAML frontmatter)
+# State machine: p=0 (before first ---), p=1 (in frontmatter), p=2 (found closing ---), p=3 (printing content)
+# When we hit the second ---, we skip it with getline and start printing from the next line
 get_content() {
     awk 'BEGIN{p=0} /^---$/{p++; if(p==2) {getline; p=3}} p==3{print}' "$1"
 }
@@ -123,12 +125,12 @@ transform_model() {
     # Only transform if not using default opencode provider
     if [[ "$OPENCODE_PROVIDER" != "opencode" ]]; then
         # Replace "opencode/" with the selected provider prefix using sed
-        transformed=$(echo "$model" | sed "s|^opencode/|${OPENCODE_PROVIDER}/|")
+        transformed=$(echo "$model" | sed "s|^opencode/|$OPENCODE_PROVIDER/|")
         
         # For Vertex AI, add version suffix
         if [[ "$OPENCODE_PROVIDER" == "google-vertex-anthropic" ]]; then
             local suffix=$(get_vertex_version "$transformed")
-            transformed="${transformed}${suffix}"
+            transformed="$transformed$suffix"
         fi
     fi
     
@@ -151,7 +153,7 @@ generate_output() {
     
     local output_dir="$BUILD_DIR/$target"
     [[ "$target" == "claude" ]] && output_dir+="/${type}s" || output_dir+="/$type"
-    local output_file="$output_dir/$filename.md"
+    local output_file="$output_dir/${filename}.md"
     
     {
         echo "---"
@@ -189,7 +191,7 @@ generate_output() {
     
     local suffix=""
     [[ "$is_primary" == "true" ]] && suffix=" (primary)"
-    echo "  Created: ${output_file#$BUILD_DIR/}$suffix"
+    echo "  Created: ${output_file#"$BUILD_DIR"/}$suffix"
 }
 
 # =============================================================================
@@ -210,6 +212,7 @@ for prompt_file in "$SHARED_DIR"/*.md; do
     
     # Extract common values
     description=$(yaml_get "$frontmatter" ".description")
+    # Valid type values: agent, command, agent,command, mode-only
     type=$(yaml_get "$frontmatter" ".type")
     
     # Extract Claude-specific values
@@ -265,9 +268,9 @@ echo -e "${GREEN}Build complete!${NC}"
 echo ""
 echo "Generated files:"
 echo "  Claude:"
-find "$BUILD_DIR/claude" -type f -name "*.md" | sed 's|'"$BUILD_DIR/"'|    |'
+find "$BUILD_DIR/claude" -type f -name "*.md" | sed "s|$BUILD_DIR/|    |"
 echo ""
 echo "  OpenCode:"
-find "$BUILD_DIR/opencode" -type f -name "*.md" | sed 's|'"$BUILD_DIR/"'|    |'
+find "$BUILD_DIR/opencode" -type f -name "*.md" | sed "s|$BUILD_DIR/|    |"
 echo ""
 echo "Run ./install.sh to install these configs."
