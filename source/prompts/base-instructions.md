@@ -46,7 +46,6 @@ BLOCK DANGEROUS COMMANDS: You must NEVER run the following commands without gett
 
 * rm (especially with -rf)
 * mv or cp (outside of the current directory)
-* curl or wget
 * git push, git commit -a
 * Any command that installs software (e.g., npm install, pip install, apt-get)
 
