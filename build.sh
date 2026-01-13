@@ -18,7 +18,24 @@ NC='\033[0m' # No Color
 # Default provider for OpenCode models
 OPENCODE_PROVIDER="opencode"
 
-# Parse command-line arguments
+# Get Vertex AI version suffix for a model
+get_vertex_version() {
+    case "$1" in
+        *claude-opus-4-5)    echo "@20251101" ;;
+        *claude-sonnet-4-5)  echo "@20250929" ;;
+        *claude-haiku-4-5)   echo "@20251001" ;;
+        *claude-opus-4-1)    echo "@20250805" ;;
+        *claude-opus-4)      echo "@20250514" ;;
+        *claude-sonnet-4)    echo "@20250514" ;;
+        *claude-3-haiku)     echo "@20240307" ;;
+        *)                   echo "" ;;
+    esac
+}
+
+# =============================================================================
+# Command-line Arguments
+# =============================================================================
+
 show_help() {
     echo "Usage: ./build.sh [OPTIONS]"
     echo ""
@@ -55,6 +72,13 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
+# Check for yq dependency
+if ! command -v yq &> /dev/null; then
+    echo -e "${RED}Error: yq is required but not installed.${NC}"
+    echo "Install with: brew install yq"
+    exit 1
+fi
+
 echo -e "${GREEN}Building AI-Agents configs...${NC}"
 echo "Source: $SHARED_DIR"
 echo "Output: $BUILD_DIR"
@@ -64,354 +88,174 @@ echo ""
 # Clean and create build directories
 [[ -z "$BUILD_DIR" ]] && { echo "Error: BUILD_DIR is empty"; exit 1; }
 rm -rf "$BUILD_DIR"
-mkdir -p "$BUILD_DIR/claude/agents"
-mkdir -p "$BUILD_DIR/claude/commands"
-mkdir -p "$BUILD_DIR/opencode/agent"
-mkdir -p "$BUILD_DIR/opencode/command"
+mkdir -p "$BUILD_DIR/claude/agents" "$BUILD_DIR/claude/commands"
+mkdir -p "$BUILD_DIR/opencode/agent" "$BUILD_DIR/opencode/command"
 
 # =============================================================================
-# YAML Frontmatter Parsing
-# =============================================================================
-# These functions parse YAML frontmatter from markdown files using awk/grep/sed.
-# 
-# Parsing approach:
-# 1. Top-level keys: Match "key: value" at start of line (no indentation)
-# 2. Nested keys: Find parent block, then match "  child: value" (2-space indent)
-# 3. Block extraction: Capture all lines under a key until next top-level key
-#
-# State machine pattern used in awk:
-# - in_parent/in_claude/in_oc flags track when we're inside a YAML block
-# - /^[a-z]/ pattern detects top-level keys (no leading whitespace)
-# - Block ends when another top-level key is encountered
-#
-# Limitations:
-# - Assumes 2-space indentation (standard YAML)
-# - Does not handle multi-line quoted strings
-# - Does not handle YAML anchors/aliases
+# Helper Functions
 # =============================================================================
 
-# Function to extract YAML value from frontmatter
-# Usage: get_yaml_value "$frontmatter" "key"
-# Matches lines like "key: value" and extracts the value
-get_yaml_value() {
-    local content="$1"
-    local key="$2"
-    echo "$content" | grep -E "^${key}:" | head -1 | sed "s/^${key}:[[:space:]]*//"
+# Extract YAML frontmatter from a markdown file
+get_frontmatter() {
+    sed -n '/^---$/,/^---$/p' "$1" | sed '1d;$d'
 }
 
-# Function to extract nested YAML value
-# Usage: get_nested_yaml "$frontmatter" "parent" "child"
-# Matches YAML like:
-#   parent:
-#     child: value
-# Returns the value after "child:"
-get_nested_yaml() {
-    local content="$1"
-    local parent="$2"
-    local child="$3"
-    # Awk logic:
-    # 1. Find line starting with "parent:" -> enter parent block
-    # 2. Exit parent block when hitting another top-level key (no indent)
-    # 3. Within parent block, find "  child:" and extract value after it
-    echo "$content" | awk -v parent="$parent" -v child="$child" '
-        $0 ~ "^"parent":" { in_parent=1; next }
-        in_parent && /^[a-z]/ { in_parent=0 }
-        in_parent && $0 ~ "^  "child":" { 
-            sub(/^  '"$child"':[[:space:]]*/, ""); 
-            print; 
-            exit 
-        }
-    '
+# Extract content after frontmatter
+get_content() {
+    awk 'BEGIN{p=0} /^---$/{p++; if(p==2) {getline; p=3}} p==3{print}' "$1"
 }
 
-# Function to extract Claude tools (handles "tools: Read, Glob, Grep" format)
-# Looks within the "claude:" block for a "tools:" line
-get_claude_tools() {
-    local content="$1"
-    # Awk logic:
-    # 1. Enter claude block when seeing "claude:"
-    # 2. Exit when hitting another top-level key
-    # 3. Find "  tools:" line and return everything after it
-    echo "$content" | awk '
-        /^claude:/ { in_claude=1; next }
-        in_claude && /^[a-z]/ { in_claude=0 }
-        in_claude && /^  tools:/ { 
-            sub(/^  tools:[[:space:]]*/, ""); 
-            print; 
-            exit 
-        }
-    '
+# Get a value from frontmatter using yq
+# Usage: yaml_get "$frontmatter" ".key" or ".parent.child"
+yaml_get() {
+    local result
+    result=$(echo "$1" | yq "$2" 2>/dev/null)
+    [[ "$result" == "null" || -z "$result" ]] && echo "" || echo "$result"
 }
 
-# Function to extract Claude model
-# Same pattern as get_claude_tools but for "model:" line
-get_claude_model() {
-    local content="$1"
-    echo "$content" | awk '
-        /^claude:/ { in_claude=1; next }
-        in_claude && /^[a-z]/ { in_claude=0 }
-        in_claude && /^  model:/ { 
-            sub(/^  model:[[:space:]]*/, ""); 
-            print; 
-            exit 
-        }
-    '
-}
-
-# Function to extract the entire OpenCode config block
-# Returns all lines under "opencode:" until the next top-level key
-get_opencode_block() {
-    local content="$1"
-    echo "$content" | awk '
-        /^opencode:/ { in_oc=1; next }
-        in_oc && /^[a-z]/ { exit }
-        in_oc { print }
-    '
-}
-
-# Function to extract OpenCode temperature
-get_opencode_temperature() {
-    local content="$1"
-    echo "$content" | awk '
-        /^opencode:/ { in_oc=1; next }
-        in_oc && /^[a-z]/ { in_oc=0 }
-        in_oc && /^  temperature:/ { 
-            sub(/^  temperature:[[:space:]]*/, ""); 
-            print; 
-            exit 
-        }
-    '
-}
-
-# Function to extract OpenCode permission block
-# Returns all lines under "permission:" within the opencode block
-get_opencode_permission() {
-    local content="$1"
-    echo "$content" | awk '
-        /^opencode:/ { in_oc=1; next }
-        in_oc && /^[a-z]/ { exit }
-        in_oc && /^  permission:/ { in_perm=1; next }
-        in_perm && /^  [a-z]/ && !/^    / { exit }
-        in_perm { print }
-    '
-}
-
-# Function to check if type includes "agent"
-has_agent() {
-    local type="$1"
-    [[ "$type" == *"agent"* ]]
-}
-
-# Function to check if type includes "command"
-has_command() {
-    local type="$1"
-    [[ "$type" == *"command"* ]]
-}
-
-# Function to check if type is "mode-only" (now treated as primary agent)
-is_mode_only() {
-    local type="$1"
-    [[ "$type" == "mode-only" ]]
-}
-
-# Function to transform OpenCode model string based on selected provider
-# Replaces "opencode/" prefix with the selected provider (e.g., "google-vertex-anthropic/")
-# For Vertex AI, adds @version suffix to model names
-transform_opencode_model() {
+# Transform OpenCode model string based on selected provider
+transform_model() {
     local model="$1"
-    if [ -n "$model" ]; then
-        # Replace "opencode/" with the selected provider prefix
-        local transformed=$(echo "$model" | sed "s|^opencode/|${OPENCODE_PROVIDER}/|")
+    [[ -z "$model" ]] && return
+    
+    local transformed="$model"
+    
+    # Only transform if not using default opencode provider
+    if [[ "$OPENCODE_PROVIDER" != "opencode" ]]; then
+        # Replace "opencode/" with the selected provider prefix using sed
+        transformed=$(echo "$model" | sed "s|^opencode/|${OPENCODE_PROVIDER}/|")
         
-        # For Vertex AI, add @version suffix to Anthropic model names
-        if [ "$OPENCODE_PROVIDER" = "google-vertex-anthropic" ]; then
-            transformed=$(echo "$transformed" | sed \
-                -e 's|claude-opus-4-5$|claude-opus-4-5@20251101|' \
-                -e 's|claude-sonnet-4-5$|claude-sonnet-4-5@20250929|' \
-                -e 's|claude-haiku-4-5$|claude-haiku-4-5@20251001|' \
-                -e 's|claude-opus-4-1$|claude-opus-4-1@20250805|' \
-                -e 's|claude-opus-4$|claude-opus-4@20250514|' \
-                -e 's|claude-sonnet-4$|claude-sonnet-4@20250514|' \
-                -e 's|claude-3-haiku$|claude-3-haiku@20240307|')
+        # For Vertex AI, add version suffix
+        if [[ "$OPENCODE_PROVIDER" == "google-vertex-anthropic" ]]; then
+            local suffix=$(get_vertex_version "$transformed")
+            transformed="${transformed}${suffix}"
         fi
-        
-        echo "$transformed"
     fi
+    
+    echo "$transformed"
 }
 
 # =============================================================================
-# Parsing Functions
+# Unified Output Generator
 # =============================================================================
 
-# Parse a prompt file and extract frontmatter and content into global variables
-# Sets: file_content, frontmatter, content
-parse_prompt_file() {
-    local file="$1"
-    file_content=$(cat "$file")
+# Generate output file with frontmatter and content
+# Usage: generate_output <target> <type> <filename> <options>
+#   target: claude | opencode
+#   type: agent | command
+#   filename: output filename (without .md)
+generate_output() {
+    local target="$1"
+    local type="$2"
+    local filename="$3"
     
-    # Extract frontmatter (between first two ---)
-    frontmatter=$(echo "$file_content" | awk '/^---$/{p=!p; if(p) next; else exit} p')
+    local output_dir="$BUILD_DIR/$target"
+    [[ "$target" == "claude" ]] && output_dir+="/${type}s" || output_dir+="/$type"
+    local output_file="$output_dir/$filename.md"
     
-    # Extract content (everything after the second ---)
-    content=$(echo "$file_content" | awk 'BEGIN{p=0} /^---$/{p++; if(p==2) {getline; p=3}} p==3{print}')
-}
-
-# Parse OpenCode-specific values from frontmatter
-# Sets: opencode_block, opencode_mode, opencode_model, opencode_subtask, opencode_temperature, opencode_permission
-parse_opencode_values() {
-    opencode_block=$(get_opencode_block "$frontmatter")
-    opencode_mode=$(echo "$opencode_block" | grep -E "^  mode:" | sed 's/^  mode:[[:space:]]*//')
-    opencode_model=$(echo "$opencode_block" | grep -E "^  model:" | sed 's/^  model:[[:space:]]*//')
-    opencode_subtask=$(echo "$opencode_block" | grep -E "^  subtask:" | sed 's/^  subtask:[[:space:]]*//')
-    opencode_temperature=$(get_opencode_temperature "$frontmatter")
-    
-    # Extract OpenCode permission block
-    opencode_permission=$(get_opencode_permission "$frontmatter")
-}
-
-# =============================================================================
-# Claude Generation Functions
-# =============================================================================
-
-# Generate Claude agent file
-generate_claude_agent() {
-    local filename="$1"
-    local output_file="$BUILD_DIR/claude/agents/$filename.md"
     {
         echo "---"
-        echo "name: $filename"
-        echo "description: $description"
-        [ -n "$claude_tools" ] && echo "tools: $claude_tools"
-        [ -n "$claude_model" ] && echo "model: $claude_model"
-        echo "---"
-        echo ""
-        echo "$content"
-    } > "$output_file"
-    echo "  Created: claude/agents/$filename.md"
-}
-
-# Generate Claude command file
-generate_claude_command() {
-    local filename="$1"
-    local output_file="$BUILD_DIR/claude/commands/$filename.md"
-    echo "$content" > "$output_file"
-    echo "  Created: claude/commands/$filename.md"
-}
-
-# =============================================================================
-# OpenCode Generation Functions
-# =============================================================================
-
-# Generate OpenCode agent file
-generate_opencode_agent() {
-    local filename="$1"
-    local output_file="$BUILD_DIR/opencode/agent/$filename.md"
-    local transformed_model=$(transform_opencode_model "$opencode_model")
-    {
-        echo "---"
-        echo "description: $description"
-        [ -n "$opencode_mode" ] && echo "mode: $opencode_mode"
-        [ -n "$transformed_model" ] && echo "model: $transformed_model"
-        if [ -n "$opencode_permission" ]; then
-            echo "permission:"
-            echo "$opencode_permission"
+        
+        if [[ "$target" == "claude" ]]; then
+            # Claude format
+            [[ "$type" == "agent" ]] && echo "name: $filename"
+            echo "description: $description"
+            [[ -n "$claude_tools" ]] && echo "tools: $claude_tools"
+            [[ -n "$claude_model" ]] && echo "model: $claude_model"
+        else
+            # OpenCode format
+            echo "description: $description"
+            
+            if [[ "$type" == "agent" ]]; then
+                if [[ "$is_primary" == "true" ]]; then
+                    echo "mode: primary"
+                    [[ -n "$oc_temperature" ]] && echo "temperature: $oc_temperature"
+                else
+                    [[ -n "$oc_mode" ]] && echo "mode: $oc_mode"
+                fi
+                [[ -n "$oc_model_transformed" ]] && echo "model: $oc_model_transformed"
+                [[ -n "$oc_permission" ]] && { echo "permission:"; echo "$oc_permission"; }
+            else
+                # command type
+                [[ -n "$oc_subtask" ]] && echo "subtask: $oc_subtask"
+                [[ -n "$oc_model_transformed" ]] && echo "model: $oc_model_transformed"
+            fi
         fi
+        
         echo "---"
         echo ""
         echo "$content"
     } > "$output_file"
-    echo "  Created: opencode/agent/$filename.md"
-}
-
-# Generate OpenCode command file (for command-only types)
-generate_opencode_command() {
-    local filename="$1"
-    local output_file="$BUILD_DIR/opencode/command/$filename.md"
-    local transformed_model=$(transform_opencode_model "$opencode_model")
-    {
-        echo "---"
-        echo "description: $description"
-        [ -n "$opencode_subtask" ] && echo "subtask: $opencode_subtask"
-        [ -n "$transformed_model" ] && echo "model: $transformed_model"
-        echo "---"
-        echo ""
-        echo "$content"
-    } > "$output_file"
-    echo "  Created: opencode/command/$filename.md"
-}
-
-# Generate OpenCode primary agent file (for mode-only types)
-# These are placed in agent/ with mode: primary so they appear in Tab switcher
-generate_opencode_primary_agent() {
-    local filename="$1"
-    local output_file="$BUILD_DIR/opencode/agent/$filename.md"
-    local transformed_model=$(transform_opencode_model "$opencode_model")
-    {
-        echo "---"
-        echo "description: $description"
-        echo "mode: primary"
-        [ -n "$transformed_model" ] && echo "model: $transformed_model"
-        [ -n "$opencode_temperature" ] && echo "temperature: $opencode_temperature"
-        if [ -n "$opencode_permission" ]; then
-            echo "permission:"
-            echo "$opencode_permission"
-        fi
-        echo "---"
-        echo ""
-        echo "$content"
-    } > "$output_file"
-    echo "  Created: opencode/agent/$filename.md (primary)"
+    
+    local suffix=""
+    [[ "$is_primary" == "true" ]] && suffix=" (primary)"
+    echo "  Created: ${output_file#$BUILD_DIR/}$suffix"
 }
 
 # =============================================================================
 # Main Processing
 # =============================================================================
 
-# Process each prompt file
 for prompt_file in "$SHARED_DIR"/*.md; do
     filename=$(basename "$prompt_file" .md)
     
     # Skip base-instructions (handled separately)
-    [ "$filename" = "base-instructions" ] && continue
+    [[ "$filename" == "base-instructions" ]] && continue
     
     echo -e "${YELLOW}Processing:${NC} $filename"
     
-    # Parse the file
-    parse_prompt_file "$prompt_file"
+    # Parse frontmatter and content
+    frontmatter=$(get_frontmatter "$prompt_file")
+    content=$(get_content "$prompt_file")
     
-    # Get common values
-    description=$(get_yaml_value "$frontmatter" "description")
-    type=$(get_yaml_value "$frontmatter" "type")
+    # Extract common values
+    description=$(yaml_get "$frontmatter" ".description")
+    type=$(yaml_get "$frontmatter" ".type")
     
-    # Get Claude-specific values
-    claude_tools=$(get_claude_tools "$frontmatter")
-    claude_model=$(get_claude_model "$frontmatter")
+    # Extract Claude-specific values
+    claude_tools=$(yaml_get "$frontmatter" ".claude.tools")
+    claude_model=$(yaml_get "$frontmatter" ".claude.model")
     
-    # Get OpenCode-specific values
-    parse_opencode_values
+    # Extract OpenCode-specific values
+    oc_mode=$(yaml_get "$frontmatter" ".opencode.mode")
+    oc_model=$(yaml_get "$frontmatter" ".opencode.model")
+    oc_subtask=$(yaml_get "$frontmatter" ".opencode.subtask")
+    oc_temperature=$(yaml_get "$frontmatter" ".opencode.temperature")
+    oc_permission=$(yaml_get "$frontmatter" ".opencode.permission" | yq -r 'to_entries | .[] | "  " + .key + ": " + .value' 2>/dev/null || true)
+    oc_model_transformed=$(transform_model "$oc_model")
     
-    # Generate Claude files
-    has_agent "$type" && generate_claude_agent "$filename"
-    has_command "$type" && generate_claude_command "$filename"
+    # Determine what to generate based on type
+    is_primary="false"
     
-    # Generate OpenCode files
-    has_agent "$type" && generate_opencode_agent "$filename"
-    has_command "$type" && ! has_agent "$type" && generate_opencode_command "$filename"
-    is_mode_only "$type" && generate_opencode_primary_agent "$filename"
+    # Claude outputs
+    [[ "$type" == *"agent"* ]] && generate_output "claude" "agent" "$filename"
+    [[ "$type" == *"command"* ]] && generate_output "claude" "command" "$filename"
+    
+    # OpenCode outputs
+    if [[ "$type" == *"agent"* ]]; then
+        generate_output "opencode" "agent" "$filename"
+    elif [[ "$type" == *"command"* ]]; then
+        generate_output "opencode" "command" "$filename"
+    fi
+    
+    # mode-only types become primary agents in OpenCode
+    if [[ "$type" == "mode-only" ]]; then
+        is_primary="true"
+        generate_output "opencode" "agent" "$filename"
+    fi
     
     echo ""
 done
 
-# Generate CLAUDE.md from base-instructions.md
+# Generate base instruction files
 echo -e "${YELLOW}Generating:${NC} CLAUDE.md"
-if [ -f "$SHARED_DIR/base-instructions.md" ]; then
+if [[ -f "$SHARED_DIR/base-instructions.md" ]]; then
     cp "$SHARED_DIR/base-instructions.md" "$BUILD_DIR/claude/CLAUDE.md"
     echo "  Created: claude/CLAUDE.md"
 fi
 
-# Generate OpenCode AGENTS.md from base-instructions.md
 echo -e "${YELLOW}Generating:${NC} OpenCode AGENTS.md"
-if [ -f "$SHARED_DIR/base-instructions.md" ]; then
+if [[ -f "$SHARED_DIR/base-instructions.md" ]]; then
     cp "$SHARED_DIR/base-instructions.md" "$BUILD_DIR/opencode/AGENTS.md"
     echo "  Created: opencode/AGENTS.md"
 fi
