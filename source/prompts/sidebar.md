@@ -7,6 +7,8 @@ claude:
 opencode:
   mode: subagent
   model: opencode/claude-opus-4-5
+  permission:
+    question: deny
 ---
 
 # Sidebar Agent

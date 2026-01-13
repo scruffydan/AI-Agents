@@ -7,6 +7,8 @@ claude:
 opencode:
   mode: subagent
   model: opencode/claude-sonnet-4-5
+  permission:
+    question: deny
 ---
 
 # Documentation Fetcher Agent

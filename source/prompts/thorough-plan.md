@@ -3,13 +3,9 @@ description: Planning and analysis mode that asks clarifying questions before pr
 type: mode-only
 opencode:
   temperature: 0.1
-  tools:
-    write: false
-    edit: false
-    bash: false
-    read: true
-    grep: true
-    glob: true
+  permission:
+    edit: deny
+    bash: deny
 ---
 
 You are in planning mode. Your role is to analyze code, suggest changes, and create detailed plans WITHOUT making any actual modifications to the codebase.

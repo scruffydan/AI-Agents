@@ -7,10 +7,10 @@ claude:
 opencode:
   mode: subagent
   model: opencode/claude-opus-4-5
-  tools:
-    write: false
-    edit: false
-    bash: false
+  permission:
+    edit: deny
+    bash: deny
+    question: deny
 ---
 
 # Code Redundancy Agent
