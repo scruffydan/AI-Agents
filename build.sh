@@ -183,6 +183,19 @@ get_opencode_temperature() {
     '
 }
 
+# Function to extract OpenCode permission block
+# Returns all lines under "permission:" within the opencode block
+get_opencode_permission() {
+    local content="$1"
+    echo "$content" | awk '
+        /^opencode:/ { in_oc=1; next }
+        in_oc && /^[a-z]/ { exit }
+        in_oc && /^  permission:/ { in_perm=1; next }
+        in_perm && /^  [a-z]/ && !/^    / { exit }
+        in_perm { print }
+    '
+}
+
 # Function to check if type includes "agent"
 has_agent() {
     local type="$1"
@@ -244,7 +257,7 @@ parse_prompt_file() {
 }
 
 # Parse OpenCode-specific values from frontmatter
-# Sets: opencode_block, opencode_mode, opencode_model, opencode_subtask, opencode_temperature, opencode_tools
+# Sets: opencode_block, opencode_mode, opencode_model, opencode_subtask, opencode_temperature, opencode_permission
 parse_opencode_values() {
     opencode_block=$(get_opencode_block "$frontmatter")
     opencode_mode=$(echo "$opencode_block" | grep -E "^  mode:" | sed 's/^  mode:[[:space:]]*//')
@@ -252,12 +265,8 @@ parse_opencode_values() {
     opencode_subtask=$(echo "$opencode_block" | grep -E "^  subtask:" | sed 's/^  subtask:[[:space:]]*//')
     opencode_temperature=$(get_opencode_temperature "$frontmatter")
     
-    # Extract OpenCode tools block
-    opencode_tools=$(echo "$opencode_block" | awk '
-        /^  tools:/ { in_tools=1; next }
-        in_tools && /^  [a-z]/ && !/^    / { exit }
-        in_tools { print }
-    ')
+    # Extract OpenCode permission block
+    opencode_permission=$(get_opencode_permission "$frontmatter")
 }
 
 # =============================================================================
@@ -303,9 +312,9 @@ generate_opencode_agent() {
         echo "description: $description"
         [ -n "$opencode_mode" ] && echo "mode: $opencode_mode"
         [ -n "$transformed_model" ] && echo "model: $transformed_model"
-        if [ -n "$opencode_tools" ]; then
-            echo "tools:"
-            echo "$opencode_tools"
+        if [ -n "$opencode_permission" ]; then
+            echo "permission:"
+            echo "$opencode_permission"
         fi
         echo "---"
         echo ""
@@ -343,9 +352,9 @@ generate_opencode_primary_agent() {
         echo "mode: primary"
         [ -n "$transformed_model" ] && echo "model: $transformed_model"
         [ -n "$opencode_temperature" ] && echo "temperature: $opencode_temperature"
-        if [ -n "$opencode_tools" ]; then
-            echo "tools:"
-            echo "$opencode_tools"
+        if [ -n "$opencode_permission" ]; then
+            echo "permission:"
+            echo "$opencode_permission"
         fi
         echo "---"
         echo ""

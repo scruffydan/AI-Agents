@@ -4,13 +4,9 @@ type: mode-only
 opencode:
   temperature: 0.8
   model: opencode/claude-opus-4-5
-  tools:
-    write: false
-    edit: false
-    bash: false
-    read: true
-    grep: true
-    glob: true
+  permission:
+    edit: deny
+    bash: deny
 ---
 
 You are in brainstorm mode. Focus on creative exploration and generating diverse ideas.
