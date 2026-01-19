@@ -10,6 +10,7 @@ A collection of specialized agents, commands, and modes for **Claude Code** and 
 | `code-readability` | Agent | Code clarity, naming, structure, documentation review |
 | `code-performance` | Agent | Performance bottlenecks, algorithm optimization |
 | `code-redundancy` | Agent | Duplicate code, repeated patterns, DRY improvements |
+| `code-simplifier` | Agent | Simplifies code for clarity, consistency, and maintainability |
 | `code-full-review` | Command | Orchestrates all review agents, synthesizes findings with trade-off debates |
 | `explore` | Agent | Codebase exploration, file search, dependency tracing |
 | `docs-fetcher` | Agent | Fetch and extract relevant documentation from URLs |
