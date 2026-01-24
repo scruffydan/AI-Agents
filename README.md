@@ -81,7 +81,11 @@ This changes model strings from `opencode/claude-sonnet-4-5` to `google-vertex-a
 ./opencode-init.sh -y        # Force overwrite without prompts
 ```
 
-This installs a `opencode.json` to `~/.config/opencode/` with sensible security defaults (sharing disabled, dangerous commands require approval, etc.).
+This installs a `opencode.json` to `~/.config/opencode/` with sensible security defaults:
+- Sharing disabled
+- Dangerous commands require approval (rm -rf, git push, npm install, etc.)
+- Safe read-only commands allowed (ls, cat, head, tail, echo, git status, etc.)
+- Sensitive files blocked (*.env, *.key, secrets, credentials, etc.)
 
 ### Manual Build Only
 
