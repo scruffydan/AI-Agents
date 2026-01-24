@@ -85,6 +85,7 @@
       "head*": "allow",
       "tail*": "allow",
       "wc*": "allow",
+      "echo*": "allow",
       "mkdir*": "ask",
       "curl*": "allow",
       "wget*": "allow",
