@@ -1,6 +1,6 @@
 ---
 name: git-push
-description: Pre-push checklist for README updates, tests/linters, commit hygiene, secret scanning, and branch/remote status. Use when preparing to run git push, reviewing a branch before publishing, or verifying release readiness.
+description: You MUST use this when performing a git push. Pre-push checklist for README updates, tests/linters, commit hygiene, secret scanning, and branch/remote status. Use when preparing to run git push, reviewing a branch before publishing, or verifying release readiness.
 ---
 
 # Git Push Checklist
