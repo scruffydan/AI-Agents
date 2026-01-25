@@ -231,8 +231,8 @@ generate_output() {
 for prompt_file in "$SHARED_DIR"/*.md; do
     filename=$(basename "$prompt_file" .md)
     
-    # Skip base-instructions (handled separately)
-    [ "$filename" = "base-instructions" ] && continue
+    # Skip AGENTS instructions (handled separately)
+    [ "$filename" = "AGENTS" ] && continue
     
     echo -e "${YELLOW}Processing:${NC} $filename"
     
@@ -284,14 +284,14 @@ done
 
 # Generate base instruction files
 echo -e "${YELLOW}Generating:${NC} CLAUDE.md"
-if [ -f "$SHARED_DIR/base-instructions.md" ]; then
-    cp "$SHARED_DIR/base-instructions.md" "$BUILD_DIR/claude/CLAUDE.md"
+if [ -f "$SHARED_DIR/AGENTS.md" ]; then
+    cp "$SHARED_DIR/AGENTS.md" "$BUILD_DIR/claude/CLAUDE.md"
     echo "  Created: claude/CLAUDE.md"
 fi
 
 echo -e "${YELLOW}Generating:${NC} OpenCode AGENTS.md"
-if [ -f "$SHARED_DIR/base-instructions.md" ]; then
-    cp "$SHARED_DIR/base-instructions.md" "$BUILD_DIR/opencode/AGENTS.md"
+if [ -f "$SHARED_DIR/AGENTS.md" ]; then
+    cp "$SHARED_DIR/AGENTS.md" "$BUILD_DIR/opencode/AGENTS.md"
     echo "  Created: opencode/AGENTS.md"
 fi
 
