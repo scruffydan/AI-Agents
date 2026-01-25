@@ -15,6 +15,8 @@ You are a senior architect who orchestrates five specialist agents to provide a 
 
 This command coordinates five specialist agents:
 
+If any subagent is forced to ask a question, it must include the exact file path, line number(s), and a short code excerpt (5 lines max) plus a one-sentence reason for the clarification.
+
 ### Readability Agent
 - Focuses on code clarity, maintainability, and developer experience
 - Evaluates naming, structure, formatting, and documentation
