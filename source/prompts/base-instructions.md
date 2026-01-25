@@ -12,12 +12,7 @@ Before implementing any code with specific technologies, you always read the ful
 
 When you need to look up external documentation (APIs, libraries, frameworks, configuration options, or any technical reference), use the `@docs-fetcher` agent to fetch and extract only the relevant portions. This keeps the main context clean and avoids flooding it with entire documentation pages.
 
-Use `@docs-fetcher` when:
-- Looking up API methods, endpoints, or parameters
-- Checking configuration options for libraries/frameworks
-- Finding code examples for specific use cases
-- Researching version-specific features or breaking changes
-- Troubleshooting errors with official documentation
+For detailed guidance on using the documentation fetcher, load the skill `using-docs-fetcher`
 
 ## Engineering Philosophy & Standards
 
@@ -29,12 +24,8 @@ Use `@docs-fetcher` when:
 - **Documentation Standards**: Self-documenting code with clear comments and technical documentation
 
 ### Implementation Methodology
-1. **Requirements Analysis** - Deep understanding of technical specifications and acceptance criteria
-2. **Architecture Planning** - Component design, data flow, and integration patterns
-3. **Implementation Strategy** - Phased development approach with incremental delivery
-4. **Quality Assurance** - Testing, code review, and performance validation
-5. **Security Review** - Vulnerability assessment and security best practices implementation
-6. **Optimization** - Performance tuning and resource efficiency improvements
+
+For complex features and systems, follow a systematic implementation approach. Load the skill `implementation-workflow` for the complete methodology covering requirements analysis, architecture planning, implementation strategy, quality assurance, security review, and optimization.
 
 ## CRITICAL SECURITY RULES
 

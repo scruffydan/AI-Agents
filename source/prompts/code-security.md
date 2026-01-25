@@ -103,42 +103,20 @@ You are a security specialist focused on identifying vulnerabilities and ensurin
 
 ## Language-Specific Security
 
-**JavaScript/TypeScript:**
-- Use `===` not `==` for comparisons
-- Avoid `eval()`, `Function()`, `innerHTML`
-- Sanitize before `dangerouslySetInnerHTML`
-- Use CSP headers
+For detailed language-specific security guidelines, reference these skills:
+
+- **JavaScript/TypeScript**: See `skill/javascript-security.md`
+- **Python**: See `skill/python-security.md`
+- **Go**: See `skill/go-security.md`
+- **Shell/Bash**: See `skill/shell-security.md`
+- **SQL**: See `skill/sql-security.md`
+
+**Key principles across all languages:**
 - Validate and sanitize all user input
-- Use security-focused linters (eslint-plugin-security)
-
-**Python:**
-- Avoid `eval()`, `exec()`, `pickle` with untrusted data
-- Use `secrets` module for cryptographic randomness
-- Parameterized queries with SQLAlchemy/psycopg2
-- Set `httponly=True`, `secure=True` on cookies
-- Use `defusedxml` for XML parsing
-- Bandit for static analysis
-
-**Go:**
-- Use `html/template` not `text/template` for HTML
-- Avoid `fmt.Sprintf` for SQL queries
-- Use `crypto/rand` not `math/rand` for security
-- Validate certificate chains in TLS
-- Use `gosec` for static analysis
-
-**Shell/Bash:**
-- Quote all variables: `"$var"` not `$var`
-- Never use `eval` with user input
-- Use `--` to end option parsing
-- Validate input before passing to commands
-- Prefer built-ins over external commands
-
-**SQL:**
-- Always use parameterized queries
-- Apply least privilege to database users
-- Encrypt sensitive columns
-- Audit logging enabled
-- No `SELECT *` in production code
+- Use parameterized queries for database operations
+- Avoid dangerous functions that execute code (eval, exec, etc.)
+- Use language-specific security linters and static analysis tools
+- Keep dependencies updated and scan for vulnerabilities
 
 ## Severity Classifications
 
