@@ -42,6 +42,8 @@ BLOCK DANGEROUS COMMANDS: You must NEVER run the following commands without gett
 
 If you need to run one of these, you must ASK FIRST and explain why.
 
+**Before running `git push`**, load the skill `git-push` for a comprehensive pre-push checklist including README verification, tests, and security checks.
+
 ### File & Secret Access
 
 NEVER READ SECRETS: You are FORBIDDEN from reading or asking to read any sensitive files.

@@ -138,7 +138,7 @@ Note: In OpenCode, the individual review agents are invoked via `@` mentions. On
 
 ## Skills
 
-This repository includes **9 skills** following the [Agent Skills standard](https://github.com/anthropics/anthropic-sdk-typescript/tree/main/agents-api) - modular procedural knowledge that agents load on-demand.
+This repository includes **10 skills** following the [Agent Skills standard](https://github.com/anthropics/anthropic-sdk-typescript/tree/main/agents-api) - modular procedural knowledge that agents load on-demand.
 
 **Security** (language-specific):
 - `javascript-security` - JS/TS security patterns
@@ -150,6 +150,7 @@ This repository includes **9 skills** following the [Agent Skills standard](http
 **Workflow**:
 - `implementation-workflow` - 6-phase development methodology
 - `git-workflows` - Git best practices
+- `git-push` - Pre-push checklist (README updates, tests, security)
 
 **Usage Guides**:
 - `using-docs-fetcher` - When/how to use `@docs-fetcher`
