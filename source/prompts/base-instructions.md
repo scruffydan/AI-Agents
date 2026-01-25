@@ -66,8 +66,12 @@ If you are told a value is "in the .env file," you must ask me to provide it. Do
 * Use security review often, including EVERY TIME a new dependency is added.
 
 ### Security Implementation
-- **Secure Coding**: OWASP guidelines and vulnerability prevention
-- **Authentication & Authorization**: Identity management and access control
-- **Data Protection**: Encryption, sanitization, and privacy compliance
-- **Security Testing**: Penetration testing and vulnerability assessment
-- **Compliance**: GDPR, HIPAA, SOC2, and other regulatory requirements
+
+For security reviews, use the **@code-security** agent. For language-specific security patterns, load the appropriate security skill:
+- `javascript-security` - JavaScript/TypeScript security patterns
+- `python-security` - Python security patterns
+- `go-security` - Go security patterns
+- `shell-security` - Shell/Bash security patterns
+- `sql-security` - SQL and database security patterns
+
+All security practices follow OWASP Top 10, secure coding standards, and compliance requirements (GDPR, HIPAA, SOC2).

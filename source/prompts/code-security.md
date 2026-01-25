@@ -103,13 +103,19 @@ You are a security specialist focused on identifying vulnerabilities and ensurin
 
 ## Language-Specific Security
 
-For detailed language-specific security guidelines, reference these skills:
+When reviewing code, load the appropriate security skill for detailed patterns:
 
-- **JavaScript/TypeScript**: See `skill/javascript-security.md`
-- **Python**: See `skill/python-security.md`
-- **Go**: See `skill/go-security.md`
-- **Shell/Bash**: See `skill/shell-security.md`
-- **SQL**: See `skill/sql-security.md`
+- **Load skill `javascript-security`** when reviewing JavaScript/TypeScript files
+- **Load skill `python-security`** when reviewing Python files
+- **Load skill `go-security`** when reviewing Go files
+- **Load skill `shell-security`** when reviewing shell scripts
+- **Load skill `sql-security`** when reviewing SQL queries or ORM usage
+
+These skills provide:
+- Language-specific dangerous functions to detect
+- Code examples of vulnerable vs. secure patterns
+- Static analysis tool recommendations
+- Framework-specific security considerations
 
 **Key principles across all languages:**
 - Validate and sanitize all user input
