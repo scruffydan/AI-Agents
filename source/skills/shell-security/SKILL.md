@@ -1,16 +1,18 @@
 ---
 name: shell-security
-description: Shell and Bash security best practices including variable quoting, command injection prevention, and safe file operations
+description: POSIX shell security best practices for sh-compatible scripts including variable quoting, command injection prevention, and safe file operations
 ---
 
-# Shell/Bash Security Checklist
+# POSIX Shell Security Checklist
+
+This guide focuses on **POSIX sh-compatible** security practices that work across all Unix shells (sh, bash, dash, ash, etc.).
 
 ## Variable Quoting
 - **Always quote variables**: Use `"$var"` not `$var`
 - Prevents word splitting and glob expansion
 - Critical for file paths with spaces
 
-```bash
+```sh
 # WRONG - breaks with spaces
 rm $file
 
@@ -27,7 +29,7 @@ rm "$file"
 - Use `--` to end option parsing and prevent option injection
 - Prevents files named `-rf` from being interpreted as options
 
-```bash
+```sh
 # WRONG - vulnerable if file starts with -
 rm $file
 
@@ -41,10 +43,18 @@ rm -- "$file"
 - Sanitize or reject unexpected characters
 - Check file paths resolve to expected directories
 
-```bash
-# Validate input
-if [[ ! "$input" =~ ^[a-zA-Z0-9_-]+$ ]]; then
-    echo "Invalid input"
+```sh
+# POSIX-compatible input validation using case/expr
+case "$input" in
+    *[!a-zA-Z0-9_-]*)
+        echo "Invalid input" >&2
+        exit 1
+        ;;
+esac
+
+# Or using expr for pattern matching
+if ! expr "$input" : '^[a-zA-Z0-9_-]*$' >/dev/null; then
+    echo "Invalid input" >&2
     exit 1
 fi
 ```
@@ -54,9 +64,16 @@ fi
 - Set restrictive permissions (600 or 700)
 - Clean up temporary files in trap handlers
 
-```bash
+```sh
 tmpfile=$(mktemp)
-trap 'rm -f "$tmpfile"' EXIT
+trap 'rm -f "$tmpfile"' EXIT INT TERM
+
+# Or for maximum portability (mktemp may not exist on all systems)
+tmpdir="${TMPDIR:-/tmp}"
+tmpfile="$tmpdir/script.$$"
+trap 'rm -f "$tmpfile"' EXIT INT TERM
+touch "$tmpfile"
+chmod 600 "$tmpfile"
 ```
 
 ## Secure File Operations
@@ -66,62 +83,111 @@ trap 'rm -f "$tmpfile"' EXIT
 - Verify file ownership and permissions
 
 ## Command Substitution
-- Prefer `$(command)` over backticks
+- Prefer `$(command)` over backticks (more readable, nestable)
 - Quote command substitution: `"$(command)"`
 - Validate output before using
 
 ## Built-in Preference
-- Prefer bash built-ins over external commands for security
-- Built-ins: `[[`, `printf`, `read`, `source`
+- Prefer shell built-ins over external commands for security
+- POSIX built-ins: `test` (or `[`), `printf`, `read`, `:`, `set`
 - Reduces attack surface from external binaries
+- **Avoid bash-isms**: `[[`, `source` (use `.` instead), `((` arithmetic
 
 ## Common Vulnerabilities to Prevent
 
 ### Path Traversal
-```bash
+```sh
 # WRONG - user can access any file
 cat "uploads/$filename"
 
-# CORRECT - validate path stays in directory
-realpath=$(realpath "uploads/$filename")
-if [[ "$realpath" != /var/www/uploads/* ]]; then
-    echo "Invalid path"
-    exit 1
+# CORRECT - validate path stays in directory (POSIX-compatible)
+# First check for path traversal attempts
+case "$filename" in
+    *..* | /* | *~* )
+        echo "Invalid filename" >&2
+        exit 1
+        ;;
+esac
+
+# Resolve and validate (requires realpath utility)
+if command -v realpath >/dev/null 2>&1; then
+    realpath=$(realpath "uploads/$filename" 2>/dev/null) || exit 1
+    case "$realpath" in
+        /var/www/uploads/*)
+            cat "$realpath"
+            ;;
+        *)
+            echo "Invalid path" >&2
+            exit 1
+            ;;
+    esac
+else
+    # Fallback without realpath - basic checks only
+    cat "uploads/$filename"
 fi
-cat "$realpath"
 ```
 
 ### Command Injection
-```bash
+```sh
 # WRONG - user can inject commands
 grep "$user_input" file.txt
 
 # CORRECT - use -- and quotes
 grep -- "$user_input" file.txt
+
+# For maximum safety, validate input first
+case "$user_input" in
+    *[\;\&\|\>\<\`\$\(\)]*)
+        echo "Invalid characters in input" >&2
+        exit 1
+        ;;
+esac
 ```
 
 ### Environment Variable Attacks
-```bash
-# Set safe PATH
-export PATH="/usr/local/bin:/usr/bin:/bin"
+```sh
+# Set safe PATH (POSIX requires 'export' separate from assignment for portability)
+PATH="/usr/local/bin:/usr/bin:/bin"
+export PATH
 
 # Unset dangerous variables
-unset LD_PRELOAD LD_LIBRARY_PATH
+unset LD_PRELOAD LD_LIBRARY_PATH IFS
+
+# Reset IFS to default if needed
+IFS=' 	
+'  # space, tab, newline
 ```
 
 ## Shell Options for Security
-```bash
-# Exit on error
+
+### POSIX-Compatible Options
+```sh
+# Exit on error (errexit)
 set -e
 
-# Exit on undefined variable
+# Exit on undefined variable (nounset)
 set -u
 
-# Fail on pipe errors
-set -o pipefail
-
-# Disable pathname expansion
+# Disable pathname expansion (noglob)
 set -f
+```
+
+### Non-POSIX Options (bash/ksh only)
+```sh
+# Fail on pipe errors (NOT POSIX - bash/ksh only)
+set -o pipefail  # Use only if #!/bin/bash
+
+# POSIX alternative: check each command in pipeline explicitly
+command1 | command2 | command3
+status1=${PIPESTATUS[0]-$?}  # bash only
+```
+
+### Strict Mode (POSIX)
+```sh
+#!/bin/sh
+set -eu  # Exit on error, exit on undefined variable
+
+# Note: -o pipefail is NOT POSIX and will fail in dash, ash, etc.
 ```
 
 ## Logging and Debugging
@@ -130,6 +196,77 @@ set -f
 - Redirect sensitive output to /dev/null when needed
 
 ## Script Execution
-- Use `#!/usr/bin/env bash` for portability
+- Use `#!/bin/sh` for maximum portability across Unix systems
+- Use `#!/usr/bin/env sh` if script needs to find sh in PATH
+- **Only use** `#!/bin/bash` if you need bash-specific features
 - Check script is run with expected privileges
 - Validate script hasn't been modified (checksums)
+
+## POSIX vs Bash: What to Avoid
+
+### Bash-Only Features (NOT POSIX)
+```sh
+# DON'T USE (bash-only):
+[[ "$var" == "value" ]]      # Use: [ "$var" = "value" ]
+source script.sh              # Use: . script.sh
+(( i++ ))                     # Use: i=$((i + 1))
+$RANDOM                       # Use: external tool or /dev/urandom
+${var^^}                      # Use: tr '[:lower:]' '[:upper:]'
+${var,,}                      # Use: tr '[:upper:]' '[:lower:]'
+[[ "$var" =~ regex ]]        # Use: expr or grep
+```
+
+### POSIX-Compatible Alternatives
+```sh
+# String comparison
+[ "$var" = "value" ]          # POSIX (note: single =)
+
+# Source a file
+. ./script.sh                 # POSIX (note: dot, not source)
+
+# Arithmetic
+i=$((i + 1))                  # POSIX arithmetic expansion
+: $((i += 1))                 # POSIX arithmetic with no-op
+
+# Test for empty string
+[ -z "$var" ]                 # POSIX (true if empty)
+[ -n "$var" ]                 # POSIX (true if not empty)
+
+# Multiple conditions
+[ "$a" = "x" ] && [ "$b" = "y" ]    # AND
+[ "$a" = "x" ] || [ "$b" = "y" ]    # OR
+```
+
+## Testing POSIX Compliance
+
+```sh
+# Test your script with different shells
+sh script.sh      # POSIX sh
+dash script.sh    # Debian/Ubuntu minimal shell
+ash script.sh     # Alpine Linux shell
+bash script.sh    # GNU bash
+
+# Check for bash-isms
+checkbashisms script.sh  # Debian devscripts package
+shellcheck script.sh     # General shell linter
+```
+
+## Platform-Specific Considerations
+
+### Linux vs BSD vs macOS
+- **stat**: Different syntax across platforms
+  ```sh
+  # DON'T: stat -c '%Y' file  # Linux only
+  # DO: use ls -l or find instead for portability
+  ```
+- **sed -i**: Different syntax
+  ```sh
+  # AVOID in-place editing across platforms
+  # DO: Use temp file explicitly
+  sed 's/old/new/g' file > "$tmpfile" && mv "$tmpfile" file
+  ```
+- **readlink -f**: Not available on macOS
+  ```sh
+  # AVOID: readlink -f
+  # DO: Use pwd -P or realpath (if available)
+  ```
