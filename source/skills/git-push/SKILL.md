@@ -1,6 +1,6 @@
 ---
 name: git-push
-description: Pre-push checklist including README verification, tests, and commit quality checks
+description: Pre-push checklist for README updates, tests/linters, commit hygiene, secret scanning, and branch/remote status. Use when preparing to run git push, reviewing a branch before publishing, or verifying release readiness.
 ---
 
 # Git Push Checklist

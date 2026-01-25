@@ -1,6 +1,6 @@
 ---
 name: implementation-workflow
-description: Systematic 6-phase implementation methodology covering requirements analysis, architecture planning, implementation strategy, QA, security review, and optimization
+description: Six-phase implementation method for complex work: requirements, architecture, strategy, QA, security, optimization. Use for multi-step features, refactors, or high-risk changes that need structured planning and verification.
 ---
 
 # Implementation Workflow

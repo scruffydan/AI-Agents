@@ -1,6 +1,6 @@
 ---
 name: javascript-security
-description: JavaScript and TypeScript security best practices including XSS prevention, CSP headers, input validation, and common vulnerability patterns
+description: JavaScript/TypeScript security practices for XSS prevention, CSP headers, input validation, and common web vulnerabilities. Use when writing browser or Node code that touches the DOM, HTML rendering (React/SSR), auth/cookies, user input, or risks like prototype pollution and ReDoS.
 ---
 
 # JavaScript/TypeScript Security Checklist

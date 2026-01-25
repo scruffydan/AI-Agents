@@ -1,6 +1,6 @@
 ---
 name: shell-security
-description: POSIX shell security best practices for sh-compatible scripts including variable quoting, command injection prevention, and safe file operations
+description: POSIX sh security guidance for safe quoting, option handling, command injection prevention, and file operations. Use when writing shell/bash scripts, handling user input, paths with spaces, temporary files, subprocess execution, or any command construction in a shell.
 ---
 
 # POSIX Shell Security Checklist

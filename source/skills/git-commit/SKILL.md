@@ -1,6 +1,6 @@
 ---
 name: git-commit
-description: Git commit workflow that analyzes the last 10 commits to learn and match repository naming conventions and commit message patterns
+description: Git commit workflow that analyzes recent history to match repo-specific message conventions. Use when crafting commit messages, preparing to commit changes, or enforcing commit style consistency.
 ---
 
 # Git Commit Skill

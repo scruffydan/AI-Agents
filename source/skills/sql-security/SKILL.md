@@ -1,6 +1,6 @@
 ---
 name: sql-security
-description: SQL security best practices including parameterized queries, injection prevention, least privilege, and ORM security patterns
+description: SQL security practices for parameterized queries, injection prevention, least-privilege access, and ORM safety. Use when writing raw SQL, building queries with user input, working with ORMs/migrations/stored procedures, configuring DB auth/roles, or reviewing database-related security risks.
 ---
 
 # SQL Security Checklist

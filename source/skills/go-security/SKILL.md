@@ -1,6 +1,6 @@
 ---
 name: go-security
-description: Go security best practices including template security, database parameterization, TLS configuration, and static analysis with gosec
+description: Go security practices for template safety, SQL parameterization, TLS/crypto usage, and secure input handling. Use when writing Go services, HTTP handlers, database access, auth flows, file path handling, or any crypto/TLS configuration.
 ---
 
 # Go Security Checklist
