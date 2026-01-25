@@ -37,19 +37,6 @@ A collection of specialized agents, commands, and modes for **Claude Code** and 
 
 Some skills are sourced from [obra/superpowers](https://github.com/obra/superpowers). Skills follow the [Agent Skills standard](https://github.com/anthropics/anthropic-sdk-typescript/tree/main/agents-api).
 
-## Directory Structure
-
-```
-AI-Agents/
-├── source/
-│   ├── prompts/       # Agent/command definitions (combined frontmatter)
-│   └── skills/        # Modular procedural knowledge (Agent Skills standard)
-├── build/             # GITIGNORED - generated output for claude/ and opencode/
-├── build.sh           # Generates build/ from source/
-├── install.sh         # Installs to ~/.claude and ~/.config/opencode
-└── opencode-init.sh   # Installs opencode.json config with secure defaults
-```
-
 ## Requirements
 
 - **yq** (v4) - YAML processor for build script
