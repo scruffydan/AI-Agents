@@ -17,6 +17,28 @@ A collection of specialized agents, commands, and modes for **Claude Code** and 
 | `sidebar` | Subagent | Answer general questions unrelated to coding session |
 | `brainstorm` | Mode (OpenCode only) | High-temperature creative mode for generating diverse ideas |
 | `thorough-plan` | Mode (OpenCode only) | Planning mode that asks clarifying questions before proceeding |
+| **Security** | **Skill Group** | Language-specific secure coding guidance |
+| `javascript-security` | Skill | JS/TS security patterns |
+| `python-security` | Skill | Python dangerous functions, injection prevention |
+| `go-security` | Skill | Go templates, crypto, race conditions |
+| `shell-security` | Skill | POSIX sh security (portable sh/bash/dash/ash) |
+| `sql-security` | Skill | SQL injection prevention |
+| **Workflow** | **Skill Group** | Planning, execution, and delivery discipline |
+| `brainstorming` | Skill | Creative ideation guidance before building |
+| `implementation-workflow` | Skill | 6-phase development methodology |
+| `executing-plans` | Skill | Execute pre-written plans with checkpoints |
+| `git-commit` | Skill | Analyzes last 10 commits to match repo conventions |
+| `git-push` | Skill | Pre-push checklist (README updates, tests, security) |
+| `receiving-code-review` | Skill | Implement review feedback with verification |
+| `subagent-driven-development` | Skill | Run independent tasks with subagents |
+| `systematic-debugging` | Skill | Structured debugging before proposing fixes |
+| **Guides** | **Skill Group** | How-to references for other tools |
+| `using-docs-fetcher` | Skill | When/how to use `@docs-fetcher` |
+| `using-code-review` | Skill | Using all 5 code review agents |
+| `verification-before-completion` | Skill | Verify before claiming completion |
+| `writing-skills` | Skill | Author and validate skill definitions |
+
+Some skills are sourced from [obra/superpowers](https://github.com/obra/superpowers). Skills follow the [Agent Skills standard](https://github.com/anthropics/anthropic-sdk-typescript/tree/main/agents-api).
 
 ## Directory Structure
 
@@ -135,26 +157,6 @@ brainstorm    # High-temperature creative mode
 ```
 
 Note: In OpenCode, the individual review agents are invoked via `@` mentions. Only `code-full-review` is a slash command since it orchestrates all 3 agents. Modes change the AI's behavior and are switched using the Tab key.
-
-## Skills
-
-This repository includes skills following the [Agent Skills standard](https://github.com/anthropics/anthropic-sdk-typescript/tree/main/agents-api) - modular procedural knowledge that agents load on-demand. Some skills are sourced from [obra/superpowers](https://github.com/obra/superpowers).
-
-**Security** (language-specific):
-- `javascript-security` - JS/TS security patterns
-- `python-security` - Python dangerous functions, injection prevention
-- `go-security` - Go templates, crypto, race conditions
-- `shell-security` - POSIX sh security (portable sh/bash/dash/ash)
-- `sql-security` - SQL injection prevention
-
-**Workflow**:
-- `implementation-workflow` - 6-phase development methodology
-- `git-commit` - Analyzes last 10 commits to match repo conventions
-- `git-push` - Pre-push checklist (README updates, tests, security)
-
-**Usage Guides**:
-- `using-docs-fetcher` - When/how to use `@docs-fetcher`
-- `using-code-review` - Using all 5 code review agents
 
 ## Customization
 
