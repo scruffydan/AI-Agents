@@ -283,21 +283,21 @@ for prompt_file in "$SHARED_DIR"/*.md; do
 done
 
 # Generate base instruction files
-echo -e "${YELLOW}Generating:${NC} CLAUDE.md"
+echo -e "${YELLOW}Generating:${NC} Base instruction files"
 if [ -f "$SHARED_DIR/AGENTS.md" ]; then
     cp "$SHARED_DIR/AGENTS.md" "$BUILD_DIR/claude/CLAUDE.md"
-    echo "  Created: claude/CLAUDE.md"
+    echo "  Created: claude/CLAUDE.md (Claude Code base instructions)"
 fi
 
-echo -e "${YELLOW}Generating:${NC} OpenCode AGENTS.md"
+echo ""
 if [ -f "$SHARED_DIR/AGENTS.md" ]; then
     cp "$SHARED_DIR/AGENTS.md" "$BUILD_DIR/opencode/AGENTS.md"
-    echo "  Created: opencode/AGENTS.md"
+    echo "  Created: opencode/AGENTS.md (OpenCode base instructions)"
 fi
 
 # Copy skills to both platforms
 echo ""
-echo -e "${YELLOW}Copying skills...${NC}"
+echo -e "${YELLOW}Copying skills to both platforms...${NC}"
 if [ -d "$SKILLS_DIR" ]; then
     skill_count=0
     for skill_dir in "$SKILLS_DIR"/*/; do
@@ -310,23 +310,30 @@ if [ -d "$SKILLS_DIR" ]; then
             mkdir -p "$BUILD_DIR/opencode/skill/$skill_name"
             cp -r "$skill_dir"* "$BUILD_DIR/claude/skills/$skill_name/"
             cp -r "$skill_dir"* "$BUILD_DIR/opencode/skill/$skill_name/"
-            echo "  Created: skill/$skill_name/"
+            echo "  Created: claude/skills/$skill_name/ and opencode/skill/$skill_name/"
             ((skill_count++))
         fi
     done
-    echo "  Total skills: $skill_count"
+    echo ""
+    echo "  Total skills copied: $skill_count (to both Claude and OpenCode)"
 else
     echo "  No skills directory found, skipping..."
 fi
 
 echo ""
+echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo -e "${GREEN}Build complete!${NC}"
+echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo ""
 echo "Generated files:"
-echo "  Claude:"
-find "$BUILD_DIR/claude" -type f -name "*.md" | sed "s|$BUILD_DIR/|    |"
 echo ""
-echo "  OpenCode:"
-find "$BUILD_DIR/opencode" -type f -name "*.md" | sed "s|$BUILD_DIR/|    |"
+echo "  Claude Code ($(find "$BUILD_DIR/claude" -type f -name "*.md" | wc -l | tr -d ' ') files):"
+find "$BUILD_DIR/claude" -type f -name "*.md" | sed "s|$BUILD_DIR/|    |" | sort
 echo ""
-echo "Run ./install.sh to install these configs."
+echo "  OpenCode ($(find "$BUILD_DIR/opencode" -type f -name "*.md" | wc -l | tr -d ' ') files):"
+find "$BUILD_DIR/opencode" -type f -name "*.md" | sed "s|$BUILD_DIR/|    |" | sort
+echo ""
+echo "Next step: Run ./install.sh to install these configs"
+echo "  - Install both:        ./install.sh"
+echo "  - Install Claude only: ./install.sh --claude"
+echo "  - Install OpenCode:    ./install.sh --opencode"
