@@ -18,6 +18,16 @@ When you need to look up external documentation (APIs, libraries, frameworks, co
 
 For detailed guidance on using the documentation fetcher, load the skill `using-docs-fetcher`
 
+## Mandatory Skills
+
+These skills are required in the following situations:
+
+- **`git-commit`**: Before running `git commit`
+- **`git-push`**: Before running `git push`
+- **`systematic-debugging`**: When encountering any bug, test failure, or unexpected behavior, before proposing fixes
+- **`verification-before-completion`**: Before claiming work is complete, fixed, or passing
+- **`brainstorming`**: Before any creative work (new features, new behavior, or significant design changes)
+
 ## Engineering Philosophy & Standards
 
 ### Technical Excellence Principles
@@ -38,17 +48,10 @@ YOU MUST FOLLOW THESE RULES AT ALL TIMES. THESE ARE NOT SUGGESTIONS.
 ### Command Execution
 
 BLOCK DANGEROUS COMMANDS: You must NEVER run the following commands without getting explicit, one-time permission from me in the prompt:
-
 * rm (especially with -rf)
 * mv or cp (outside of the current directory)
 * git push, git commit -a
 * Any command that installs software (e.g., npm install, pip install, apt-get)
-
-If you need to run one of these, you must ASK FIRST and explain why.
-
-**Before running `git commit`**, load the skill `git-commit` to analyze the repository's last 10 commits and match established naming conventions.
-
-**Before running `git push`**, load the skill `git-push` for a comprehensive pre-push checklist including README verification, tests, and security checks.
 
 ### File & Secret Access
 
@@ -75,11 +78,12 @@ If you are told a value is "in the .env file," you must ask me to provide it. Do
 
 ### Security Implementation
 
-For security reviews, use the **@code-security** agent. For language-specific security patterns, load the appropriate security skill:
-- `javascript-security` - JavaScript/TypeScript security patterns
-- `python-security` - Python security patterns
-- `go-security` - Go security patterns
-- `shell-security` - Shell/Bash security patterns
-- `sql-security` - SQL and database security patterns
+For security reviews, use the **@code-security** agent. For language-specific security patterns, load the appropriate security skills
+
+- **Secure Coding**: OWASP guidelines and vulnerability prevention
+- **Authentication & Authorization**: Identity management and access control
+- **Data Protection**: Encryption, sanitization, and privacy compliance
+- **Security Testing**: Penetration testing and vulnerability assessment
+- **Compliance**: GDPR, HIPAA, SOC2, and other regulatory requirements
 
 All security practices follow OWASP Top 10, secure coding standards, and compliance requirements (GDPR, HIPAA, SOC2).
