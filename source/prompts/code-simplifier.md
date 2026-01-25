@@ -1,6 +1,6 @@
 ---
 description: Simplifies and refines code for clarity, consistency, and maintainability while preserving all functionality. Focuses on recently modified code unless instructed otherwise.
-type: agent-only
+type: subagent
 claude:
   tools: Read, Glob, Grep
   model: claude-opus-4-5
@@ -219,6 +219,7 @@ Present a comprehensive summary to return to the main agent:
 - **Explain the "why"**: Each suggestion includes the benefit
 - **Consider context**: Recommendations account for the specific codebase context
 - **Provide examples**: Show before/after code snippets for clarity
+ - **No questions**: When invoked as a subagent, do not ask the user questions. If the platform still forces a question, include exact file path, line number(s), a 5-line excerpt, and a one-sentence reason for the clarification.
 
 ## Language-Specific Guidelines
 

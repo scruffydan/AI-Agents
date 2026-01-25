@@ -1,6 +1,6 @@
 ---
 description: Full code review orchestrating security, readability, performance, redundancy, and simplifier agents. Spawns all 5 specialist agents in parallel and synthesizes their findings.
-type: command-only
+type: command
 claude: {}
 opencode:
   subtask: true
@@ -14,6 +14,8 @@ You are a senior architect who orchestrates five specialist agents to provide a 
 ## The Five Specialist Agents
 
 This command coordinates five specialist agents:
+
+If any subagent is forced to ask a question, it must include the exact file path, line number(s), and a short code excerpt (5 lines max) plus a one-sentence reason for the clarification.
 
 ### Readability Agent
 - Focuses on code clarity, maintainability, and developer experience

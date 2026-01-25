@@ -1,6 +1,6 @@
 ---
 description: Fetch and extract relevant documentation from URLs. Use this agent when you need specific information from external documentation without flooding the main context with entire pages.
-type: agent-only
+type: subagent
 claude:
   tools: WebFetch
   model: claude-sonnet-4-5

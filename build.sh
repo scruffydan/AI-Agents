@@ -7,6 +7,7 @@ set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SHARED_DIR="$SCRIPT_DIR/source/prompts"
+SKILLS_DIR="$SCRIPT_DIR/source/skills"
 BUILD_DIR="$SCRIPT_DIR/build"
 
 # Colors for output
@@ -17,10 +18,12 @@ NC='\033[0m' # No Color
 
 # Default provider for OpenCode models
 OPENCODE_PROVIDER="opencode"
+VERTEX_PROVIDER="google-vertex"
 
 # Get Vertex AI version suffix for a model
 get_vertex_version() {
     case "$1" in
+        *gemini-3-pro)        echo "-preview" ;;
         *claude-opus-4-5)    echo "@20251101" ;;
         *claude-sonnet-4-5)  echo "@20250929" ;;
         *claude-haiku-4-5)   echo "@20251001" ;;
@@ -50,7 +53,7 @@ show_help() {
     echo ""
 }
 
-while [[ $# -gt 0 ]]; do
+while [ $# -gt 0 ]; do
     case $1 in
         --opencode)
             OPENCODE_PROVIDER="opencode"
@@ -86,10 +89,10 @@ echo "OpenCode Provider: $OPENCODE_PROVIDER"
 echo ""
 
 # Clean and create build directories
-[[ -z "$BUILD_DIR" ]] && { echo "Error: BUILD_DIR is empty"; exit 1; }
+[ -z "$BUILD_DIR" ] && { echo "Error: BUILD_DIR is empty"; exit 1; }
 rm -rf "$BUILD_DIR"
-mkdir -p "$BUILD_DIR/claude/agents" "$BUILD_DIR/claude/commands"
-mkdir -p "$BUILD_DIR/opencode/agent" "$BUILD_DIR/opencode/command"
+mkdir -p "$BUILD_DIR/claude/agents" "$BUILD_DIR/claude/commands" "$BUILD_DIR/claude/skills"
+mkdir -p "$BUILD_DIR/opencode/agent" "$BUILD_DIR/opencode/command" "$BUILD_DIR/opencode/skill"
 
 # =============================================================================
 # Helper Functions
@@ -104,7 +107,20 @@ get_frontmatter() {
 # State machine: p=0 (before first ---), p=1 (in frontmatter), p=2 (found closing ---), p=3 (printing content)
 # When we hit the second ---, we skip it with getline and start printing from the next line
 get_content() {
-    awk 'BEGIN{p=0} /^---$/{p++; if(p==2) {getline; p=3}} p==3{print}' "$1"
+    awk '
+      # p tracks frontmatter parsing state:
+      # 0 = before first ---
+      # 1 = inside frontmatter
+      # 2 = found closing ---
+      # 3 = printing content after frontmatter
+      BEGIN { p = 0 }
+      /^---$/ {
+        p++
+        if (p == 2) { getline; p = 3 }
+        next
+      }
+      p == 3 { print }
+    ' "$1"
 }
 
 # Get a value from frontmatter using yq
@@ -112,23 +128,33 @@ get_content() {
 yaml_get() {
     local result
     result=$(echo "$1" | yq "$2" 2>/dev/null)
-    [[ "$result" == "null" || -z "$result" ]] && echo "" || echo "$result"
+    if [ "$result" = "null" ] || [ -z "$result" ]; then
+        echo ""
+    else
+        echo "$result"
+    fi
 }
 
 # Transform OpenCode model string based on selected provider
 transform_model() {
     local model="$1"
-    [[ -z "$model" ]] && return
+    [ -z "$model" ] && return
     
     local transformed="$model"
     
     # Only transform if not using default opencode provider
-    if [[ "$OPENCODE_PROVIDER" != "opencode" ]]; then
+    if [ "$OPENCODE_PROVIDER" != "opencode" ]; then
+        local provider_prefix="$OPENCODE_PROVIDER"
+
+        if echo "$model" | grep -q "^opencode/gemini-"; then
+            provider_prefix="$VERTEX_PROVIDER"
+        fi
+
         # Replace "opencode/" with the selected provider prefix using sed
-        transformed=$(echo "$model" | sed "s|^opencode/|$OPENCODE_PROVIDER/|")
+        transformed=$(echo "$model" | sed "s|^opencode/|$provider_prefix/|")
         
         # For Vertex AI, add version suffix
-        if [[ "$OPENCODE_PROVIDER" == "google-vertex-anthropic" ]]; then
+        if [ "$provider_prefix" = "google-vertex-anthropic" ] || [ "$provider_prefix" = "$VERTEX_PROVIDER" ]; then
             local suffix=$(get_vertex_version "$transformed")
             transformed="$transformed$suffix"
         fi
@@ -152,35 +178,39 @@ generate_output() {
     local filename="$3"
     
     local output_dir="$BUILD_DIR/$target"
-    [[ "$target" == "claude" ]] && output_dir+="/${type}s" || output_dir+="/$type"
+    if [ "$target" = "claude" ]; then
+        output_dir+="/${type}s"
+    else
+        output_dir+="/$type"
+    fi
     local output_file="$output_dir/${filename}.md"
     
     {
         echo "---"
         
-        if [[ "$target" == "claude" ]]; then
+        if [ "$target" = "claude" ]; then
             # Claude format
-            [[ "$type" == "agent" ]] && echo "name: $filename"
+            [ "$type" = "agent" ] && echo "name: $filename"
             echo "description: $description"
-            [[ -n "$claude_tools" ]] && echo "tools: $claude_tools"
-            [[ -n "$claude_model" ]] && echo "model: $claude_model"
+            [ -n "$claude_tools" ] && echo "tools: $claude_tools"
+            [ -n "$claude_model" ] && echo "model: $claude_model"
         else
             # OpenCode format
             echo "description: $description"
             
-            if [[ "$type" == "agent" ]]; then
-                if [[ "$is_primary" == "true" ]]; then
+            if [ "$type" = "agent" ]; then
+                if [ "$is_primary" = "true" ]; then
                     echo "mode: primary"
-                    [[ -n "$oc_temperature" ]] && echo "temperature: $oc_temperature"
+                    [ -n "$oc_temperature" ] && echo "temperature: $oc_temperature"
                 else
-                    [[ -n "$oc_mode" ]] && echo "mode: $oc_mode"
+                    [ -n "$oc_mode" ] && echo "mode: $oc_mode"
                 fi
-                [[ -n "$oc_model_transformed" ]] && echo "model: $oc_model_transformed"
-                [[ -n "$oc_permission" ]] && { echo "permission:"; echo "$oc_permission"; }
+                [ -n "$oc_model_transformed" ] && echo "model: $oc_model_transformed"
+                [ -n "$oc_permission" ] && { echo "permission:"; echo "$oc_permission"; }
             else
                 # command type
-                [[ -n "$oc_subtask" ]] && echo "subtask: $oc_subtask"
-                [[ -n "$oc_model_transformed" ]] && echo "model: $oc_model_transformed"
+                [ -n "$oc_subtask" ] && echo "subtask: $oc_subtask"
+                [ -n "$oc_model_transformed" ] && echo "model: $oc_model_transformed"
             fi
         fi
         
@@ -190,7 +220,7 @@ generate_output() {
     } > "$output_file"
     
     local suffix=""
-    [[ "$is_primary" == "true" ]] && suffix=" (primary)"
+    [ "$is_primary" = "true" ] && suffix=" (primary)"
     echo "  Created: ${output_file#"$BUILD_DIR"/}$suffix"
 }
 
@@ -202,7 +232,7 @@ for prompt_file in "$SHARED_DIR"/*.md; do
     filename=$(basename "$prompt_file" .md)
     
     # Skip base-instructions (handled separately)
-    [[ "$filename" == "base-instructions" ]] && continue
+    [ "$filename" = "base-instructions" ] && continue
     
     echo -e "${YELLOW}Processing:${NC} $filename"
     
@@ -212,7 +242,7 @@ for prompt_file in "$SHARED_DIR"/*.md; do
     
     # Extract common values
     description=$(yaml_get "$frontmatter" ".description")
-    # Valid type values: agent, command, agent,command, mode-only
+    # Valid type values: subagent, command, mode
     type=$(yaml_get "$frontmatter" ".type")
     
     # Extract Claude-specific values
@@ -228,39 +258,65 @@ for prompt_file in "$SHARED_DIR"/*.md; do
     oc_model_transformed=$(transform_model "$oc_model")
     
     # Determine what to generate based on type
-    is_primary="false"
-    
-    # Claude outputs
-    [[ "$type" == *"agent"* ]] && generate_output "claude" "agent" "$filename"
-    [[ "$type" == *"command"* ]] && generate_output "claude" "command" "$filename"
-    
-    # OpenCode outputs
-    if [[ "$type" == *"agent"* ]]; then
-        generate_output "opencode" "agent" "$filename"
-    elif [[ "$type" == *"command"* ]]; then
-        generate_output "opencode" "command" "$filename"
-    fi
-    
-    # mode-only types become primary agents in OpenCode
-    if [[ "$type" == "mode-only" ]]; then
-        is_primary="true"
-        generate_output "opencode" "agent" "$filename"
-    fi
+    case "$type" in
+        subagent)
+            is_primary="false"
+            generate_output "claude" "agent" "$filename"
+            generate_output "opencode" "agent" "$filename"
+            ;;
+        command)
+            is_primary="false"
+            generate_output "claude" "command" "$filename"
+            generate_output "opencode" "command" "$filename"
+            ;;
+        mode)
+            is_primary="true"
+            generate_output "opencode" "agent" "$filename"
+            ;;
+        *)
+            echo "Unknown type: $type (file: $prompt_file)"
+            exit 1
+            ;;
+    esac
     
     echo ""
 done
 
 # Generate base instruction files
 echo -e "${YELLOW}Generating:${NC} CLAUDE.md"
-if [[ -f "$SHARED_DIR/base-instructions.md" ]]; then
+if [ -f "$SHARED_DIR/base-instructions.md" ]; then
     cp "$SHARED_DIR/base-instructions.md" "$BUILD_DIR/claude/CLAUDE.md"
     echo "  Created: claude/CLAUDE.md"
 fi
 
 echo -e "${YELLOW}Generating:${NC} OpenCode AGENTS.md"
-if [[ -f "$SHARED_DIR/base-instructions.md" ]]; then
+if [ -f "$SHARED_DIR/base-instructions.md" ]; then
     cp "$SHARED_DIR/base-instructions.md" "$BUILD_DIR/opencode/AGENTS.md"
     echo "  Created: opencode/AGENTS.md"
+fi
+
+# Copy skills to both platforms
+echo ""
+echo -e "${YELLOW}Copying skills...${NC}"
+if [ -d "$SKILLS_DIR" ]; then
+    skill_count=0
+    for skill_dir in "$SKILLS_DIR"/*/; do
+        [ -d "$skill_dir" ] || continue
+        skill_name=$(basename "$skill_dir")
+        
+        if [ -f "$skill_dir/SKILL.md" ]; then
+            # Create skill directory and copy contents
+            mkdir -p "$BUILD_DIR/claude/skills/$skill_name"
+            mkdir -p "$BUILD_DIR/opencode/skill/$skill_name"
+            cp -r "$skill_dir"* "$BUILD_DIR/claude/skills/$skill_name/"
+            cp -r "$skill_dir"* "$BUILD_DIR/opencode/skill/$skill_name/"
+            echo "  Created: skill/$skill_name/"
+            ((skill_count++))
+        fi
+    done
+    echo "  Total skills: $skill_count"
+else
+    echo "  No skills directory found, skipping..."
 fi
 
 echo ""

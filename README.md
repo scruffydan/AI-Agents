@@ -6,23 +6,25 @@ A collection of specialized agents, commands, and modes for **Claude Code** and 
 
 | Name | Type | Purpose |
 |------|------|---------|
-| `code-security` | Agent | Security vulnerability detection, OWASP Top 10 compliance |
-| `code-readability` | Agent | Code clarity, naming, structure, documentation review |
-| `code-performance` | Agent | Performance bottlenecks, algorithm optimization |
-| `code-redundancy` | Agent | Duplicate code, repeated patterns, DRY improvements |
-| `code-simplifier` | Agent | Simplifies code for clarity, consistency, and maintainability |
+| `code-security` | Subagent | Security vulnerability detection, OWASP Top 10 compliance |
+| `code-readability` | Subagent | Code clarity, naming, structure, documentation review |
+| `code-performance` | Subagent | Performance bottlenecks, algorithm optimization |
+| `code-redundancy` | Subagent | Duplicate code, repeated patterns, DRY improvements |
+| `code-simplifier` | Subagent | Simplifies code for clarity, consistency, and maintainability |
 | `code-full-review` | Command | Orchestrates all review agents, synthesizes findings with trade-off debates |
-| `explore` | Agent | Codebase exploration, file search, dependency tracing |
-| `docs-fetcher` | Agent | Fetch and extract relevant documentation from URLs |
-| `sidebar` | Agent | Answer general questions unrelated to coding session |
-| `brainstorm` | Mode (OpenCode) / Command (Claude) | High-temperature creative mode for generating diverse ideas |
+| `explore` | Subagent | Codebase exploration, file search, dependency tracing |
+| `docs-fetcher` | Subagent | Fetch and extract relevant documentation from URLs |
+| `sidebar` | Subagent | Answer general questions unrelated to coding session |
+| `brainstorm` | Mode (OpenCode only) | High-temperature creative mode for generating diverse ideas |
 | `thorough-plan` | Mode (OpenCode only) | Planning mode that asks clarifying questions before proceeding |
 
 ## Directory Structure
 
 ```
 AI-Agents/
-├── source/            # Source of truth (combined frontmatter)
+├── source/
+│   ├── prompts/       # Agent/command definitions (combined frontmatter)
+│   └── skills/        # Modular procedural knowledge (Agent Skills standard)
 ├── build/             # GITIGNORED - generated output for claude/ and opencode/
 ├── build.sh           # Generates build/ from source/
 ├── install.sh         # Installs to ~/.claude and ~/.config/opencode
@@ -46,8 +48,8 @@ AI-Agents/
 
 This will:
 1. Run `build.sh` to generate tool-specific configs
-2. Install Claude Code configs to `~/.claude/`
-3. Install OpenCode configs to `~/.config/opencode/`
+2. Install Claude Code configs to `~/.claude/` (agents, commands, skills)
+3. Install OpenCode configs to `~/.config/opencode/` (agents, commands, skills)
 
 ### Options
 
@@ -61,14 +63,14 @@ This will:
 
 ### Model Provider Selection
 
-By default, OpenCode agents use the `opencode` provider (OpenCode Zen). You can alternatively use **Google Vertex AI** for all Anthropic models:
+By default, OpenCode agents use the `opencode` provider (OpenCode Zen). You can alternatively use **Google Vertex AI** for Anthropic and Gemini models:
 
 ```bash
 ./install.sh --opencode --vertex    # Install OpenCode with Vertex AI models
 ./build.sh --vertex                 # Build only, using Vertex AI models
 ```
 
-This changes model strings from `opencode/claude-sonnet-4-5` to `google-vertex-anthropic/claude-sonnet-4-5@20250929`.
+This changes model strings from `opencode/claude-sonnet-4-5` to `google-vertex-anthropic/claude-sonnet-4-5@20250929`, and `opencode/gemini-3-pro` to `google-vertex/gemini-3-pro-preview`.
 
 **Vertex AI Setup Requirements:**
 - Set `GOOGLE_CLOUD_PROJECT` environment variable
@@ -134,6 +136,26 @@ brainstorm    # High-temperature creative mode
 
 Note: In OpenCode, the individual review agents are invoked via `@` mentions. Only `code-full-review` is a slash command since it orchestrates all 3 agents. Modes change the AI's behavior and are switched using the Tab key.
 
+## Skills
+
+This repository includes skills following the [Agent Skills standard](https://github.com/anthropics/anthropic-sdk-typescript/tree/main/agents-api) - modular procedural knowledge that agents load on-demand. Some skills are sourced from [obra/superpowers](https://github.com/obra/superpowers).
+
+**Security** (language-specific):
+- `javascript-security` - JS/TS security patterns
+- `python-security` - Python dangerous functions, injection prevention
+- `go-security` - Go templates, crypto, race conditions
+- `shell-security` - POSIX sh security (portable sh/bash/dash/ash)
+- `sql-security` - SQL injection prevention
+
+**Workflow**:
+- `implementation-workflow` - 6-phase development methodology
+- `git-commit` - Analyzes last 10 commits to match repo conventions
+- `git-push` - Pre-push checklist (README updates, tests, security)
+
+**Usage Guides**:
+- `using-docs-fetcher` - When/how to use `@docs-fetcher`
+- `using-code-review` - Using all 5 code review agents
+
 ## Customization
 
 ### Editing Instructions
@@ -145,7 +167,7 @@ Each prompt file uses **combined frontmatter**:
 ```yaml
 ---
 description: What this agent does...
-type: agent+command    # or "agent-only", "command-only", or "mode-only"
+type: subagent    # or "command" or "mode"
 claude:
   tools: Read, Glob, Grep
   model: opus
@@ -171,6 +193,12 @@ The `build.sh` script parses this and generates the appropriate format for each 
 1. Create `source/prompts/my-agent.md` with combined frontmatter
 2. Run `./install.sh` to rebuild and install
 
+### Adding New Skills
+
+1. Create `source/skills/my-skill/SKILL.md` following the [Agent Skills format](https://github.com/anthropics/anthropic-sdk-typescript/tree/main/agents-api)
+2. Reference from agents: `Load skill \`my-skill\` when...`
+3. Run `./install.sh`
+
 ### Base Instructions
 
 `source/prompts/base-instructions.md` generates:
@@ -186,12 +214,14 @@ The `build.sh` script parses this and generates the appropriate format for each 
 **For Claude Code:**
 - `build/claude/agents/{name}.md` - Agent with Claude-specific frontmatter
 - `build/claude/commands/{name}.md` - Raw prompt for slash commands
+- `build/claude/skills/{name}/SKILL.md` - Skills (copied from `source/skills/`)
 - `build/claude/CLAUDE.md` - From `base-instructions.md`
 
 **For OpenCode:**
 - `build/opencode/agent/{name}.md` - Agent with OpenCode-specific frontmatter
 - `build/opencode/command/{name}.md` - Command that references the agent
 - `build/opencode/mode/{name}.md` - Mode with temperature and tool settings
+- `build/opencode/skill/{name}/SKILL.md` - Skills (copied from `source/skills/`)
 - `build/opencode/AGENTS.md` - From `base-instructions.md`
 
 ### Agent vs Command vs Mode
@@ -202,7 +232,7 @@ The `build.sh` script parses this and generates the appropriate format for each 
 | Command | Manual via `/command-name` | Manual via `/command-name` |
 | Mode | N/A | Switch via Tab key, changes behavior |
 
-Commands with type `agent+command` create both. Commands with type `command-only` create only commands (like `code-full-review` which orchestrates sub-agents). Commands with type `mode-only` create OpenCode modes only (like `brainstorm` for creative exploration).
+Prompts with type `subagent` create both Claude agents and OpenCode agents. Prompts with type `command` create commands only (like `code-full-review` which orchestrates sub-agents). Prompts with type `mode` create OpenCode modes only (like `brainstorm` for creative exploration).
 
 ## Workflow
 
