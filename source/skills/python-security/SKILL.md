@@ -1,6 +1,6 @@
 ---
 name: python-security
-description: Python security best practices including dangerous functions to avoid, SQL injection prevention, cryptographic randomness, and static analysis tools
+description: Python security practices covering unsafe APIs (eval/exec/pickle), input validation, SQL injection prevention, crypto randomness, and safe subprocess/file handling. Use when writing Python code that touches user input, DB queries, web auth/sessions, XML parsing, serialization, or system commands.
 ---
 
 # Python Security Checklist

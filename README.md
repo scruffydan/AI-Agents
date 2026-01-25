@@ -138,7 +138,7 @@ Note: In OpenCode, the individual review agents are invoked via `@` mentions. On
 
 ## Skills
 
-This repository includes **10 skills** following the [Agent Skills standard](https://github.com/anthropics/anthropic-sdk-typescript/tree/main/agents-api) - modular procedural knowledge that agents load on-demand.
+This repository includes skills following the [Agent Skills standard](https://github.com/anthropics/anthropic-sdk-typescript/tree/main/agents-api) - modular procedural knowledge that agents load on-demand. Some skills are sourced from [obra/superpowers](https://github.com/obra/superpowers).
 
 **Security** (language-specific):
 - `javascript-security` - JS/TS security patterns

@@ -1,6 +1,6 @@
 ---
 name: using-docs-fetcher
-description: Guide for effectively using the @docs-fetcher agent to retrieve targeted documentation without flooding context
+description: How to use @docs-fetcher to pull current, targeted external documentation (APIs, SDKs, configs, errors, version changes). Use when you need authoritative docs or examples instead of relying on memory.
 ---
 
 # Using the Documentation Fetcher

@@ -1,6 +1,6 @@
 ---
 name: using-code-review
-description: Guide for using code review agents including when and how to invoke @code-security, @code-readability, @code-performance, @code-redundancy, @code-simplifier, and @code-full-review
+description: How and when to invoke code review agents (@code-security, @code-readability, @code-performance, @code-redundancy, @code-simplifier, @code-full-review). Use before major PRs, audits, refactors, or whenever targeted review feedback is needed.
 ---
 
 # Using Code Review Agents
