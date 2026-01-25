@@ -47,7 +47,7 @@ show_help() {
 SKIP_BUILD=false
 USE_VERTEX=false
 
-while [[ $# -gt 0 ]]; do
+while [ $# -gt 0 ]; do
     case $1 in
         -y|--yes)
             FORCE=true
@@ -179,7 +179,7 @@ ask_user_action() {
     case "$choice" in
         y|Y)
             echo "   Removing existing"
-            [[ -n "$target" ]] && rm -rf "$target"
+            [ -n "$target" ] && rm -rf "$target"
             return 0
             ;;
         *)
@@ -198,7 +198,7 @@ copy_with_overwrite() {
     
     if [ -f "$dest" ] || [ -L "$dest" ]; then
         if [ "$FORCE" = true ]; then
-            [[ -n "$dest" ]] && rm -rf "$dest"
+            [ -n "$dest" ] && rm -rf "$dest"
         elif ! ask_user_action "$dest" "$label"; then
             return 1
         fi
@@ -235,6 +235,43 @@ copy_file() {
     copy_with_overwrite "$src" "$dest" "$label"
 }
 
+# Copy a directory with overwrite handling
+copy_dir_with_overwrite() {
+    local src="$1"
+    local dest="$2"
+    local label="$3"
+
+    [ ! -d "$src" ] && return
+
+    if [ -e "$dest" ]; then
+        if [ "$FORCE" = true ]; then
+            [ -n "$dest" ] && rm -rf "$dest"
+        elif ! ask_user_action "$dest" "$label"; then
+            return 1
+        fi
+    fi
+
+    mkdir -p "$(dirname "$dest")"
+    cp -R "$src" "$dest"
+    echo "  Copied: $label"
+    return 0
+}
+
+# Copy skill directories (each skill is its own directory)
+copy_skill_dirs() {
+    local src_dir="$1"
+    local dest_dir="$2"
+    local label="$3"
+
+    [ ! -d "$src_dir" ] && return
+    mkdir -p "$dest_dir"
+
+    for dir in "$src_dir"/*; do
+        [ -d "$dir" ] || continue
+        copy_dir_with_overwrite "$dir" "$dest_dir/$(basename "$dir")" "$label/$(basename "$dir")"
+    done
+}
+
 # ============================================================
 # CLAUDE CODE INSTALLATION
 # ============================================================
@@ -259,6 +296,13 @@ if [ "$INSTALL_CLAUDE" = true ]; then
     echo ""
     echo "Copying CLAUDE.md..."
     copy_file "$BUILD_DIR/claude/CLAUDE.md" "$CLAUDE_DIR/CLAUDE.md" "CLAUDE.md"
+
+    # Copy skills
+    if [ -d "$BUILD_DIR/claude/skills" ]; then
+        echo ""
+        echo "Copying skills..."
+        copy_skill_dirs "$BUILD_DIR/claude/skills" "$CLAUDE_DIR/skills" "skills"
+    fi
     
     echo ""
     echo -e "${GREEN}Claude Code installation complete!${NC}"
@@ -305,6 +349,13 @@ if [ "$INSTALL_OPENCODE" = true ]; then
     echo ""
     echo "Copying AGENTS.md..."
     copy_file "$BUILD_DIR/opencode/AGENTS.md" "$OPENCODE_DIR/AGENTS.md" "AGENTS.md"
+
+    # Copy skills
+    if [ -d "$BUILD_DIR/opencode/skill" ]; then
+        echo ""
+        echo "Copying skills..."
+        copy_skill_dirs "$BUILD_DIR/opencode/skill" "$OPENCODE_DIR/skill" "skill"
+    fi
     
     echo ""
     echo -e "${GREEN}OpenCode installation complete!${NC}"

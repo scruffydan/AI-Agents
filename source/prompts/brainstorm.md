@@ -1,9 +1,9 @@
 ---
 description: Creative brainstorming mode with high temperature for generating diverse ideas and exploring unconventional solutions.
-type: mode-only
+type: mode
 opencode:
   temperature: 0.8
-  model: opencode/claude-opus-4-5
+  model: opencode/gemini-3-pro
   permission:
     edit: deny
     bash: deny
