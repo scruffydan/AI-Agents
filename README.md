@@ -201,7 +201,7 @@ The `build.sh` script parses this and generates the appropriate format for each 
 
 ### Base Instructions
 
-`source/prompts/base-instructions.md` generates:
+`source/prompts/AGENTS.md` generates:
 - Claude Code: `~/.claude/CLAUDE.md` (global instructions)
 - OpenCode: `~/.config/opencode/AGENTS.md` (global instructions)
 
@@ -215,14 +215,14 @@ The `build.sh` script parses this and generates the appropriate format for each 
 - `build/claude/agents/{name}.md` - Agent with Claude-specific frontmatter
 - `build/claude/commands/{name}.md` - Raw prompt for slash commands
 - `build/claude/skills/{name}/SKILL.md` - Skills (copied from `source/skills/`)
-- `build/claude/CLAUDE.md` - From `base-instructions.md`
+- `build/claude/CLAUDE.md` - From `AGENTS.md`
 
 **For OpenCode:**
 - `build/opencode/agent/{name}.md` - Agent with OpenCode-specific frontmatter
 - `build/opencode/command/{name}.md` - Command that references the agent
 - `build/opencode/mode/{name}.md` - Mode with temperature and tool settings
 - `build/opencode/skill/{name}/SKILL.md` - Skills (copied from `source/skills/`)
-- `build/opencode/AGENTS.md` - From `base-instructions.md`
+- `build/opencode/AGENTS.md` - From `AGENTS.md`
 
 ### Agent vs Command vs Mode
 
