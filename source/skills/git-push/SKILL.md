@@ -20,21 +20,9 @@ ls -la README.md 2>/dev/null
 ```
 
 **Update README if:**
-- ✅ New features added → Document usage
-- ✅ New commands/scripts added → Add to documentation
-- ✅ New configuration options → Document settings
-- ✅ Breaking changes → Update examples and migration notes
-- ✅ New dependencies → Update requirements section
-- ✅ Installation process changed → Update install instructions
-- ✅ API changes → Update API documentation
-
-**README sections to review:**
-- Installation/Setup
-- Usage examples
-- Configuration
-- Requirements/Dependencies
-- API reference (if applicable)
-- Breaking changes/Migration guides
+- New features, commands, or configuration changes
+- Installation, dependencies, or requirements change
+- Breaking changes or API changes
 
 ### 2. Commit Quality
 
@@ -51,28 +39,9 @@ Ensure commits:
 
 ### 3. Code Quality
 
-**Run tests:**
-```sh
-# Run test suite
-npm test          # Node.js
-pytest            # Python
-go test ./...     # Go
-./run_tests.sh    # Custom
-```
-
-**Check linting:**
-```sh
-npm run lint      # Node.js
-pylint .          # Python
-golangci-lint run # Go
-```
-
-**Verify build:**
-```sh
-npm run build     # Node.js
-python setup.py build  # Python
-go build ./...    # Go
-```
+- Run the project's tests
+- Run linters/formatters if configured
+- Verify build or packaging if applicable
 
 ### 4. Security Check
 
@@ -146,35 +115,8 @@ After pushing:
 
 ## Common Issues
 
-### Push Rejected
-```sh
-# Pull and rebase
-git pull --rebase origin main
-git push
-```
-
-### Diverged Branches
-```sh
-# Check what diverged
-git log HEAD..origin/main
-git log origin/main..HEAD
-
-# Rebase or merge as appropriate
-git pull --rebase  # or git merge origin/main
-```
-
-### Accidental Secret Push
-
-**If secrets were pushed:**
-1. Immediately rotate/revoke the exposed credentials
-2. Remove from history:
-   ```sh
-   git filter-branch --force --index-filter \
-     "git rm --cached --ignore-unmatch path/to/secret" \
-     --prune-empty --tag-name-filter cat -- --all
-   ```
-3. Force push (if safe to do so)
-4. Notify team/security
+- For push rejections or diverged branches, rebase/merge per repo policy.
+- If secrets were pushed, rotate credentials and remove from history.
 
 ## Checklist Summary
 

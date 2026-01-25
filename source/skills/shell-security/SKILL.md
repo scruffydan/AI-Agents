@@ -60,21 +60,9 @@ fi
 ```
 
 ## Temporary Files
-- Use `mktemp` for creating secure temporary files
+- Use `mktemp` for secure temp files
 - Set restrictive permissions (600 or 700)
-- Clean up temporary files in trap handlers
-
-```sh
-tmpfile=$(mktemp)
-trap 'rm -f "$tmpfile"' EXIT INT TERM
-
-# Or for maximum portability (mktemp may not exist on all systems)
-tmpdir="${TMPDIR:-/tmp}"
-tmpfile="$tmpdir/script.$$"
-trap 'rm -f "$tmpfile"' EXIT INT TERM
-touch "$tmpfile"
-chmod 600 "$tmpfile"
-```
+- Clean up temp files in trap handlers
 
 ## Secure File Operations
 - Check if files exist before operations
@@ -96,67 +84,16 @@ chmod 600 "$tmpfile"
 ## Common Vulnerabilities to Prevent
 
 ### Path Traversal
-```sh
-# WRONG - user can access any file
-cat "uploads/$filename"
-
-# CORRECT - validate path stays in directory (POSIX-compatible)
-# First check for path traversal attempts
-case "$filename" in
-    *..* | /* | *~* )
-        echo "Invalid filename" >&2
-        exit 1
-        ;;
-esac
-
-# Resolve and validate (requires realpath utility)
-if command -v realpath >/dev/null 2>&1; then
-    realpath=$(realpath "uploads/$filename" 2>/dev/null) || exit 1
-    case "$realpath" in
-        /var/www/uploads/*)
-            cat "$realpath"
-            ;;
-        *)
-            echo "Invalid path" >&2
-            exit 1
-            ;;
-    esac
-else
-    # Fallback without realpath - basic checks only
-    cat "uploads/$filename"
-fi
-```
+- Reject `..`, absolute paths, and unexpected prefixes
+- Validate resolved paths stay within the allowed directory
 
 ### Command Injection
-```sh
-# WRONG - user can inject commands
-grep "$user_input" file.txt
-
-# CORRECT - use -- and quotes
-grep -- "$user_input" file.txt
-
-# For maximum safety, validate input first
-case "$user_input" in
-    *[\;\&\|\>\<\`\$\(\)]*)
-        echo "Invalid characters in input" >&2
-        exit 1
-        ;;
-esac
-```
+- Use `--` and quotes
+- Validate or reject metacharacters in user input
 
 ### Environment Variable Attacks
-```sh
-# Set safe PATH (POSIX requires 'export' separate from assignment for portability)
-PATH="/usr/local/bin:/usr/bin:/bin"
-export PATH
-
-# Unset dangerous variables
-unset LD_PRELOAD LD_LIBRARY_PATH IFS
-
-# Reset IFS to default if needed
-IFS=' 	
-'  # space, tab, newline
-```
+- Set a safe `PATH`
+- Unset `LD_PRELOAD`, `LD_LIBRARY_PATH`, and `IFS`
 
 ## Shell Options for Security
 
@@ -173,21 +110,7 @@ set -f
 ```
 
 ### Non-POSIX Options (bash/ksh only)
-```sh
-# Fail on pipe errors (NOT POSIX - bash/ksh only)
-set -o pipefail  # Use only if #!/bin/bash
-
-# POSIX alternative: check each command in pipeline explicitly
-if ! command1 | command2 | command3; then
-    echo "Pipeline failed" >&2
-    exit 1
-fi
-
-# Or capture intermediate results to files
-command1 > "$tmpfile1" || exit 1
-command2 < "$tmpfile1" > "$tmpfile2" || exit 1
-command3 < "$tmpfile2" || exit 1
-```
+- `set -o pipefail` (use only with `#!/bin/bash`)
 
 ### Strict Mode (POSIX)
 ```sh
@@ -211,69 +134,14 @@ set -eu  # Exit on error, exit on undefined variable
 
 ## POSIX vs Bash: What to Avoid
 
-### Bash-Only Features (NOT POSIX)
-```sh
-# DON'T USE (bash-only):
-[[ "$var" == "value" ]]      # Use: [ "$var" = "value" ]
-source script.sh              # Use: . script.sh
-(( i++ ))                     # Use: i=$((i + 1))
-$RANDOM                       # Use: external tool or /dev/urandom
-${var^^}                      # Use: tr '[:lower:]' '[:upper:]'
-${var,,}                      # Use: tr '[:upper:]' '[:lower:]'
-[[ "$var" =~ regex ]]        # Use: expr or grep
-```
-
-### POSIX-Compatible Alternatives
-```sh
-# String comparison
-[ "$var" = "value" ]          # POSIX (note: single =)
-
-# Source a file
-. ./script.sh                 # POSIX (note: dot, not source)
-
-# Arithmetic
-i=$((i + 1))                  # POSIX arithmetic expansion
-: $((i += 1))                 # POSIX arithmetic with no-op
-
-# Test for empty string
-[ -z "$var" ]                 # POSIX (true if empty)
-[ -n "$var" ]                 # POSIX (true if not empty)
-
-# Multiple conditions
-[ "$a" = "x" ] && [ "$b" = "y" ]    # AND
-[ "$a" = "x" ] || [ "$b" = "y" ]    # OR
-```
+- Avoid bash-only features like `[[ ]]`, `source`, `(( ))`, `$RANDOM`, and `=~`
+- Prefer POSIX forms: `[ ]`, `.`, `$(( ))`, and `case`/`expr`
 
 ## Testing POSIX Compliance
 
-```sh
-# Test your script with different shells
-sh script.sh      # POSIX sh
-dash script.sh    # Debian/Ubuntu minimal shell
-ash script.sh     # Alpine Linux shell
-bash script.sh    # GNU bash
-
-# Check for bash-isms
-checkbashisms script.sh  # Debian devscripts package
-shellcheck script.sh     # General shell linter
-```
+- Test with `sh`, `dash`, `ash`, and `bash` where available
+- Use `checkbashisms` or `shellcheck` to detect bash-isms
 
 ## Platform-Specific Considerations
 
-### Linux vs BSD vs macOS
-- **stat**: Different syntax across platforms
-  ```sh
-  # DON'T: stat -c '%Y' file  # Linux only
-  # DO: use ls -l or find instead for portability
-  ```
-- **sed -i**: Different syntax
-  ```sh
-  # AVOID in-place editing across platforms
-  # DO: Use temp file explicitly
-  sed 's/old/new/g' file > "$tmpfile" && mv "$tmpfile" file
-  ```
-- **readlink -f**: Not available on macOS
-  ```sh
-  # AVOID: readlink -f
-  # DO: Use pwd -P or realpath (if available)
-  ```
+- `stat`, `sed -i`, and `readlink -f` vary across platforms; prefer portable alternatives

@@ -44,36 +44,11 @@ git log -10 --format="%h %s%n%b%n"
 
 **Use the EXACT same conventions as recent commits:**
 
-If recent commits show:
-```
-feat: add user authentication
-fix: resolve memory leak in cache
-docs: update installation guide
-```
-
-Then use the same format:
-```
-<type>: <description>
-```
-
-If recent commits show:
-```
-feat(api): add webhook support
-fix(auth): prevent token expiry edge case
-```
-
-Then include scopes:
 ```
 <type>(<scope>): <description>
 ```
 
-If recent commits show:
-```
-Add user authentication feature
-Resolve memory leak in cache module
-```
-
-Then use free-form without prefixes.
+If commits are free-form, use the same free-form style without prefixes.
 
 ### 4. Craft the Commit Message
 
@@ -115,52 +90,8 @@ Closes #123"
 When changes are complex:
 
 ```sh
-git commit -m "feat: add payment processing system" -m "
-Integrate Stripe API for payment handling with:
-- Webhook support for payment events
-- Retry logic for failed transactions
-- PCI compliance measures
-
-Related to discussion in #456"
-```
-
-## Common Patterns
-
-### Conventional Commits
-```
-feat: add new feature
-fix: bug fix
-docs: documentation
-style: formatting
-refactor: code restructuring
-test: add tests
-chore: maintenance
-perf: performance
-ci: CI/CD changes
-build: build system
-```
-
-### With Scopes
-```
-feat(auth): add OAuth support
-fix(api): handle null response
-docs(readme): update installation
-```
-
-### With Breaking Changes
-```
-feat!: redesign API authentication
-
-BREAKING CHANGE: Auth endpoints now require Bearer token
-```
-
-### With Issue References
-```
-fix: prevent duplicate submissions
-
-Closes #123
-Fixes #124
-Related to #125
+git commit -m "feat: add payment processing" -m "
+Explain why, impact, and any references."
 ```
 
 ## Verification Before Commit
@@ -188,32 +119,9 @@ git commit --dry-run
 
 ## Special Cases
 
-### Amending Last Commit
-
-**Only if:**
-- Commit hasn't been pushed
-- You need to fix typo or add forgotten file
-
-```sh
-git add forgotten-file.js
-git commit --amend --no-edit
-
-# Or to change message
-git commit --amend -m "corrected message"
-```
-
-### Co-authored Commits
-
-```sh
-git commit -m "feat: implement shared feature" -m "
-Co-authored-by: Name <email@example.com>"
-```
-
-### Empty Commits (rarely needed)
-
-```sh
-git commit --allow-empty -m "chore: trigger CI rebuild"
-```
+- Amend only if not pushed and fixing a typo/forgotten file.
+- Add co-authors in commit body when needed.
+- Use empty commits only if explicitly required.
 
 ## Integration with Other Skills
 
