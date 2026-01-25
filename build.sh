@@ -105,7 +105,20 @@ get_frontmatter() {
 # State machine: p=0 (before first ---), p=1 (in frontmatter), p=2 (found closing ---), p=3 (printing content)
 # When we hit the second ---, we skip it with getline and start printing from the next line
 get_content() {
-    awk 'BEGIN{p=0} /^---$/{p++; if(p==2) {getline; p=3}} p==3{print}' "$1"
+    awk '
+      # p tracks frontmatter parsing state:
+      # 0 = before first ---
+      # 1 = inside frontmatter
+      # 2 = found closing ---
+      # 3 = printing content after frontmatter
+      BEGIN { p = 0 }
+      /^---$/ {
+        p++
+        if (p == 2) { getline; p = 3 }
+        next
+      }
+      p == 3 { print }
+    ' "$1"
 }
 
 # Get a value from frontmatter using yq
