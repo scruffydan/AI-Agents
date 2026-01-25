@@ -22,7 +22,9 @@ A collection of specialized agents, commands, and modes for **Claude Code** and 
 
 ```
 AI-Agents/
-├── source/            # Source of truth (combined frontmatter)
+├── source/
+│   ├── prompts/       # Agent/command definitions (combined frontmatter)
+│   └── skills/        # Modular procedural knowledge (Agent Skills standard)
 ├── build/             # GITIGNORED - generated output for claude/ and opencode/
 ├── build.sh           # Generates build/ from source/
 ├── install.sh         # Installs to ~/.claude and ~/.config/opencode
@@ -134,6 +136,16 @@ brainstorm    # High-temperature creative mode
 
 Note: In OpenCode, the individual review agents are invoked via `@` mentions. Only `code-full-review` is a slash command since it orchestrates all 3 agents. Modes change the AI's behavior and are switched using the Tab key.
 
+## Skills
+
+This repository includes **9 skills** following the [Agent Skills standard](https://github.com/anthropics/anthropic-sdk-typescript/tree/main/agents-api) - modular procedural knowledge that agents load on-demand:
+
+- **Security**: `javascript-security`, `python-security`, `go-security`, `shell-security`, `sql-security`
+- **Workflow**: `implementation-workflow`, `git-workflows`
+- **Usage Guides**: `using-docs-fetcher`, `using-code-review`
+
+See [`source/skills/README.md`](source/skills/README.md) for details.
+
 ## Customization
 
 ### Editing Instructions
@@ -171,6 +183,12 @@ The `build.sh` script parses this and generates the appropriate format for each 
 1. Create `source/prompts/my-agent.md` with combined frontmatter
 2. Run `./install.sh` to rebuild and install
 
+### Adding New Skills
+
+1. Create `source/skills/my-skill/SKILL.md` following the [Agent Skills format](https://github.com/anthropics/anthropic-sdk-typescript/tree/main/agents-api)
+2. Reference from agents: `Load skill \`my-skill\` when...`
+3. Run `./install.sh`
+
 ### Base Instructions
 
 `source/prompts/base-instructions.md` generates:
@@ -186,12 +204,14 @@ The `build.sh` script parses this and generates the appropriate format for each 
 **For Claude Code:**
 - `build/claude/agents/{name}.md` - Agent with Claude-specific frontmatter
 - `build/claude/commands/{name}.md` - Raw prompt for slash commands
+- `build/claude/skills/{name}/SKILL.md` - Skills (copied from `source/skills/`)
 - `build/claude/CLAUDE.md` - From `base-instructions.md`
 
 **For OpenCode:**
 - `build/opencode/agent/{name}.md` - Agent with OpenCode-specific frontmatter
 - `build/opencode/command/{name}.md` - Command that references the agent
 - `build/opencode/mode/{name}.md` - Mode with temperature and tool settings
+- `build/opencode/skill/{name}/SKILL.md` - Skills (copied from `source/skills/`)
 - `build/opencode/AGENTS.md` - From `base-instructions.md`
 
 ### Agent vs Command vs Mode
