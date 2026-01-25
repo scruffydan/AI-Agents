@@ -6,16 +6,16 @@ A collection of specialized agents, commands, and modes for **Claude Code** and 
 
 | Name | Type | Purpose |
 |------|------|---------|
-| `code-security` | Agent | Security vulnerability detection, OWASP Top 10 compliance |
-| `code-readability` | Agent | Code clarity, naming, structure, documentation review |
-| `code-performance` | Agent | Performance bottlenecks, algorithm optimization |
-| `code-redundancy` | Agent | Duplicate code, repeated patterns, DRY improvements |
-| `code-simplifier` | Agent | Simplifies code for clarity, consistency, and maintainability |
+| `code-security` | Subagent | Security vulnerability detection, OWASP Top 10 compliance |
+| `code-readability` | Subagent | Code clarity, naming, structure, documentation review |
+| `code-performance` | Subagent | Performance bottlenecks, algorithm optimization |
+| `code-redundancy` | Subagent | Duplicate code, repeated patterns, DRY improvements |
+| `code-simplifier` | Subagent | Simplifies code for clarity, consistency, and maintainability |
 | `code-full-review` | Command | Orchestrates all review agents, synthesizes findings with trade-off debates |
-| `explore` | Agent | Codebase exploration, file search, dependency tracing |
-| `docs-fetcher` | Agent | Fetch and extract relevant documentation from URLs |
-| `sidebar` | Agent | Answer general questions unrelated to coding session |
-| `brainstorm` | Mode (OpenCode) / Command (Claude) | High-temperature creative mode for generating diverse ideas |
+| `explore` | Subagent | Codebase exploration, file search, dependency tracing |
+| `docs-fetcher` | Subagent | Fetch and extract relevant documentation from URLs |
+| `sidebar` | Subagent | Answer general questions unrelated to coding session |
+| `brainstorm` | Mode (OpenCode only) | High-temperature creative mode for generating diverse ideas |
 | `thorough-plan` | Mode (OpenCode only) | Planning mode that asks clarifying questions before proceeding |
 
 ## Directory Structure
@@ -63,14 +63,14 @@ This will:
 
 ### Model Provider Selection
 
-By default, OpenCode agents use the `opencode` provider (OpenCode Zen). You can alternatively use **Google Vertex AI** for all Anthropic models:
+By default, OpenCode agents use the `opencode` provider (OpenCode Zen). You can alternatively use **Google Vertex AI** for Anthropic and Gemini models:
 
 ```bash
 ./install.sh --opencode --vertex    # Install OpenCode with Vertex AI models
 ./build.sh --vertex                 # Build only, using Vertex AI models
 ```
 
-This changes model strings from `opencode/claude-sonnet-4-5` to `google-vertex-anthropic/claude-sonnet-4-5@20250929`.
+This changes model strings from `opencode/claude-sonnet-4-5` to `google-vertex-anthropic/claude-sonnet-4-5@20250929`, and `opencode/gemini-3-pro` to `google-vertex/gemini-3-pro-preview`.
 
 **Vertex AI Setup Requirements:**
 - Set `GOOGLE_CLOUD_PROJECT` environment variable
@@ -167,7 +167,7 @@ Each prompt file uses **combined frontmatter**:
 ```yaml
 ---
 description: What this agent does...
-type: agent+command    # or "agent-only", "command-only", or "mode-only"
+type: subagent    # or "command" or "mode"
 claude:
   tools: Read, Glob, Grep
   model: opus
@@ -232,7 +232,7 @@ The `build.sh` script parses this and generates the appropriate format for each 
 | Command | Manual via `/command-name` | Manual via `/command-name` |
 | Mode | N/A | Switch via Tab key, changes behavior |
 
-Commands with type `agent+command` create both. Commands with type `command-only` create only commands (like `code-full-review` which orchestrates sub-agents). Commands with type `mode-only` create OpenCode modes only (like `brainstorm` for creative exploration).
+Prompts with type `subagent` create both Claude agents and OpenCode agents. Prompts with type `command` create commands only (like `code-full-review` which orchestrates sub-agents). Prompts with type `mode` create OpenCode modes only (like `brainstorm` for creative exploration).
 
 ## Workflow
 
