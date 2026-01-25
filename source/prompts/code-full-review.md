@@ -1,6 +1,6 @@
 ---
 description: Full code review orchestrating security, readability, performance, redundancy, and simplifier agents. Spawns all 5 specialist agents in parallel and synthesizes their findings.
-type: command-only
+type: command
 claude: {}
 opencode:
   subtask: true

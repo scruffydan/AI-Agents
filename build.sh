@@ -234,7 +234,7 @@ for prompt_file in "$SHARED_DIR"/*.md; do
     
     # Extract common values
     description=$(yaml_get "$frontmatter" ".description")
-    # Valid type values: agent, command, agent,command, mode-only
+    # Valid type values: subagent, command, mode
     type=$(yaml_get "$frontmatter" ".type")
     
     # Extract Claude-specific values
@@ -250,27 +250,26 @@ for prompt_file in "$SHARED_DIR"/*.md; do
     oc_model_transformed=$(transform_model "$oc_model")
     
     # Determine what to generate based on type
-    is_primary="false"
-    
-    # Claude outputs
     case "$type" in
-        *agent*) generate_output "claude" "agent" "$filename" ;;
+        subagent)
+            is_primary="false"
+            generate_output "claude" "agent" "$filename"
+            generate_output "opencode" "agent" "$filename"
+            ;;
+        command)
+            is_primary="false"
+            generate_output "claude" "command" "$filename"
+            generate_output "opencode" "command" "$filename"
+            ;;
+        mode)
+            is_primary="true"
+            generate_output "opencode" "agent" "$filename"
+            ;;
+        *)
+            echo "Unknown type: $type (file: $prompt_file)"
+            exit 1
+            ;;
     esac
-    case "$type" in
-        *command*) generate_output "claude" "command" "$filename" ;;
-    esac
-    
-    # OpenCode outputs
-    case "$type" in
-        *agent*) generate_output "opencode" "agent" "$filename" ;;
-        *command*) generate_output "opencode" "command" "$filename" ;;
-    esac
-    
-    # mode-only prompts are OpenCode primary agents
-    if [ "$type" = "mode-only" ]; then
-        is_primary="true"
-        generate_output "opencode" "agent" "$filename"
-    fi
     
     echo ""
 done
