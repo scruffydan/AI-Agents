@@ -48,8 +48,8 @@ AI-Agents/
 
 This will:
 1. Run `build.sh` to generate tool-specific configs
-2. Install Claude Code configs to `~/.claude/`
-3. Install OpenCode configs to `~/.config/opencode/`
+2. Install Claude Code configs to `~/.claude/` (agents, commands, skills)
+3. Install OpenCode configs to `~/.config/opencode/` (agents, commands, skills)
 
 ### Options
 
