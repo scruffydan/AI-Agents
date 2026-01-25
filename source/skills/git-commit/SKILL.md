@@ -1,6 +1,6 @@
 ---
 name: git-commit
-description: Git commit workflow that analyzes recent history to match repo-specific message conventions. Use when crafting commit messages, preparing to commit changes, or enforcing commit style consistency.
+description: You MUST use this when performing a git commit.  Git commit workflow that analyzes recent history to match repo-specific message conventions. Use when crafting commit messages, preparing to commit changes, or enforcing commit style consistency.
 ---
 
 # Git Commit Skill
@@ -30,7 +30,7 @@ git log -10 --oneline --no-decorate
 For deeper pattern analysis:
 
 ```sh
-git log -10 --format="%h %s%n%b%n"
+git log -10 --format="%h %s%n%b%ne
 ```
 
 **Look for:**
