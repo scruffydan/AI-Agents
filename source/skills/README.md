@@ -1,6 +1,6 @@
 # Skills Directory
 
-This directory contains **modular procedural knowledge** that agents can reference. Skills are separate from agent instructions to improve maintainability and reduce token usage.
+Modular procedural knowledge following the [Agent Skills standard](https://github.com/anthropics/anthropic-sdk-typescript/tree/main/agents-api). Agents load skills on-demand to reduce token usage.
 
 ## What Are Skills?
 
@@ -18,69 +18,50 @@ Skills are reusable knowledge modules that contain:
 | **Skills** | Procedural knowledge | `skills/*.md` | "JavaScript security checklist" |
 | **Agents** | Task-specific personas | `prompts/*.md` | `@code-security`, `@explore` |
 
-## Current Skills
+## Available Skills (9 total)
 
-### Security Skills
-- **javascript-security.md** - JS/TypeScript security best practices
-- **python-security.md** - Python security patterns and dangerous functions
-- **go-security.md** - Go security patterns, templates, crypto
-- **shell-security.md** - Bash security, quoting, command injection prevention
-- **sql-security.md** - SQL injection prevention, parameterized queries
+**Security** (language-specific):
+- `javascript-security` - JS/TS security patterns
+- `python-security` - Python dangerous functions, injection prevention
+- `go-security` - Go templates, crypto, race conditions
+- `shell-security` - POSIX sh security (portable sh/bash/dash/ash)
+- `sql-security` - SQL injection prevention
 
-### Workflow Skills
-- **implementation-workflow.md** - 6-phase implementation methodology
-- **git-workflows.md** - Git best practices, commits, branching
-- **using-docs-fetcher.md** - How to use @docs-fetcher agent
+**Workflow**:
+- `implementation-workflow` - 6-phase development methodology
+- `git-workflows` - Git best practices
 
-## How Skills Are Used
+**Usage Guides**:
+- `using-docs-fetcher` - When/how to use `@docs-fetcher`
+- `using-code-review` - Using all 5 code review agents
 
-Agents reference skills using relative paths:
+## Usage
+
+Agents reference skills for dynamic loading:
 
 ```markdown
-For JavaScript security guidelines, see `skill/javascript-security.md`
+When reviewing JavaScript, load skill `javascript-security` for security patterns.
 ```
 
-After building, skills are available at:
-- Claude: `~/.claude/skills/`
-- OpenCode: `~/.config/opencode/skill/`
+For format details, see [Agent Skills documentation](https://github.com/anthropics/anthropic-sdk-typescript/tree/main/agents-api).
 
-## Adding New Skills
+## Adding Skills
 
-1. Create a new `.md` file in this directory
-2. Write clear, focused procedural knowledge
-3. Reference it from relevant agent files
-4. Run `./build.sh` to copy to build directories
+1. Create `source/skills/my-skill/SKILL.md` following the [Agent Skills format](https://github.com/anthropics/anthropic-sdk-typescript/tree/main/agents-api)
+2. Reference from agents: `Load skill \`my-skill\` when...`
+3. Run `./install.sh`
 
-### Skill Format
+## Guidelines
 
 Skills should be:
-- **Focused** - Cover one specific domain
-- **Actionable** - Provide concrete steps or checklists
-- **Reusable** - Referenced by multiple agents
-- **Maintainable** - Easy to update independently
-
-Example:
-```markdown
-# Skill Name
-
-Brief description of what this skill covers.
-
-## Section 1
-Content...
-
-## Section 2
-Content...
-```
+- **Focused** - One specific domain
+- **Actionable** - Concrete checklists/patterns
+- **Reusable** - Used by multiple agents
+- **Standards-compliant** - Follow [Agent Skills format](https://github.com/anthropics/anthropic-sdk-typescript/tree/main/agents-api)
 
 ## Benefits
 
-1. **Modularity** - Update knowledge without touching agent definitions
-2. **Reduced Bloat** - Keep agent prompts focused on behavior
-3. **Reusability** - Multiple agents can share the same skill
-4. **Easier Maintenance** - Update best practices in one place
-
-## Future Enhancements
-
-- Skill auto-loading based on file types
-- Skill versioning for reproducibility
-- Community-contributed skill library
+- **On-demand loading** - Skills loaded only when needed
+- **Modularity** - Update knowledge independently
+- **Reusability** - Shared across agents
+- **Cross-references** - Skills ↔ Agents ↔ Workflows create a knowledge graph
