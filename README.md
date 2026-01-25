@@ -149,7 +149,7 @@ This repository includes **10 skills** following the [Agent Skills standard](htt
 
 **Workflow**:
 - `implementation-workflow` - 6-phase development methodology
-- `git-workflows` - Git best practices
+- `git-commit` - Analyzes last 10 commits to match repo conventions
 - `git-push` - Pre-push checklist (README updates, tests, security)
 
 **Usage Guides**:
