@@ -32,7 +32,7 @@ show_help() {
     echo ""
 }
 
-while [[ $# -gt 0 ]]; do
+while [ $# -gt 0 ]; do
     case $1 in
         -y|--yes)
             FORCE=true

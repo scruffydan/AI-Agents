@@ -47,7 +47,7 @@ show_help() {
 SKIP_BUILD=false
 USE_VERTEX=false
 
-while [[ $# -gt 0 ]]; do
+while [ $# -gt 0 ]; do
     case $1 in
         -y|--yes)
             FORCE=true
@@ -179,7 +179,7 @@ ask_user_action() {
     case "$choice" in
         y|Y)
             echo "   Removing existing"
-            [[ -n "$target" ]] && rm -rf "$target"
+            [ -n "$target" ] && rm -rf "$target"
             return 0
             ;;
         *)
@@ -198,7 +198,7 @@ copy_with_overwrite() {
     
     if [ -f "$dest" ] || [ -L "$dest" ]; then
         if [ "$FORCE" = true ]; then
-            [[ -n "$dest" ]] && rm -rf "$dest"
+            [ -n "$dest" ] && rm -rf "$dest"
         elif ! ask_user_action "$dest" "$label"; then
             return 1
         fi
@@ -245,7 +245,7 @@ copy_dir_with_overwrite() {
 
     if [ -e "$dest" ]; then
         if [ "$FORCE" = true ]; then
-            [[ -n "$dest" ]] && rm -rf "$dest"
+            [ -n "$dest" ] && rm -rf "$dest"
         elif ! ask_user_action "$dest" "$label"; then
             return 1
         fi
