@@ -218,10 +218,15 @@ copy_files() {
     [ ! -d "$src_dir" ] && return
     mkdir -p "$dest_dir"
     
+    local count=0
     for file in "$src_dir"/*.md; do
         [ -f "$file" ] || continue
-        copy_with_overwrite "$file" "$dest_dir/$(basename "$file")" "$label/$(basename "$file")"
+        if copy_with_overwrite "$file" "$dest_dir/$(basename "$file")" "$label/$(basename "$file")"; then
+            ((count++))
+        fi
     done
+    
+    echo "  Total copied: $count file(s)"
 }
 
 # Copy a single file to destination
@@ -266,10 +271,15 @@ copy_skill_dirs() {
     [ ! -d "$src_dir" ] && return
     mkdir -p "$dest_dir"
 
+    local count=0
     for dir in "$src_dir"/*; do
         [ -d "$dir" ] || continue
-        copy_dir_with_overwrite "$dir" "$dest_dir/$(basename "$dir")" "$label/$(basename "$dir")"
+        if copy_dir_with_overwrite "$dir" "$dest_dir/$(basename "$dir")" "$label/$(basename "$dir")"; then
+            ((count++))
+        fi
     done
+    
+    echo "  Total copied: $count skill(s)"
 }
 
 # ============================================================
@@ -294,7 +304,7 @@ if [ "$INSTALL_CLAUDE" = true ]; then
     
     # Copy CLAUDE.md
     echo ""
-    echo "Copying CLAUDE.md..."
+    echo "Copying base instructions..."
     copy_file "$BUILD_DIR/claude/CLAUDE.md" "$CLAUDE_DIR/CLAUDE.md" "CLAUDE.md"
 
     # Copy skills
@@ -305,16 +315,26 @@ if [ "$INSTALL_CLAUDE" = true ]; then
     fi
     
     echo ""
+    echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo -e "${GREEN}Claude Code installation complete!${NC}"
+    echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo ""
     if [ -d "$CLAUDE_DIR/agents" ]; then
-        echo "Available agents:"
-        ls -1 "$CLAUDE_DIR/agents/" 2>/dev/null | sed 's/^/  - /' || echo "  (none)"
+        local agent_count=$(ls -1 "$CLAUDE_DIR/agents/"*.md 2>/dev/null | wc -l | tr -d ' ')
+        echo "Available agents ($agent_count):"
+        ls -1 "$CLAUDE_DIR/agents/"*.md 2>/dev/null | sed 's|.*/||; s/\.md$//' | sed 's/^/  - /' || echo "  (none)"
     fi
     echo ""
     if [ -d "$CLAUDE_DIR/commands" ]; then
-        echo "Available commands:"
-        ls -1 "$CLAUDE_DIR/commands/" 2>/dev/null | sed 's/^/  - /' || echo "  (none)"
+        local command_count=$(ls -1 "$CLAUDE_DIR/commands/"*.md 2>/dev/null | wc -l | tr -d ' ')
+        echo "Available commands ($command_count):"
+        ls -1 "$CLAUDE_DIR/commands/"*.md 2>/dev/null | sed 's|.*/||; s/\.md$//' | sed 's/^/  - /' || echo "  (none)"
+    fi
+    echo ""
+    if [ -d "$CLAUDE_DIR/skills" ]; then
+        local skill_count=$(find "$CLAUDE_DIR/skills" -type d -mindepth 1 -maxdepth 1 2>/dev/null | wc -l | tr -d ' ')
+        echo "Available skills ($skill_count):"
+        ls -1 "$CLAUDE_DIR/skills/" 2>/dev/null | sed 's/^/  - /' || echo "  (none)"
     fi
     echo ""
     if [ -f "$CLAUDE_DIR/CLAUDE.md" ]; then
@@ -347,7 +367,7 @@ if [ "$INSTALL_OPENCODE" = true ]; then
     
     # Copy AGENTS.md
     echo ""
-    echo "Copying AGENTS.md..."
+    echo "Copying base instructions..."
     copy_file "$BUILD_DIR/opencode/AGENTS.md" "$OPENCODE_DIR/AGENTS.md" "AGENTS.md"
 
     # Copy skills
@@ -358,16 +378,26 @@ if [ "$INSTALL_OPENCODE" = true ]; then
     fi
     
     echo ""
+    echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo -e "${GREEN}OpenCode installation complete!${NC}"
+    echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo ""
     if [ -d "$OPENCODE_DIR/agent" ]; then
-        echo "Available agents (invoke with @name):"
-        ls -1 "$OPENCODE_DIR/agent/" 2>/dev/null | sed 's/\.md$//' | sed 's/^/  @/' || echo "  (none)"
+        local agent_count=$(ls -1 "$OPENCODE_DIR/agent/"*.md 2>/dev/null | wc -l | tr -d ' ')
+        echo "Available agents ($agent_count) - invoke with @name:"
+        ls -1 "$OPENCODE_DIR/agent/"*.md 2>/dev/null | sed 's|.*/||; s/\.md$//' | sed 's/^/  @/' || echo "  (none)"
     fi
     if [ -d "$OPENCODE_DIR/command" ] && [ "$(ls -A "$OPENCODE_DIR/command" 2>/dev/null)" ]; then
         echo ""
-        echo "Available commands:"
-        ls -1 "$OPENCODE_DIR/command/" 2>/dev/null | sed 's/\.md$//' | sed 's/^/  \//' || echo "  (none)"
+        local command_count=$(ls -1 "$OPENCODE_DIR/command/"*.md 2>/dev/null | wc -l | tr -d ' ')
+        echo "Available commands ($command_count) - invoke with /name:"
+        ls -1 "$OPENCODE_DIR/command/"*.md 2>/dev/null | sed 's|.*/||; s/\.md$//' | sed 's/^/  /' || echo "  (none)"
+    fi
+    if [ -d "$OPENCODE_DIR/skill" ]; then
+        echo ""
+        local skill_count=$(find "$OPENCODE_DIR/skill" -type d -mindepth 1 -maxdepth 1 2>/dev/null | wc -l | tr -d ' ')
+        echo "Available skills ($skill_count):"
+        ls -1 "$OPENCODE_DIR/skill/" 2>/dev/null | sed 's/^/  - /' || echo "  (none)"
     fi
     echo ""
     if [ -f "$OPENCODE_DIR/AGENTS.md" ]; then
@@ -380,24 +410,32 @@ fi
 # ============================================================
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo -e "${GREEN}Installation complete!${NC}"
+echo -e "${GREEN}All installations complete!${NC}"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
-echo "Usage:"
+echo "Quick Start:"
 if [ "$INSTALL_CLAUDE" = true ]; then
+    echo ""
     echo "  Claude Code:"
-    echo "    - Agents auto-invoke when Claude detects relevant tasks"
-    echo "    - Commands: /code-full-review (orchestrates all specialist agents)"
+    echo "    • Agents auto-invoke when Claude detects relevant tasks"
+    echo "    • Slash commands: /code-full-review (orchestrates all specialist agents)"
+    echo "    • Config location: $CLAUDE_DIR"
 fi
 if [ "$INSTALL_OPENCODE" = true ]; then
+    echo ""
     echo "  OpenCode:"
-    echo "    - Specialist agents: @code-security, @code-readability, @code-performance,"
+    echo "    • Specialist agents: @code-security, @code-readability, @code-performance,"
     echo "      @code-redundancy, @code-simplifier"
-    echo "    - Utility agents: @explore, @sidebar, @docs-fetcher"
-    echo "    - Primary agents (Tab to switch): brainstorm, thorough-plan"
-    echo "    - Command: /code-full-review (orchestrates all 5 specialist agents)"
+    echo "    • Utility agents: @explore, @sidebar, @docs-fetcher, @git-commit"
+    echo "    • Primary modes (Tab to switch): brainstorm, thorough-plan"
+    echo "    • Slash commands: /code-full-review (orchestrates all 5 specialist agents)"
+    echo "    • Config location: $OPENCODE_DIR"
 fi
 echo ""
-echo "Note: Files are copied (not symlinked). Run ./install.sh again to update."
-echo "      Use ./install.sh -y to force overwrite without prompts."
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+echo "Notes:"
+echo "  • Files are copied (not symlinked). Run ./install.sh again to update."
+echo "  • Use ./install.sh -y to force overwrite without prompts."
+echo "  • Use ./install.sh --help to see all installation options."
 echo ""
