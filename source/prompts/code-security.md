@@ -1,6 +1,6 @@
 ---
 description: Security review specialist for identifying vulnerabilities and ensuring secure coding practices. Invoke for security audits, vulnerability assessments, and OWASP compliance checks.
-type: agent-only
+type: subagent
 claude:
   tools: Read, Glob, Grep
   model: claude-opus-4-5

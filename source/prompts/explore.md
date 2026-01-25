@@ -1,6 +1,6 @@
 ---
 description: Explore and answer questions about the codebase. Use this agent to find files, search code, understand implementations, and trace dependencies without consuming main conversation context.
-type: agent-only
+type: subagent
 claude:
   tools: Glob, Grep, Read, List
   model: claude-sonnet-4-5
