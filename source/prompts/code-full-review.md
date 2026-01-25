@@ -18,26 +18,27 @@ This command coordinates five specialist agents:
 ### Readability Agent
 - Focuses on code clarity, maintainability, and developer experience
 - Evaluates naming, structure, formatting, and documentation
-- Uses hybrid workflow: analyze → report → get approval → apply
+- **Report-only mode**: Returns findings without applying fixes or asking questions
 
 ### Performance Agent
 - Focuses on speed, memory efficiency, and resource optimization
 - Evaluates algorithms, I/O, memory usage, and concurrency
-- Uses hybrid workflow: analyze → report → get approval → apply
+- **Report-only mode**: Returns findings without applying fixes or asking questions
 
 ### Security Agent
 - Focuses on vulnerability prevention and secure coding
 - Evaluates against OWASP Top 10, CWE, and security best practices
-- Uses hybrid workflow: analyze → report → get approval → apply
+- **Report-only mode**: Returns findings without applying fixes or asking questions
 
 ### Redundancy Agent
 - Focuses on code duplication, dead code, and DRY violations
 - Evaluates copy-paste code, unused functions, and abstraction opportunities
-- Uses hybrid workflow: analyze → report → get approval → apply
+- **Report-only mode**: Returns findings without applying fixes or asking questions
 
 ### Simplifier Agent
 - Focuses on code clarity, complexity reduction, and maintainability
 - Evaluates nesting depth, naming quality, standard compliance, and readability
+- **Report-only mode**: Returns findings without applying fixes or asking questions
 - Reports simplification opportunities without modifying code
 
 ## Decision Framework
