@@ -18,10 +18,12 @@ NC='\033[0m' # No Color
 
 # Default provider for OpenCode models
 OPENCODE_PROVIDER="opencode"
+VERTEX_PROVIDER="google-vertex"
 
 # Get Vertex AI version suffix for a model
 get_vertex_version() {
     case "$1" in
+        *gemini-3-pro)        echo "-preview" ;;
         *claude-opus-4-5)    echo "@20251101" ;;
         *claude-sonnet-4-5)  echo "@20250929" ;;
         *claude-haiku-4-5)   echo "@20251001" ;;
@@ -142,11 +144,17 @@ transform_model() {
     
     # Only transform if not using default opencode provider
     if [ "$OPENCODE_PROVIDER" != "opencode" ]; then
+        local provider_prefix="$OPENCODE_PROVIDER"
+
+        if echo "$model" | grep -q "^opencode/gemini-"; then
+            provider_prefix="$VERTEX_PROVIDER"
+        fi
+
         # Replace "opencode/" with the selected provider prefix using sed
-        transformed=$(echo "$model" | sed "s|^opencode/|$OPENCODE_PROVIDER/|")
+        transformed=$(echo "$model" | sed "s|^opencode/|$provider_prefix/|")
         
         # For Vertex AI, add version suffix
-        if [ "$OPENCODE_PROVIDER" = "google-vertex-anthropic" ]; then
+        if [ "$provider_prefix" = "google-vertex-anthropic" ] || [ "$provider_prefix" = "$VERTEX_PROVIDER" ]; then
             local suffix=$(get_vertex_version "$transformed")
             transformed="$transformed$suffix"
         fi
