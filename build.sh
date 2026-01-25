@@ -7,6 +7,7 @@ set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SHARED_DIR="$SCRIPT_DIR/source/prompts"
+SKILLS_DIR="$SCRIPT_DIR/source/skills"
 BUILD_DIR="$SCRIPT_DIR/build"
 
 # Colors for output
@@ -88,8 +89,8 @@ echo ""
 # Clean and create build directories
 [[ -z "$BUILD_DIR" ]] && { echo "Error: BUILD_DIR is empty"; exit 1; }
 rm -rf "$BUILD_DIR"
-mkdir -p "$BUILD_DIR/claude/agents" "$BUILD_DIR/claude/commands"
-mkdir -p "$BUILD_DIR/opencode/agent" "$BUILD_DIR/opencode/command"
+mkdir -p "$BUILD_DIR/claude/agents" "$BUILD_DIR/claude/commands" "$BUILD_DIR/claude/skills"
+mkdir -p "$BUILD_DIR/opencode/agent" "$BUILD_DIR/opencode/command" "$BUILD_DIR/opencode/skill"
 
 # =============================================================================
 # Helper Functions
@@ -261,6 +262,30 @@ echo -e "${YELLOW}Generating:${NC} OpenCode AGENTS.md"
 if [[ -f "$SHARED_DIR/base-instructions.md" ]]; then
     cp "$SHARED_DIR/base-instructions.md" "$BUILD_DIR/opencode/AGENTS.md"
     echo "  Created: opencode/AGENTS.md"
+fi
+
+# Copy skills to both platforms
+echo ""
+echo -e "${YELLOW}Copying skills...${NC}"
+if [[ -d "$SKILLS_DIR" ]]; then
+    skill_count=0
+    for skill_dir in "$SKILLS_DIR"/*/; do
+        [[ -d "$skill_dir" ]] || continue
+        skill_name=$(basename "$skill_dir")
+        
+        if [[ -f "$skill_dir/SKILL.md" ]]; then
+            # Create skill directory and copy contents
+            mkdir -p "$BUILD_DIR/claude/skills/$skill_name"
+            mkdir -p "$BUILD_DIR/opencode/skill/$skill_name"
+            cp -r "$skill_dir"* "$BUILD_DIR/claude/skills/$skill_name/"
+            cp -r "$skill_dir"* "$BUILD_DIR/opencode/skill/$skill_name/"
+            echo "  Created: skill/$skill_name/"
+            ((skill_count++))
+        fi
+    done
+    echo "  Total skills: $skill_count"
+else
+    echo "  No skills directory found, skipping..."
 fi
 
 echo ""
