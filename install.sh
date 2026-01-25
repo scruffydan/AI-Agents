@@ -113,6 +113,18 @@ if [ "$TARGET_SPECIFIED" = false ]; then
     echo ""
 fi
 
+# Check for yq dependency (only if not skipping build)
+if [ "$SKIP_BUILD" = false ]; then
+    if ! command -v yq &> /dev/null; then
+        echo -e "${RED}Error: yq is required but not installed.${NC}"
+        echo "Install with: brew install yq"
+        echo ""
+        echo "Alternatively, run with --skip-build if you already have the build/ directory:"
+        echo "  ./install.sh --skip-build"
+        exit 1
+    fi
+fi
+
 # Run build.sh first
 if [ "$SKIP_BUILD" = false ]; then
     echo -e "${YELLOW}Running build.sh...${NC}"
