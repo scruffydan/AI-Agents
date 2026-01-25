@@ -14,9 +14,11 @@ A collection of specialized agents, commands, and modes for **Claude Code** and 
 | `code-full-review` | Command | Orchestrates all review agents, synthesizes findings with trade-off debates |
 | `explore` | Subagent | Codebase exploration, file search, dependency tracing |
 | `docs-fetcher` | Subagent | Fetch and extract relevant documentation from URLs |
+| `git-commit` | Subagent | Analyzes git history, drafts commit message for user verification |
 | `sidebar` | Subagent | Answer general questions unrelated to coding session |
 | `brainstorm` | Mode (OpenCode only) | High-temperature creative mode for generating diverse ideas |
 | `thorough-plan` | Mode (OpenCode only) | Planning mode that asks clarifying questions before proceeding |
+| `five-whys` | Skill | Root cause analysis using Toyota's Five Whys technique |
 | `javascript-security` | Skill | JS/TS security patterns |
 | `python-security` | Skill | Python dangerous functions, injection prevention |
 | `go-security` | Skill | Go templates, crypto, race conditions |
@@ -128,6 +130,7 @@ This installs a `opencode.json` to `~/.config/opencode/` with sensible security 
 @code-security src/auth/login.ts
 @code-readability src/utils/
 @code-performance src/data-processor.ts
+@git-commit                          # Analyzes changes, proposes commit message
 ```
 
 **Commands**:
@@ -141,6 +144,37 @@ brainstorm    # High-temperature creative mode
 ```
 
 Note: In OpenCode, the individual review agents are invoked via `@` mentions. Only `code-full-review` is a slash command since it orchestrates all 3 agents. Modes change the AI's behavior and are switched using the Tab key.
+
+## Special Workflows
+
+### Git Commit Workflow
+
+The `@git-commit` agent provides a safe, verified commit workflow:
+
+1. **Analyze**: The agent analyzes your git history (last 10 commits) to understand repository conventions
+2. **Prepare**: Drafts a commit message that matches your repo's style and reviews staged changes
+3. **Verify**: Returns the proposed commit message and file list for your approval
+4. **Commit**: After you approve, the main agent runs the commit
+
+**Example:**
+```
+You: @git-commit
+  ↓
+Agent analyzes git history and returns:
+  • Proposed message: "feat(auth): add JWT validation"
+  • Files: src/auth/jwt.ts, tests/auth.test.ts
+  • Convention found: Uses conventional commits with scope
+  ↓
+You approve
+  ↓
+Main agent commits with approved message
+```
+
+**Benefits:**
+- Keeps main context clean (analysis happens in subagent)
+- Automatically matches your repository's commit style
+- You verify every commit before it happens
+- No accidental commits
 
 ## Customization
 

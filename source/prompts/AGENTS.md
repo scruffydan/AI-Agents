@@ -18,12 +18,40 @@ When you need to look up external documentation (APIs, libraries, frameworks, co
 
 For detailed guidance on using the documentation fetcher, load the skill `using-docs-fetcher`
 
+## Git Operations
+
+When working with git commits and pushes, use specialized workflows:
+
+### Git Commit Workflow
+
+When the user wants to commit changes:
+
+1. **Use `@git-commit` agent** to analyze and prepare:
+   - The agent analyzes git history to understand repository conventions
+   - Returns a proposed commit message and file list for your review
+   - **The agent will NOT actually commit** - it only prepares
+
+2. **Present to user for verification**:
+   - Show the proposed commit message
+   - Show the files to be committed
+   - Explain the repository conventions found
+   - Ask for approval or modifications
+
+3. **After user approval**, run the commit:
+   ```bash
+   git commit -m "approved message"
+   ```
+
+### Git Push
+
+- **`git-push` skill**: Load this skill before running `git push` for pre-push verification checklist.
+
 ## Mandatory Skills
 
 These skills are required in the following situations:
 
-- **`git-commit`**: Before running `git commit`
-- **`git-push`**: Before running `git push`
+- **`git-commit`**: Before running `git commit` to ensure proper commit message conventions
+- **`git-push`**: Before running `git push` for pre-push verification checklist
 - **`systematic-debugging`**: When encountering any bug, test failure, or unexpected behavior, before proposing fixes
 - **`verification-before-completion`**: Before claiming work is complete, fixed, or passing
 - **`brainstorming`**: Before any creative work (new features, new behavior, or significant design changes)
