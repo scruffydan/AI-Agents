@@ -22,29 +22,14 @@ Use the docs-fetcher agent when you need to:
 ### Basic Pattern
 
 ```
-I need to understand how to use the Stripe payment intent API. 
-Let me use @docs-fetcher to get the current documentation.
-
-@docs-fetcher: Fetch the Stripe Payment Intents API documentation, 
+@docs-fetcher: Fetch the Stripe Payment Intents API documentation,
 specifically how to create a payment intent with metadata.
-```
-
-### Asking for Specific Sections
-
-Be specific about what you need from the documentation:
-
-```
-@docs-fetcher: From the React Router v6 documentation, extract 
-information about the useNavigate hook and how it differs from 
-the old useHistory hook.
 ```
 
 ### Version-Specific Queries
 
-When version matters, specify it:
-
 ```
-@docs-fetcher: Get the Next.js 13 App Router documentation about 
+@docs-fetcher: Get the Next.js 13 App Router documentation about
 server components and data fetching patterns.
 ```
 
@@ -63,19 +48,12 @@ server components and data fetching patterns.
 4. **Use for unfamiliar APIs** - When you're not certain about current syntax
 5. **Verify breaking changes** - Check docs when upgrading dependencies
 
-## Examples
+## Example
 
-### Good Usage
 ```
-@docs-fetcher: Fetch the PostgreSQL documentation for the JSONB 
+@docs-fetcher: Fetch the PostgreSQL documentation for the JSONB
 data type, specifically the containment operators and indexing strategies.
 ```
-
-### Less Effective
-```
-@docs-fetcher: Get PostgreSQL docs
-```
-(Too vague - might return irrelevant information)
 
 ## When NOT to Use @docs-fetcher
 

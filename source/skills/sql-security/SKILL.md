@@ -48,26 +48,11 @@ SELECT * FROM users WHERE email = ?
 - Rotate database credentials regularly
 - Use connection string encryption
 
-## Injection Prevention Patterns
+## Injection Prevention
 
-### SQL Injection
-```sql
--- WRONG - concatenation
-cursor.execute("SELECT * FROM users WHERE id = " + user_id)
-
--- CORRECT - parameterized
-cursor.execute("SELECT * FROM users WHERE id = ?", (user_id,))
-```
-
-### UNION-based Injection
-- Limit query results to expected types
-- Validate expected result structure
-- Use allowlists for column names and table names
-
-### Blind SQL Injection
-- Implement rate limiting on queries
-- Use generic error messages
-- Monitor for timing attacks
+- Always use parameterized queries or ORM bind parameters
+- Validate inputs and allowlist dynamic identifiers
+- Rate-limit and monitor unusual query patterns
 
 ## ORM Security
 - Understand how your ORM generates SQL
@@ -89,12 +74,6 @@ User.objects.filter(name=name)
 - Use strong authentication mechanisms
 - Keep database software updated
 
-## Common SQL Injection Patterns to Block
-- `' OR '1'='1` - authentication bypass
-- `'; DROP TABLE users--` - data destruction
-- `UNION SELECT` - data exfiltration
-- Time-based blind injection patterns
-
 ## Protection Layers
 1. **Input Validation** - Validate before query
 2. **Parameterized Queries** - Use placeholders
@@ -107,9 +86,3 @@ User.objects.filter(name=name)
 - Use parameterized statements inside procedures
 - Grant EXECUTE-only permissions
 - Avoid dynamic SQL within procedures
-
-## NoSQL Injection (MongoDB, etc.)
-- Validate input types (prevent object injection)
-- Use parameterized queries in NoSQL drivers
-- Sanitize regex patterns from user input
-- Use allowlists for operators and field names
