@@ -3,7 +3,7 @@ description: Creative brainstorming mode with high temperature for generating di
 type: mode
 opencode:
   temperature: 0.8
-  model: opencode/claude-opus-4-5
+  model: opencode/gemini-3-pro
   permission:
     edit: deny
     bash: deny
