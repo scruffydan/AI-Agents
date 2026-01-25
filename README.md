@@ -17,13 +17,11 @@ A collection of specialized agents, commands, and modes for **Claude Code** and 
 | `sidebar` | Subagent | Answer general questions unrelated to coding session |
 | `brainstorm` | Mode (OpenCode only) | High-temperature creative mode for generating diverse ideas |
 | `thorough-plan` | Mode (OpenCode only) | Planning mode that asks clarifying questions before proceeding |
-| **Security** | **Skill Group** | Language-specific secure coding guidance |
 | `javascript-security` | Skill | JS/TS security patterns |
 | `python-security` | Skill | Python dangerous functions, injection prevention |
 | `go-security` | Skill | Go templates, crypto, race conditions |
 | `shell-security` | Skill | POSIX sh security (portable sh/bash/dash/ash) |
 | `sql-security` | Skill | SQL injection prevention |
-| **Workflow** | **Skill Group** | Planning, execution, and delivery discipline |
 | `brainstorming` | Skill | Creative ideation guidance before building |
 | `implementation-workflow` | Skill | 6-phase development methodology |
 | `executing-plans` | Skill | Execute pre-written plans with checkpoints |
@@ -32,7 +30,6 @@ A collection of specialized agents, commands, and modes for **Claude Code** and 
 | `receiving-code-review` | Skill | Implement review feedback with verification |
 | `subagent-driven-development` | Skill | Run independent tasks with subagents |
 | `systematic-debugging` | Skill | Structured debugging before proposing fixes |
-| **Guides** | **Skill Group** | How-to references for other tools |
 | `using-docs-fetcher` | Skill | When/how to use `@docs-fetcher` |
 | `using-code-review` | Skill | Using all 5 code review agents |
 | `verification-before-completion` | Skill | Verify before claiming completion |
