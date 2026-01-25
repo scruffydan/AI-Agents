@@ -178,8 +178,15 @@ set -f
 set -o pipefail  # Use only if #!/bin/bash
 
 # POSIX alternative: check each command in pipeline explicitly
-command1 | command2 | command3
-status1=${PIPESTATUS[0]-$?}  # bash only
+if ! command1 | command2 | command3; then
+    echo "Pipeline failed" >&2
+    exit 1
+fi
+
+# Or capture intermediate results to files
+command1 > "$tmpfile1" || exit 1
+command2 < "$tmpfile1" > "$tmpfile2" || exit 1
+command3 < "$tmpfile2" || exit 1
 ```
 
 ### Strict Mode (POSIX)
