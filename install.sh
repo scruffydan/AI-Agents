@@ -6,6 +6,9 @@
 
 set -e
 
+# Validate HOME is set (defensive programming)
+[ -z "$HOME" ] && { echo "Error: HOME environment variable is not set"; exit 1; }
+
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BUILD_DIR="$REPO_ROOT/build"
 CLAUDE_DIR="$HOME/.claude"
@@ -189,22 +192,34 @@ ask_user_action() {
     esac
 }
 
-# Copy a single file with overwrite handling
+# Copy a file or directory with overwrite handling
 # Returns 0 if copied, 1 if skipped
 copy_with_overwrite() {
     local src="$1"
     local dest="$2"
     local label="$3"
     
-    if [ -f "$dest" ] || [ -L "$dest" ]; then
+    # Skip if source doesn't exist
+    [ ! -e "$src" ] && return 1
+    
+    # Handle existing destination
+    if [ -e "$dest" ] || [ -L "$dest" ]; then
         if [ "$FORCE" = true ]; then
-            [ -n "$dest" ] && rm -rf "$dest"
+            [ -n "$dest" ] && rm -rf -- "$dest"
         elif ! ask_user_action "$dest" "$label"; then
             return 1
         fi
     fi
     
-    cp "$src" "$dest"
+    # Ensure parent directory exists
+    mkdir -p "$(dirname "$dest")"
+    
+    # Copy (use -R for directories)
+    if [ -d "$src" ]; then
+        cp -R -- "$src" "$dest"
+    else
+        cp -- "$src" "$dest"
+    fi
     echo "  Copied: $label"
     return 0
 }
@@ -240,28 +255,6 @@ copy_file() {
     copy_with_overwrite "$src" "$dest" "$label"
 }
 
-# Copy a directory with overwrite handling
-copy_dir_with_overwrite() {
-    local src="$1"
-    local dest="$2"
-    local label="$3"
-
-    [ ! -d "$src" ] && return
-
-    if [ -e "$dest" ]; then
-        if [ "$FORCE" = true ]; then
-            [ -n "$dest" ] && rm -rf "$dest"
-        elif ! ask_user_action "$dest" "$label"; then
-            return 1
-        fi
-    fi
-
-    mkdir -p "$(dirname "$dest")"
-    cp -R "$src" "$dest"
-    echo "  Copied: $label"
-    return 0
-}
-
 # Copy skill directories (each skill is its own directory)
 copy_skill_dirs() {
     local src_dir="$1"
@@ -274,7 +267,7 @@ copy_skill_dirs() {
     local count=0
     for dir in "$src_dir"/*; do
         [ -d "$dir" ] || continue
-        if copy_dir_with_overwrite "$dir" "$dest_dir/$(basename "$dir")" "$label/$(basename "$dir")"; then
+        if copy_with_overwrite "$dir" "$dest_dir/$(basename "$dir")" "$label/$(basename "$dir")"; then
             ((count++))
         fi
     done
