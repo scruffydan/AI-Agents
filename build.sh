@@ -135,6 +135,15 @@ yaml_get() {
     fi
 }
 
+# Format a YAML object as indented key: value lines
+# Input: JSON/YAML object string
+# Output: Formatted lines with 2-space indent, empty if input is null/empty
+format_yaml_object() {
+    local yaml_content="$1"
+    [ -z "$yaml_content" ] || [ "$yaml_content" = "null" ] && return
+    echo "$yaml_content" | yq -r 'to_entries | .[] | "  " + .key + ": " + .value' 2>/dev/null || true
+}
+
 # Transform OpenCode model string based on selected provider
 transform_model() {
     local model="$1"
@@ -254,7 +263,7 @@ for prompt_file in "$SHARED_DIR"/*.md; do
     oc_model=$(yaml_get "$frontmatter" ".opencode.model")
     oc_subtask=$(yaml_get "$frontmatter" ".opencode.subtask")
     oc_temperature=$(yaml_get "$frontmatter" ".opencode.temperature")
-    oc_permission=$(yaml_get "$frontmatter" ".opencode.permission" | yq -r 'to_entries | .[] | "  " + .key + ": " + .value' 2>/dev/null || true)
+    oc_permission=$(format_yaml_object "$(yaml_get "$frontmatter" ".opencode.permission")")
     oc_model_transformed=$(transform_model "$oc_model")
     
     # Determine what to generate based on type
