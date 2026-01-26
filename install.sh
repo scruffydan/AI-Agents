@@ -320,19 +320,19 @@ if [ "$INSTALL_CLAUDE" = true ]; then
     echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo ""
     if [ -d "$CLAUDE_DIR/agents" ]; then
-        local agent_count=$(ls -1 "$CLAUDE_DIR/agents/"*.md 2>/dev/null | wc -l | tr -d ' ')
+        agent_count=$(ls -1 "$CLAUDE_DIR/agents/"*.md 2>/dev/null | wc -l | tr -d ' ')
         echo "Available agents ($agent_count):"
         ls -1 "$CLAUDE_DIR/agents/"*.md 2>/dev/null | sed 's|.*/||; s/\.md$//' | sed 's/^/  - /' || echo "  (none)"
     fi
     echo ""
     if [ -d "$CLAUDE_DIR/commands" ]; then
-        local command_count=$(ls -1 "$CLAUDE_DIR/commands/"*.md 2>/dev/null | wc -l | tr -d ' ')
+        command_count=$(ls -1 "$CLAUDE_DIR/commands/"*.md 2>/dev/null | wc -l | tr -d ' ')
         echo "Available commands ($command_count):"
         ls -1 "$CLAUDE_DIR/commands/"*.md 2>/dev/null | sed 's|.*/||; s/\.md$//' | sed 's/^/  - /' || echo "  (none)"
     fi
     echo ""
     if [ -d "$CLAUDE_DIR/skills" ]; then
-        local skill_count=$(find "$CLAUDE_DIR/skills" -type d -mindepth 1 -maxdepth 1 2>/dev/null | wc -l | tr -d ' ')
+        skill_count=$(find "$CLAUDE_DIR/skills" -type d -mindepth 1 -maxdepth 1 2>/dev/null | wc -l | tr -d ' ')
         echo "Available skills ($skill_count):"
         ls -1 "$CLAUDE_DIR/skills/" 2>/dev/null | sed 's/^/  - /' || echo "  (none)"
     fi
@@ -383,19 +383,19 @@ if [ "$INSTALL_OPENCODE" = true ]; then
     echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo ""
     if [ -d "$OPENCODE_DIR/agent" ]; then
-        local agent_count=$(ls -1 "$OPENCODE_DIR/agent/"*.md 2>/dev/null | wc -l | tr -d ' ')
+        agent_count=$(ls -1 "$OPENCODE_DIR/agent/"*.md 2>/dev/null | wc -l | tr -d ' ')
         echo "Available agents ($agent_count) - invoke with @name:"
         ls -1 "$OPENCODE_DIR/agent/"*.md 2>/dev/null | sed 's|.*/||; s/\.md$//' | sed 's/^/  @/' || echo "  (none)"
     fi
     if [ -d "$OPENCODE_DIR/command" ] && [ "$(ls -A "$OPENCODE_DIR/command" 2>/dev/null)" ]; then
         echo ""
-        local command_count=$(ls -1 "$OPENCODE_DIR/command/"*.md 2>/dev/null | wc -l | tr -d ' ')
+        command_count=$(ls -1 "$OPENCODE_DIR/command/"*.md 2>/dev/null | wc -l | tr -d ' ')
         echo "Available commands ($command_count) - invoke with /name:"
         ls -1 "$OPENCODE_DIR/command/"*.md 2>/dev/null | sed 's|.*/||; s/\.md$//' | sed 's/^/  /' || echo "  (none)"
     fi
     if [ -d "$OPENCODE_DIR/skill" ]; then
         echo ""
-        local skill_count=$(find "$OPENCODE_DIR/skill" -type d -mindepth 1 -maxdepth 1 2>/dev/null | wc -l | tr -d ' ')
+        skill_count=$(find "$OPENCODE_DIR/skill" -type d -mindepth 1 -maxdepth 1 2>/dev/null | wc -l | tr -d ' ')
         echo "Available skills ($skill_count):"
         ls -1 "$OPENCODE_DIR/skill/" 2>/dev/null | sed 's/^/  - /' || echo "  (none)"
     fi
