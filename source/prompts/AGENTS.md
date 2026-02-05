@@ -27,8 +27,11 @@ When working with git commits and pushes, use specialized workflows:
 When the user wants to commit changes:
 
 1. **Check if you have recent commit history in context**:
-   - If you don't have commit history (e.g., new session, different repo), **use `@git-commit` agent** to analyze and determine repository conventions
-   - If you already know the conventions from recent context, proceed directly to step 2
+   - If you don't have commit history (e.g., new session, different repo), **use `@git-commit` agent**:
+     - The agent will analyze git history, review staged changes, and draft a commit message
+     - The agent will ask the user for approval directly using the question tool
+     - The agent returns the confirmed commit message for you to execute
+   - If you already know the conventions from recent context, proceed to step 2
 
 2. **Analyze the changes** and craft a commit message following the repository's established conventions
 
@@ -36,7 +39,7 @@ When the user wants to commit changes:
    - Show the proposed commit message
    - Show the files to be committed
    - Explain the reasoning behind the message
-   - Ask for approval or modifications
+   - Ask for approval or modifications using the question tool
 
 4. **After user approval**, run the commit:
    ```bash
