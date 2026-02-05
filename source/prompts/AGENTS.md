@@ -26,18 +26,19 @@ When working with git commits and pushes, use specialized workflows:
 
 When the user wants to commit changes:
 
-1. **Use `@git-commit` agent** to analyze and prepare:
-   - The agent analyzes git history to understand repository conventions
-   - Returns a proposed commit message and file list for your review
-   - **The agent will NOT actually commit** - it only prepares
+1. **Check if you have recent commit history in context**:
+   - If you don't have commit history (e.g., new session, different repo), **use `@git-commit` agent** to analyze and determine repository conventions
+   - If you already know the conventions from recent context, proceed directly to step 2
 
-2. **Present to user for verification**:
+2. **Analyze the changes** and craft a commit message following the repository's established conventions
+
+3. **Present to user for verification**:
    - Show the proposed commit message
    - Show the files to be committed
-   - Explain the repository conventions found
+   - Explain the reasoning behind the message
    - Ask for approval or modifications
 
-3. **After user approval**, run the commit:
+4. **After user approval**, run the commit:
    ```bash
    git commit -m "approved message"
    ```
@@ -50,7 +51,7 @@ When the user wants to commit changes:
 
 These skills are required in the following situations:
 
-- **`git-commit`**: Before running `git commit` to ensure proper commit message conventions
+- **`git-commit`**: When you don't have recent commit history in context and need to determine the repository's commit message conventions
 - **`git-push`**: Before running `git push` for pre-push verification checklist
 - **`systematic-debugging`**: When encountering any bug, test failure, or unexpected behavior, before proposing fixes
 - **`verification-before-completion`**: Before claiming work is complete, fixed, or passing
