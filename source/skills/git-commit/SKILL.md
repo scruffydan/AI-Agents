@@ -1,6 +1,6 @@
 ---
 name: git-commit
-description: You MUST use this when performing a git commit.  Git commit workflow that analyzes recent history to match repo-specific message conventions. Use when crafting commit messages, preparing to commit changes, or enforcing commit style consistency.
+description: Git commit workflow that analyzes recent history to match repo-specific message conventions. Use when you don't have recent commit history in context and need to determine the repository's commit message style, or when crafting commit messages that need to match existing conventions.
 ---
 
 # Git Commit Skill
@@ -11,7 +11,7 @@ This skill ensures commit messages follow the repository's established conventio
 
 ### 1. Analyze Recent Commit History
 
-**REQUIRED: Always run this BEFORE crafting commit message**
+**Run this when you don't have recent commit history in context**
 
 ```sh
 git log -10 --oneline --no-decorate
@@ -136,8 +136,8 @@ git commit --dry-run
 ## Checklist
 
 Before running `git commit`:
-- [ ] Analyzed last 10 commits for conventions
-- [ ] Identified repository's commit message pattern
+- [ ] Analyzed last 10 commits for conventions (if not already known)
+- [ ] Identified repository's commit message pattern (if not already known)
 - [ ] Matched format, style, and conventions
 - [ ] Wrote clear, specific message explaining WHY
 - [ ] Verified staged changes are correct
