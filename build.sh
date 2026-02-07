@@ -18,21 +18,37 @@ NC='\033[0m' # No Color
 
 # Default provider for OpenCode models
 OPENCODE_PROVIDER="opencode"
-VERTEX_PROVIDER="google-vertex"
+WORK_MODE_ENABLED=false
+UNMAPPED_MODELS=""
 
-# Get Vertex AI version suffix for a model
-get_vertex_version() {
-    case "$1" in
-        *gemini-3-pro)        echo "-preview" ;;
-        *claude-opus-4-5)    echo "@20251101" ;;
-        *claude-sonnet-4-5)  echo "@20250929" ;;
-        *claude-haiku-4-5)   echo "@20251001" ;;
-        *claude-opus-4-1)    echo "@20250805" ;;
-        *claude-opus-4)      echo "@20250514" ;;
-        *claude-sonnet-4)    echo "@20250514" ;;
-        *claude-3-haiku)     echo "@20240307" ;;
-        *)                   echo "" ;;
-    esac
+# Model mappings file
+MODEL_MAPPINGS_FILE="$SCRIPT_DIR/source/model-mappings.json"
+
+# Transform model based on work mode and mappings
+# Output format: "transformed_model<TAB>unmapped_status" (unmapped_status is "1" if not mapped, "0" if mapped)
+transform_model() {
+    local model="$1"
+    [ -z "$model" ] && return
+    
+    local transformed="$model"
+    local unmapped="0"
+    local mapped=""
+    
+    # Check if model is in mappings file (always track unmapped, but only transform in work mode)
+    if [ -f "$MODEL_MAPPINGS_FILE" ]; then
+        mapped=$(jq -r --arg m "$model" '.models[$m] // empty' "$MODEL_MAPPINGS_FILE" 2>/dev/null)
+        
+        if [ -n "$mapped" ]; then
+            # Only apply transformation in work mode
+            if [ "$WORK_MODE_ENABLED" = true ]; then
+                transformed="$mapped"
+            fi
+        else
+            unmapped="1"
+        fi
+    fi
+    
+    echo -e "$transformed\t$unmapped"
 }
 
 # =============================================================================
@@ -44,12 +60,14 @@ show_help() {
     echo ""
     echo "Options:"
     echo "  --opencode         Use OpenCode as the model provider (default)"
-    echo "  --vertex           Use Google Vertex AI Anthropic as the model provider"
+    echo "  --work             Use work environment model mappings"
     echo "  -h, --help         Show this help message"
     echo ""
     echo "The provider selection affects OpenCode agent model strings:"
     echo "  --opencode  ->  opencode/claude-sonnet-4-5"
-    echo "  --vertex    ->  google-vertex-anthropic/claude-sonnet-4-5@20250929"
+    echo "  --work      ->  google-vertex-anthropic/claude-sonnet-4-5@20250929"
+    echo ""
+    echo "Work model mappings are configured in: source/model-mappings.json"
     echo ""
 }
 
@@ -57,10 +75,11 @@ while [ $# -gt 0 ]; do
     case $1 in
         --opencode)
             OPENCODE_PROVIDER="opencode"
+            WORK_MODE_ENABLED=false
             shift
             ;;
-        --vertex)
-            OPENCODE_PROVIDER="google-vertex-anthropic"
+        --work)
+            WORK_MODE_ENABLED=true
             shift
             ;;
         -h|--help)
@@ -82,10 +101,21 @@ if ! command -v yq &> /dev/null; then
     exit 1
 fi
 
+# Check for jq dependency (needed for work mode)
+if [ "$WORK_MODE_ENABLED" = true ] && ! command -v jq &> /dev/null; then
+    echo -e "${RED}Error: jq is required for --work mode but not installed.${NC}"
+    echo "Install with: brew install jq"
+    exit 1
+fi
+
 echo -e "${GREEN}Building AI-Agents configs...${NC}"
 echo "Source: $SHARED_DIR"
 echo "Output: $BUILD_DIR"
-echo "OpenCode Provider: $OPENCODE_PROVIDER"
+if [ "$WORK_MODE_ENABLED" = true ]; then
+    echo "Mode: work (using model mappings from $MODEL_MAPPINGS_FILE)"
+else
+    echo "Mode: opencode"
+fi
 echo ""
 
 # Clean and create build directories
@@ -142,34 +172,6 @@ format_yaml_object() {
     local yaml_content="$1"
     [ -z "$yaml_content" ] || [ "$yaml_content" = "null" ] && return
     echo "$yaml_content" | yq -r 'to_entries | .[] | "  " + .key + ": " + .value' 2>/dev/null || true
-}
-
-# Transform OpenCode model string based on selected provider
-transform_model() {
-    local model="$1"
-    [ -z "$model" ] && return
-    
-    local transformed="$model"
-    
-    # Only transform if not using default opencode provider
-    if [ "$OPENCODE_PROVIDER" != "opencode" ]; then
-        local provider_prefix="$OPENCODE_PROVIDER"
-
-        if echo "$model" | grep -q "^opencode/gemini-"; then
-            provider_prefix="$VERTEX_PROVIDER"
-        fi
-
-        # Replace "opencode/" with the selected provider prefix using sed
-        transformed=$(echo "$model" | sed "s|^opencode/|$provider_prefix/|")
-        
-        # For Vertex AI, add version suffix
-        if [ "$provider_prefix" = "google-vertex-anthropic" ] || [ "$provider_prefix" = "$VERTEX_PROVIDER" ]; then
-            local suffix=$(get_vertex_version "$transformed")
-            transformed="$transformed$suffix"
-        fi
-    fi
-    
-    echo "$transformed"
 }
 
 # =============================================================================
@@ -264,7 +266,19 @@ for prompt_file in "$SHARED_DIR"/*.md; do
     oc_subtask=$(yaml_get "$frontmatter" ".opencode.subtask")
     oc_temperature=$(yaml_get "$frontmatter" ".opencode.temperature")
     oc_permission=$(format_yaml_object "$(yaml_get "$frontmatter" ".opencode.permission")")
-    oc_model_transformed=$(transform_model "$oc_model")
+    
+    # Transform model and track unmapped models
+    transform_output=$(transform_model "$oc_model")
+    oc_model_transformed=$(echo "$transform_output" | cut -f1)
+    is_unmapped=$(echo "$transform_output" | cut -f2)
+    if [ "$is_unmapped" = "1" ] && [ -n "$oc_model" ]; then
+        if [ -z "$UNMAPPED_MODELS" ]; then
+            UNMAPPED_MODELS="$oc_model"
+        else
+            UNMAPPED_MODELS="$UNMAPPED_MODELS
+$oc_model"
+        fi
+    fi
     
     # Determine what to generate based on type
     case "$type" in
@@ -334,6 +348,17 @@ echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━
 echo -e "${GREEN}Build complete!${NC}"
 echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo ""
+
+# Warn about unmapped models
+if [ -n "$UNMAPPED_MODELS" ]; then
+    echo -e "${YELLOW}⚠ Warning: The following models were not mapped in $MODEL_MAPPINGS_FILE:${NC}"
+    echo "$UNMAPPED_MODELS" | sort -u | sed 's/^/  - /'
+    echo ""
+    echo "These models will use their original opencode/ provider."
+    echo "Add mappings to $MODEL_MAPPINGS_FILE if needed."
+    echo ""
+fi
+
 echo "Generated files:"
 echo ""
 echo "  Claude Code ($(find "$BUILD_DIR/claude" -type f -name "*.md" | wc -l | tr -d ' ') files):"
