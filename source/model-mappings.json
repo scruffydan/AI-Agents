@@ -1,0 +1,12 @@
+{
+  "models": {
+    "opencode/claude-sonnet-4-5": "google-vertex-anthropic/claude-sonnet-4-5@20250929",
+    "opencode/claude-opus-4-5": "google-vertex-anthropic/claude-opus-4-5@20251101",
+    "opencode/claude-haiku-4-5": "google-vertex-anthropic/claude-haiku-4-5@20251001",
+    "opencode/claude-opus-4-1": "google-vertex-anthropic/claude-opus-4-1@20250805",
+    "opencode/claude-opus-4": "google-vertex-anthropic/claude-opus-4@20250514",
+    "opencode/claude-sonnet-4": "google-vertex-anthropic/claude-sonnet-4@20250514",
+    "opencode/claude-3-haiku": "google-vertex-anthropic/claude-3-haiku@20240307",
+    "opencode/gemini-3-pro": "google-vertex/gemini-3-pro-preview"
+  }
+}
