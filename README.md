@@ -45,6 +45,10 @@ Some skills are sourced from [obra/superpowers](https://github.com/obra/superpow
   ```bash
   brew install yq
   ```
+- **jq** - JSON processor for work mode model mappings
+  ```bash
+  brew install jq
+  ```
 
 ## Installation
 
@@ -65,23 +69,27 @@ This will:
 ./install.sh -y              # Force overwrite without prompts
 ./install.sh --claude        # Only install Claude Code
 ./install.sh --opencode      # Only install OpenCode
-./install.sh --vertex        # Use Google Vertex AI as the model provider for OpenCode
+./install.sh --work          # Use work environment model mappings for OpenCode
 ./install.sh --skip-build    # Use existing build/ (skip regeneration)
 ```
 
 ### Model Provider Selection
 
-By default, OpenCode agents use the `opencode` provider (OpenCode Zen). You can alternatively use **Google Vertex AI** for Anthropic and Gemini models:
+By default, OpenCode agents use the `opencode` provider (OpenCode Zen). You can alternatively use **work environment model mappings** for different providers (e.g., Google Vertex AI):
 
 ```bash
-./install.sh --opencode --vertex    # Install OpenCode with Vertex AI models
-./build.sh --vertex                 # Build only, using Vertex AI models
+./install.sh --opencode --work    # Install OpenCode with work model mappings
+./build.sh --work                 # Build only, using work model mappings
 ```
 
-This changes model strings from `opencode/claude-sonnet-4-5` to `google-vertex-anthropic/claude-sonnet-4-5@20250929`, and `opencode/gemini-3-pro` to `google-vertex/gemini-3-pro-preview`.
+Model mappings are configured in `source/model-mappings.json`. This allows you to map models like:
+- `opencode/claude-sonnet-4-5` → `google-vertex-anthropic/claude-sonnet-4-5@20250929`
+- `opencode/gemini-3-pro` → `google-vertex/gemini-3-pro-preview`
 
-**Vertex AI Setup Requirements:**
-- Set `GOOGLE_CLOUD_PROJECT` environment variable
+Or map to completely different models as needed. Unmapped models will show a warning during build.
+
+**Work Mode Setup Requirements:**
+- Set `GOOGLE_CLOUD_PROJECT` environment variable (if using Vertex AI)
 - Authenticate via `gcloud auth application-default login` or set `GOOGLE_APPLICATION_CREDENTIALS`
 - Optionally set `VERTEX_LOCATION` (defaults to `global`)
 
