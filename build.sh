@@ -120,7 +120,7 @@ echo ""
 
 # Clean and create build directories
 [ -z "$BUILD_DIR" ] && { echo "Error: BUILD_DIR is empty"; exit 1; }
-rm -rf "$BUILD_DIR"
+rm -rf -- "$BUILD_DIR"
 mkdir -p "$BUILD_DIR/claude/agents" "$BUILD_DIR/claude/commands" "$BUILD_DIR/claude/skills"
 mkdir -p "$BUILD_DIR/opencode/agent" "$BUILD_DIR/opencode/command" "$BUILD_DIR/opencode/skill"
 

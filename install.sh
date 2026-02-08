@@ -182,7 +182,7 @@ ask_user_action() {
     case "$choice" in
         y|Y)
             echo "   Removing existing"
-            [ -n "$target" ] && rm -rf "$target"
+            [ -n "$target" ] && rm -rf -- "$target"
             return 0
             ;;
         *)
