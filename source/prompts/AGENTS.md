@@ -59,6 +59,7 @@ These skills are required in the following situations:
 - **`systematic-debugging`**: When encountering any bug, test failure, or unexpected behavior, before proposing fixes
 - **`verification-before-completion`**: Before claiming work is complete, fixed, or passing
 - **`brainstorming`**: Before any creative work (new features, new behavior, or significant design changes)
+- **`update-readme`**: Before committing or pushing changes that affect user-facing behavior
 
 ## Engineering Philosophy & Standards
 
