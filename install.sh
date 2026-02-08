@@ -4,7 +4,7 @@
 # Supports Claude Code and OpenCode
 # Installs from build/ directory (run build.sh first or use this script)
 
-set -e
+set -eu
 
 # Validate HOME is set (defensive programming)
 [ -z "$HOME" ] && { echo "Error: HOME environment variable is not set"; exit 1; }
