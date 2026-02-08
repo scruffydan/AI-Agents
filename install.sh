@@ -163,6 +163,25 @@ if [ "$FORCE" = true ]; then
 fi
 echo ""
 
+# List installed items (agents, commands, skills) from a directory
+# Usage: list_installed <dir> <label> <prefix> [type]
+#   type: "dir" for skill directories, "file" for .md files (default)
+list_installed() {
+    local dir="$1" label="$2" prefix="$3" type="${4:-file}"
+    [ -d "$dir" ] || return 0
+
+    local count
+    if [ "$type" = "dir" ]; then
+        count=$(find "$dir" -type d -mindepth 1 -maxdepth 1 2>/dev/null | wc -l | tr -d ' ')
+        echo "$label ($count):"
+        ls -1 "$dir/" 2>/dev/null | sed "s/^/  ${prefix}/" || echo "  (none)"
+    else
+        count=$(ls -1 "$dir/"*.md 2>/dev/null | wc -l | tr -d ' ')
+        echo "$label ($count):"
+        ls -1 "$dir/"*.md 2>/dev/null | sed 's|.*/||; s/\.md$//' | sed "s/^/  ${prefix}/" || echo "  (none)"
+    fi
+}
+
 # Helper function to ask user what to do with existing file
 ask_user_action() {
     local target="$1"
@@ -312,23 +331,11 @@ if [ "$INSTALL_CLAUDE" = true ]; then
     echo -e "${GREEN}Claude Code installation complete!${NC}"
     echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo ""
-    if [ -d "$CLAUDE_DIR/agents" ]; then
-        agent_count=$(ls -1 "$CLAUDE_DIR/agents/"*.md 2>/dev/null | wc -l | tr -d ' ')
-        echo "Available agents ($agent_count):"
-        ls -1 "$CLAUDE_DIR/agents/"*.md 2>/dev/null | sed 's|.*/||; s/\.md$//' | sed 's/^/  - /' || echo "  (none)"
-    fi
+    list_installed "$CLAUDE_DIR/agents" "Available agents" "- "
     echo ""
-    if [ -d "$CLAUDE_DIR/commands" ]; then
-        command_count=$(ls -1 "$CLAUDE_DIR/commands/"*.md 2>/dev/null | wc -l | tr -d ' ')
-        echo "Available commands ($command_count):"
-        ls -1 "$CLAUDE_DIR/commands/"*.md 2>/dev/null | sed 's|.*/||; s/\.md$//' | sed 's/^/  - /' || echo "  (none)"
-    fi
+    list_installed "$CLAUDE_DIR/commands" "Available commands" "- "
     echo ""
-    if [ -d "$CLAUDE_DIR/skills" ]; then
-        skill_count=$(find "$CLAUDE_DIR/skills" -type d -mindepth 1 -maxdepth 1 2>/dev/null | wc -l | tr -d ' ')
-        echo "Available skills ($skill_count):"
-        ls -1 "$CLAUDE_DIR/skills/" 2>/dev/null | sed 's/^/  - /' || echo "  (none)"
-    fi
+    list_installed "$CLAUDE_DIR/skills" "Available skills" "- " "dir"
     echo ""
     if [ -f "$CLAUDE_DIR/CLAUDE.md" ]; then
         echo "Global instructions: $CLAUDE_DIR/CLAUDE.md"
@@ -375,23 +382,13 @@ if [ "$INSTALL_OPENCODE" = true ]; then
     echo -e "${GREEN}OpenCode installation complete!${NC}"
     echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo ""
-    if [ -d "$OPENCODE_DIR/agent" ]; then
-        agent_count=$(ls -1 "$OPENCODE_DIR/agent/"*.md 2>/dev/null | wc -l | tr -d ' ')
-        echo "Available agents ($agent_count) - invoke with @name:"
-        ls -1 "$OPENCODE_DIR/agent/"*.md 2>/dev/null | sed 's|.*/||; s/\.md$//' | sed 's/^/  @/' || echo "  (none)"
-    fi
+    list_installed "$OPENCODE_DIR/agent" "Available agents - invoke with @name" "@"
     if [ -d "$OPENCODE_DIR/command" ] && [ "$(ls -A "$OPENCODE_DIR/command" 2>/dev/null)" ]; then
         echo ""
-        command_count=$(ls -1 "$OPENCODE_DIR/command/"*.md 2>/dev/null | wc -l | tr -d ' ')
-        echo "Available commands ($command_count) - invoke with /name:"
-        ls -1 "$OPENCODE_DIR/command/"*.md 2>/dev/null | sed 's|.*/||; s/\.md$//' | sed 's/^/  /' || echo "  (none)"
+        list_installed "$OPENCODE_DIR/command" "Available commands - invoke with /name" "/"
     fi
-    if [ -d "$OPENCODE_DIR/skill" ]; then
-        echo ""
-        skill_count=$(find "$OPENCODE_DIR/skill" -type d -mindepth 1 -maxdepth 1 2>/dev/null | wc -l | tr -d ' ')
-        echo "Available skills ($skill_count):"
-        ls -1 "$OPENCODE_DIR/skill/" 2>/dev/null | sed 's/^/  - /' || echo "  (none)"
-    fi
+    echo ""
+    list_installed "$OPENCODE_DIR/skill" "Available skills" "- " "dir"
     echo ""
     if [ -f "$OPENCODE_DIR/AGENTS.md" ]; then
         echo "Global instructions: $OPENCODE_DIR/AGENTS.md"
