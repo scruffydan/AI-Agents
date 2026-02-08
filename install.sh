@@ -95,18 +95,18 @@ done
 # Interactive selection if no target specified
 if [ "$TARGET_SPECIFIED" = false ]; then
     echo -e "${YELLOW}Select what to install:${NC}"
-    echo "  1) Claude Code only"
-    echo "  2) OpenCode only"
+    echo "  1) OpenCode only"
+    echo "  2) Claude Code only"
     echo "  3) Both (default)"
     echo ""
     read -p "Choice [1/2/3]: " choice
     
     case "$choice" in
         1)
-            INSTALL_CLAUDE=true
+            INSTALL_OPENCODE=true
             ;;
         2)
-            INSTALL_OPENCODE=true
+            INSTALL_CLAUDE=true
             ;;
         *)
             INSTALL_CLAUDE=true

@@ -32,6 +32,7 @@ A collection of specialized agents, commands, and modes for **Claude Code** and 
 | `receiving-code-review` | Skill | Implement review feedback with verification |
 | `subagent-driven-development` | Skill | Run independent tasks with subagents |
 | `systematic-debugging` | Skill | Structured debugging before proposing fixes |
+| `update-readme` | Skill | Reminds to update README before committing changes |
 | `using-docs-fetcher` | Skill | When/how to use `@docs-fetcher` |
 | `using-code-review` | Skill | Using all 5 code review agents |
 | `verification-before-completion` | Skill | Verify before claiming completion |
