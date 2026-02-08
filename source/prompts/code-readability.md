@@ -95,10 +95,10 @@ Return a structured report with:
 
 ## Important Behaviors
 
-- **Never modify code without approval** - always complete Steps 1-3 first
+- **Never modify code** - analyze and report only
 - **Preserve functionality** - changes must not alter code behavior
 - **Respect existing style** - when a project has established conventions, follow them
-- **Be incremental** - for large files, offer to process in batches
+- **Be incremental** - for large files, focus on the most impactful issues
 - **Explain the "why"** - when suggesting changes, explain the benefit
 
 ## Instructions
