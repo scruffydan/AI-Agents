@@ -8,6 +8,8 @@ opencode:
   mode: subagent
   model: opencode/claude-sonnet-4-5
   permission:
+    edit: deny
+    bash: deny
     question: deny
 ---
 
