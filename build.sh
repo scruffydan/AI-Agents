@@ -349,6 +349,15 @@ echo -e "${GREEN}Build complete!${NC}"
 echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo ""
 
+echo "Generated files:"
+echo ""
+echo "  Claude Code ($(find "$BUILD_DIR/claude" -type f -name "*.md" | wc -l | tr -d ' ') files):"
+find "$BUILD_DIR/claude" -type f -name "*.md" | sed "s|$BUILD_DIR/|    |" | sort
+echo ""
+echo "  OpenCode ($(find "$BUILD_DIR/opencode" -type f -name "*.md" | wc -l | tr -d ' ') files):"
+find "$BUILD_DIR/opencode" -type f -name "*.md" | sed "s|$BUILD_DIR/|    |" | sort
+echo ""
+
 # Warn about unmapped models
 if [ -n "$UNMAPPED_MODELS" ]; then
     echo -e "${YELLOW}⚠ Warning: The following models were not mapped in $MODEL_MAPPINGS_FILE:${NC}"
@@ -359,14 +368,6 @@ if [ -n "$UNMAPPED_MODELS" ]; then
     echo ""
 fi
 
-echo "Generated files:"
-echo ""
-echo "  Claude Code ($(find "$BUILD_DIR/claude" -type f -name "*.md" | wc -l | tr -d ' ') files):"
-find "$BUILD_DIR/claude" -type f -name "*.md" | sed "s|$BUILD_DIR/|    |" | sort
-echo ""
-echo "  OpenCode ($(find "$BUILD_DIR/opencode" -type f -name "*.md" | wc -l | tr -d ' ') files):"
-find "$BUILD_DIR/opencode" -type f -name "*.md" | sed "s|$BUILD_DIR/|    |" | sort
-echo ""
 echo "Next step: Run ./install.sh to install these configs"
 echo "  - Install both:        ./install.sh"
 echo "  - Install Claude only: ./install.sh --claude"
