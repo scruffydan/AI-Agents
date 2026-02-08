@@ -59,7 +59,7 @@ digraph process {
     "Read plan, extract all tasks with full text, note context, create TodoWrite" [shape=box];
     "More tasks remain?" [shape=diamond];
     "Dispatch final code reviewer subagent for entire implementation" [shape=box];
-    "Use superpowers:finishing-a-development-branch" [shape=box style=filled fillcolor=lightgreen];
+    "Finish development branch (final review, cleanup)" [shape=box style=filled fillcolor=lightgreen];
 
     "Read plan, extract all tasks with full text, note context, create TodoWrite" -> "Dispatch implementer subagent (./implementer-prompt.md)";
     "Dispatch implementer subagent (./implementer-prompt.md)" -> "Implementer subagent asks questions?";
@@ -78,7 +78,7 @@ digraph process {
     "Mark task complete in TodoWrite" -> "More tasks remain?";
     "More tasks remain?" -> "Dispatch implementer subagent (./implementer-prompt.md)" [label="yes"];
     "More tasks remain?" -> "Dispatch final code reviewer subagent for entire implementation" [label="no"];
-    "Dispatch final code reviewer subagent for entire implementation" -> "Use superpowers:finishing-a-development-branch";
+    "Dispatch final code reviewer subagent for entire implementation" -> "Finish development branch (final review, cleanup)";
 }
 ```
 
@@ -229,12 +229,10 @@ Done!
 ## Integration
 
 **Required workflow skills:**
-- **superpowers:writing-plans** - Creates the plan this skill executes
-- **superpowers:requesting-code-review** - Code review template for reviewer subagents
-- **superpowers:finishing-a-development-branch** - Complete development after all tasks
+- **`executing-plans`** - Alternative: use for parallel session instead of same-session execution
 
 **Subagents should use:**
-- **superpowers:test-driven-development** - Subagents follow TDD for each task
+- **`verification-before-completion`** - Verify work before claiming completion
+- **`using-code-review`** - Code review agents for reviewer subagents
 
-**Alternative workflow:**
-- **superpowers:executing-plans** - Use for parallel session instead of same-session execution
+**Note:** This skill was adapted from [obra/superpowers](https://github.com/obra/superpowers). Some referenced skills (writing-plans, test-driven-development, finishing-a-development-branch) are available in the upstream project.
