@@ -179,10 +179,13 @@ format_yaml_object() {
 # =============================================================================
 
 # Generate output file with frontmatter and content
-# Usage: generate_output <target> <type> <filename> <options>
+# Usage: generate_output <target> <type> <filename>
 #   target: claude | opencode
 #   type: agent | command
 #   filename: output filename (without .md)
+# Reads from globals: description, content, is_primary,
+#   claude_tools, claude_model, oc_mode, oc_model_transformed,
+#   oc_subtask, oc_temperature, oc_permission
 generate_output() {
     local target="$1"
     local type="$2"
