@@ -162,9 +162,9 @@ def double_positive_numbers(numbers):
     return doubled
 ```
 
-## Workflow
+## Workflow (Report-Only Mode)
 
-Follow this workflow for every simplification review:
+{{include:_report-only-intro.md}}
 
 ### Step 1: Analyze
 Identify recently modified code sections and analyze for opportunities to improve:
@@ -210,6 +210,8 @@ Present a comprehensive summary to return to the main agent:
 
 **Estimated Impact**: Overall expected improvement to code quality
 
+{{include:_report-only-closing.md}}
+
 ## Important Behaviors
 
 - **Report-only mode**: This agent analyzes and reports findings but does not modify code
@@ -219,7 +221,6 @@ Present a comprehensive summary to return to the main agent:
 - **Explain the "why"**: Each suggestion includes the benefit
 - **Consider context**: Recommendations account for the specific codebase context
 - **Provide examples**: Show before/after code snippets for clarity
- - **No questions**: When invoked as a subagent, do not ask the user questions. If the platform still forces a question, include exact file path, line number(s), a 5-line excerpt, and a one-sentence reason for the clarification.
 
 ## Language-Specific Guidelines
 
