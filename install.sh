@@ -427,6 +427,41 @@ fi
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
+
+# Check for unmapped models in source prompts
+MODEL_MAPPINGS_FILE="$REPO_ROOT/source/model-mappings.json"
+UNMAPPED_MODELS=""
+
+if [ -f "$MODEL_MAPPINGS_FILE" ] && [ -d "$REPO_ROOT/source/prompts" ]; then
+    for prompt_file in "$REPO_ROOT/source/prompts"/*.md; do
+        [ -f "$prompt_file" ] || continue
+        # Extract model from opencode section
+        model=$(sed -n '/^opencode:/,/^---$/p' "$prompt_file" 2>/dev/null | grep "^  model:" | head -1 | sed 's/.*model: //')
+        if [ -n "$model" ] && echo "$model" | grep -q "^opencode/"; then
+            # Check if model is in mappings
+            if ! jq -e --arg m "$model" '.models[$m] // empty' "$MODEL_MAPPINGS_FILE" >/dev/null 2>&1; then
+                if [ -z "$UNMAPPED_MODELS" ]; then
+                    UNMAPPED_MODELS="$model"
+                else
+                    UNMAPPED_MODELS="$UNMAPPED_MODELS
+$model"
+                fi
+            fi
+        fi
+    done
+fi
+
+if [ -n "$UNMAPPED_MODELS" ]; then
+    echo -e "${YELLOW}⚠ Warning: The following models were not mapped in source/model-mappings.json:${NC}"
+    echo "$UNMAPPED_MODELS" | sort -u | sed 's/^/  - /'
+    echo ""
+    echo "These models will use their original opencode/ provider."
+    echo "Add mappings to source/model-mappings.json if needed."
+    echo ""
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo ""
+fi
+
 echo "Notes:"
 echo "  • Files are copied (not symlinked). Run ./install.sh again to update."
 echo "  • Use ./install.sh -y to force overwrite without prompts."
