@@ -1,0 +1,1 @@
+**Important**: Do NOT ask the user which changes to apply. Do NOT use the question tool. Return the report to the calling agent and let it handle user decisions.

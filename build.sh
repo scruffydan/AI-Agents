@@ -153,6 +153,34 @@ get_content() {
     ' "$1"
 }
 
+# Process {{include:filename}} directives in content
+# Replaces each directive with the contents of the referenced file from SHARED_DIR
+process_includes() {
+    local content="$1"
+    local include_pattern='\{\{include:([^}]+)\}\}'
+    
+    while echo "$content" | grep -qE "$include_pattern"; do
+        local include_file
+        include_file=$(echo "$content" | grep -oE "$include_pattern" | head -1 | sed 's/{{include://;s/}}//')
+        local include_path="$SHARED_DIR/$include_file"
+        
+        if [ -f "$include_path" ]; then
+            local include_content
+            include_content=$(cat "$include_path")
+            local placeholder="{{include:$include_file}}"
+            # Split content at the placeholder and reassemble with include content
+            local before="${content%%"$placeholder"*}"
+            local after="${content#*"$placeholder"}"
+            content="${before}${include_content}${after}"
+        else
+            echo -e "${RED}Warning: Include file not found: $include_path${NC}" >&2
+            break
+        fi
+    done
+    
+    echo "$content"
+}
+
 # Get a value from frontmatter using yq
 # Usage: yaml_get "$frontmatter" ".key" or ".parent.child"
 yaml_get() {
@@ -245,14 +273,16 @@ generate_output() {
 for prompt_file in "$SHARED_DIR"/*.md; do
     filename=$(basename "$prompt_file" .md)
     
-    # Skip AGENTS instructions (handled separately)
+    # Skip AGENTS instructions (handled separately) and partial includes (prefixed with _)
     [ "$filename" = "AGENTS" ] && continue
+    [ "${filename#_}" != "$filename" ] && continue
     
     echo -e "${YELLOW}Processing:${NC} $filename"
     
     # Parse frontmatter and content
     frontmatter=$(get_frontmatter "$prompt_file")
     content=$(get_content "$prompt_file")
+    content=$(process_includes "$content")
     
     # Extract common values
     description=$(yaml_get "$frontmatter" ".description")
