@@ -105,7 +105,7 @@ This skill explains when and how to use the specialized code review agents.
 - Before handing off code to another team
 
 **What it does**:
-- Runs all 5 review agents in sequence
+- Runs all 5 review agents in parallel
 - Aggregates findings from each specialist
 - Provides comprehensive feedback
 - Prioritizes issues by severity

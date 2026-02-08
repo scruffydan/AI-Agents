@@ -151,7 +151,7 @@ This installs a `opencode.json` to `~/.config/opencode/` with sensible security 
 brainstorm    # High-temperature creative mode
 ```
 
-Note: In OpenCode, the individual review agents are invoked via `@` mentions. Only `code-full-review` is a slash command since it orchestrates all 3 agents. Modes change the AI's behavior and are switched using the Tab key.
+Note: In OpenCode, the individual review agents are invoked via `@` mentions. Only `code-full-review` is a slash command since it orchestrates all 5 specialist agents. Modes change the AI's behavior and are switched using the Tab key.
 
 ## Special Workflows
 
