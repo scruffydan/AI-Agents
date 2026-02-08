@@ -3,7 +3,7 @@
 # Build script for AI-Agents
 # Generates Claude Code and OpenCode configs from source prompts
 
-set -e
+set -eu
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SHARED_DIR="$SCRIPT_DIR/source/prompts"

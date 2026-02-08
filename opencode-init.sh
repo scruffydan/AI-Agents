@@ -3,7 +3,7 @@
 # OpenCode configuration initializer
 # Copies opencode.json from source/ to ~/.config/opencode/
 
-set -e
+set -eu
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SOURCE_FILE="$REPO_ROOT/source/opencode.json"
