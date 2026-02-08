@@ -30,7 +30,7 @@ git log -10 --oneline --no-decorate
 For deeper pattern analysis:
 
 ```sh
-git log -10 --format="%h %s%n%b%ne
+git log -10 --format="%h %s%n%b%n"
 ```
 
 **Look for:**
