@@ -87,14 +87,18 @@
       "wc*": "allow",
       "echo*": "allow",
       "mkdir*": "ask",
-      "curl*": "allow",
-      "wget*": "allow",
+      "curl*": "ask",
+      "wget*": "ask",
       "npm install*": "ask",
       "brew*": "ask",
       "rm*-r*": "deny",
       "rm*-f*": "deny",
       "rm*--recursive*": "deny",
-      "rm*--force*": "deny"
+      "rm*--force*": "deny",
+      "/bin/rm*": "deny",
+      "/usr/bin/rm*": "deny",
+      "find*-delete*": "deny",
+      "find*-exec*rm*": "deny"
     }
   }
 }
