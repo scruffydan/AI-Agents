@@ -34,21 +34,21 @@ show_help() {
     echo "  --opencode         Install OpenCode configs"
     echo "  --all              Install both Claude Code and OpenCode (default if no target specified)"
     echo "  --skip-build       Skip running build.sh (use existing build/)"
-    echo "  --vertex           Use Google Vertex AI as the model provider for OpenCode"
+    echo "  --work             Use work environment model mappings for OpenCode"
     echo "  -h, --help         Show this help message"
     echo ""
     echo "Examples:"
     echo "  ./install.sh                    # Interactive: prompts which to install"
     echo "  ./install.sh --claude           # Install only Claude Code"
     echo "  ./install.sh --opencode         # Install only OpenCode"
-    echo "  ./install.sh --opencode --vertex # Install OpenCode with Vertex AI models"
+    echo "  ./install.sh --opencode --work   # Install OpenCode with work model mappings"
     echo "  ./install.sh --all              # Install both without prompting"
     echo "  ./install.sh --claude -y        # Install Claude Code, force overwrite"
     echo ""
 }
 
 SKIP_BUILD=false
-USE_VERTEX=false
+USE_WORK=false
 
 while [ $# -gt 0 ]; do
     case $1 in
@@ -76,8 +76,8 @@ while [ $# -gt 0 ]; do
             SKIP_BUILD=true
             shift
             ;;
-        --vertex)
-            USE_VERTEX=true
+        --work)
+            USE_WORK=true
             shift
             ;;
         -h|--help)
@@ -131,8 +131,8 @@ fi
 # Run build.sh first
 if [ "$SKIP_BUILD" = false ]; then
     echo -e "${YELLOW}Running build.sh...${NC}"
-    if [ "$USE_VERTEX" = true ]; then
-        "$REPO_ROOT/build.sh" --vertex
+    if [ "$USE_WORK" = true ]; then
+        "$REPO_ROOT/build.sh" --work
     else
         "$REPO_ROOT/build.sh"
     fi
@@ -152,8 +152,8 @@ if [ "$INSTALL_CLAUDE" = true ]; then
 fi
 if [ "$INSTALL_OPENCODE" = true ]; then
     echo "OpenCode target: $OPENCODE_DIR"
-    if [ "$USE_VERTEX" = true ]; then
-        echo "OpenCode provider: Google Vertex AI"
+    if [ "$USE_WORK" = true ]; then
+        echo "OpenCode provider: Work environment (model mappings)"
     else
         echo "OpenCode provider: OpenCode"
     fi
