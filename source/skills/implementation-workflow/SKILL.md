@@ -66,7 +66,7 @@ For manual review, verify:
 - Validate security headers and configurations
 - Perform threat modeling for sensitive features
 
-Load language-specific security skills (`javascript-security`, `python-security`, etc.) for detailed patterns.
+
 
 ### 6. Optimization
 **Performance tuning and resource efficiency improvements**

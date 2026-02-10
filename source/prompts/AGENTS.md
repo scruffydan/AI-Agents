@@ -111,7 +111,7 @@ If you are told a value is "in the .env file," you must ask me to provide it. Do
 
 ### Security Implementation
 
-For security reviews, use the **@code-security** agent. For language-specific security patterns, load the appropriate security skills
+For security reviews, use the **@code-security** agent.
 
 - **Secure Coding**: OWASP guidelines and vulnerability prevention
 - **Authentication & Authorization**: Identity management and access control

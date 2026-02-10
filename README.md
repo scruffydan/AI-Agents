@@ -19,11 +19,6 @@ A collection of specialized agents, commands, and modes for **Claude Code** and 
 | `brainstorm` | Mode (OpenCode only) | High-temperature creative mode for generating diverse ideas |
 | `thorough-plan` | Mode (OpenCode only) | Planning mode that asks clarifying questions before proceeding |
 | `five-whys` | Skill | Root cause analysis using Toyota's Five Whys technique |
-| `javascript-security` | Skill | JS/TS security patterns |
-| `python-security` | Skill | Python dangerous functions, injection prevention |
-| `go-security` | Skill | Go templates, crypto, race conditions |
-| `shell-security` | Skill | POSIX sh security (portable sh/bash/dash/ash) |
-| `sql-security` | Skill | SQL injection prevention |
 | `brainstorming` | Skill | Creative ideation guidance before building |
 | `implementation-workflow` | Skill | 6-phase development methodology |
 | `executing-plans` | Skill | Execute pre-written plans with checkpoints |
