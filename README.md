@@ -107,7 +107,6 @@ This installs a `opencode.json` to `~/.config/opencode/` with sensible security 
 ```bash
 ./build.sh                   # Just generate configs (uses OpenCode provider)
 ./build.sh --work            # Generate configs using work model mappings
-./build.sh --opencode        # Explicitly use OpenCode provider (default)
 ```
 
 ## Usage

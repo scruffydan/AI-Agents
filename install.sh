@@ -99,7 +99,7 @@ if [ "$TARGET_SPECIFIED" = false ]; then
     echo "  2) Claude Code only"
     echo "  3) Both (default)"
     echo ""
-    read -p "Choice [1/2/3]: " choice
+    read -rp "Choice [1/2/3]: " choice
     
     case "$choice" in
         1)
@@ -174,11 +174,11 @@ list_installed() {
     if [ "$type" = "dir" ]; then
         count=$(find "$dir" -type d -mindepth 1 -maxdepth 1 2>/dev/null | wc -l | tr -d ' ')
         echo "$label ($count):"
-        ls -1 "$dir/" 2>/dev/null | sed "s/^/  ${prefix}/" || echo "  (none)"
+        ls -1 "$dir/" 2>/dev/null | sed "s|^|  ${prefix}|" || echo "  (none)"
     else
         count=$(ls -1 "$dir/"*.md 2>/dev/null | wc -l | tr -d ' ')
         echo "$label ($count):"
-        ls -1 "$dir/"*.md 2>/dev/null | sed 's|.*/||; s/\.md$//' | sed "s/^/  ${prefix}/" || echo "  (none)"
+        ls -1 "$dir/"*.md 2>/dev/null | sed 's|.*/||; s/\.md$//' | sed "s|^|  ${prefix}|" || echo "  (none)"
     fi
 }
 
@@ -196,7 +196,7 @@ ask_user_action() {
         echo "⚠️  Existing directory found: $name"
     fi
 
-    read -p "   Overwrite? [y/N]: " choice
+    read -rp "   Overwrite? [y/N]: " choice
 
     case "$choice" in
         y|Y)
@@ -425,32 +425,10 @@ echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 
-# Check for unmapped models in source prompts
-MODEL_MAPPINGS_FILE="$REPO_ROOT/source/model-mappings.json"
-UNMAPPED_MODELS=""
-
-if [ -f "$MODEL_MAPPINGS_FILE" ] && [ -d "$REPO_ROOT/source/prompts" ]; then
-    for prompt_file in "$REPO_ROOT/source/prompts"/*.md; do
-        [ -f "$prompt_file" ] || continue
-        # Extract model from opencode section
-        model=$(sed -n '/^opencode:/,/^---$/p' "$prompt_file" 2>/dev/null | grep "^  model:" | head -1 | sed 's/.*model: //')
-        if [ -n "$model" ] && echo "$model" | grep -q "^opencode/"; then
-            # Check if model is in mappings
-            if ! jq -e --arg m "$model" '.models[$m] // empty' "$MODEL_MAPPINGS_FILE" >/dev/null 2>&1; then
-                if [ -z "$UNMAPPED_MODELS" ]; then
-                    UNMAPPED_MODELS="$model"
-                else
-                    UNMAPPED_MODELS="$UNMAPPED_MODELS
-$model"
-                fi
-            fi
-        fi
-    done
-fi
-
-if [ -n "$UNMAPPED_MODELS" ]; then
+# Warn about unmapped models (read from build output written by build.sh)
+if [ -f "$BUILD_DIR/.unmapped-models" ] && [ -s "$BUILD_DIR/.unmapped-models" ]; then
     echo -e "${YELLOW}⚠ Warning: The following models were not mapped in source/model-mappings.json:${NC}"
-    echo "$UNMAPPED_MODELS" | sort -u | sed 's/^/  - /'
+    sed 's/^/  - /' "$BUILD_DIR/.unmapped-models"
     echo ""
     echo "These models will use their original opencode/ provider."
     echo "Add mappings to source/model-mappings.json if needed."
