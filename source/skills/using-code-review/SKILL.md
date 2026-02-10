@@ -138,7 +138,6 @@ All review agents operate in **report-only mode** - they analyze and return find
 
 Review agents work best when combined with relevant skills:
 
-- **For security reviews**: Load language-specific security skills (`javascript-security`, `python-security`, `go-security`, `shell-security`, `sql-security`)
 - **For implementation**: Use `implementation-workflow` for overall development methodology
 - **For commits**: Use `git-workflows` for commit message and PR best practices
 
