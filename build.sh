@@ -5,10 +5,10 @@
 
 set -eu
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-SHARED_DIR="$SCRIPT_DIR/source/prompts"
-SKILLS_DIR="$SCRIPT_DIR/source/skills"
-BUILD_DIR="$SCRIPT_DIR/build"
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SHARED_DIR="$REPO_ROOT/source/prompts"
+SKILLS_DIR="$REPO_ROOT/source/skills"
+BUILD_DIR="$REPO_ROOT/build"
 
 # Colors for output
 RED='\033[0;31m'
@@ -16,13 +16,11 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
-# Default provider for OpenCode models
-OPENCODE_PROVIDER="opencode"
 WORK_MODE_ENABLED=false
 UNMAPPED_MODELS=""
 
 # Model mappings file
-MODEL_MAPPINGS_FILE="$SCRIPT_DIR/source/model-mappings.json"
+MODEL_MAPPINGS_FILE="$REPO_ROOT/source/model-mappings.json"
 
 # Transform model based on work mode and mappings
 # Output format: "transformed_model<TAB>unmapped_status" (unmapped_status is "1" if not mapped, "0" if mapped)
@@ -59,25 +57,17 @@ show_help() {
     echo "Usage: ./build.sh [OPTIONS]"
     echo ""
     echo "Options:"
-    echo "  --opencode         Use OpenCode as the model provider (default)"
     echo "  --work             Use work environment model mappings"
     echo "  -h, --help         Show this help message"
     echo ""
-    echo "The provider selection affects OpenCode agent model strings:"
-    echo "  --opencode  ->  opencode/claude-sonnet-4-5"
-    echo "  --work      ->  google-vertex-anthropic/claude-sonnet-4-5@20250929"
-    echo ""
-    echo "Work model mappings are configured in: source/model-mappings.json"
+    echo "By default, OpenCode agents use the opencode provider (e.g. opencode/claude-sonnet-4-5)."
+    echo "With --work, models are remapped via source/model-mappings.json:"
+    echo "  opencode/claude-sonnet-4-5  ->  google-vertex-anthropic/claude-sonnet-4-5@20250929"
     echo ""
 }
 
 while [ $# -gt 0 ]; do
     case $1 in
-        --opencode)
-            OPENCODE_PROVIDER="opencode"
-            WORK_MODE_ENABLED=false
-            shift
-            ;;
         --work)
             WORK_MODE_ENABLED=true
             shift
@@ -101,9 +91,9 @@ if ! command -v yq &> /dev/null; then
     exit 1
 fi
 
-# Check for jq dependency (needed for work mode)
-if [ "$WORK_MODE_ENABLED" = true ] && ! command -v jq &> /dev/null; then
-    echo -e "${RED}Error: jq is required for --work mode but not installed.${NC}"
+# Check for jq dependency (needed for model mapping lookups)
+if ! command -v jq &> /dev/null; then
+    echo -e "${RED}Error: jq is required but not installed.${NC}"
     echo "Install with: brew install jq"
     exit 1
 fi
@@ -301,9 +291,7 @@ for prompt_file in "$SHARED_DIR"/*.md; do
     oc_permission=$(format_yaml_object "$(yaml_get "$frontmatter" ".opencode.permission")")
     
     # Transform model and track unmapped models
-    transform_output=$(transform_model "$oc_model")
-    oc_model_transformed=$(echo "$transform_output" | cut -f1)
-    is_unmapped=$(echo "$transform_output" | cut -f2)
+    IFS=$'\t' read -r oc_model_transformed is_unmapped <<< "$(transform_model "$oc_model")"
     if [ "$is_unmapped" = "1" ] && [ -n "$oc_model" ]; then
         if [ -z "$UNMAPPED_MODELS" ]; then
             UNMAPPED_MODELS="$oc_model"
@@ -343,10 +331,7 @@ echo -e "${YELLOW}Generating:${NC} Base instruction files"
 if [ -f "$SHARED_DIR/AGENTS.md" ]; then
     cp "$SHARED_DIR/AGENTS.md" "$BUILD_DIR/claude/CLAUDE.md"
     echo "  Created: claude/CLAUDE.md (Claude Code base instructions)"
-fi
-
-echo ""
-if [ -f "$SHARED_DIR/AGENTS.md" ]; then
+    echo ""
     cp "$SHARED_DIR/AGENTS.md" "$BUILD_DIR/opencode/AGENTS.md"
     echo "  Created: opencode/AGENTS.md (OpenCode base instructions)"
 fi
@@ -391,14 +376,17 @@ echo "  OpenCode ($(find "$BUILD_DIR/opencode" -type f -name "*.md" | wc -l | tr
 find "$BUILD_DIR/opencode" -type f -name "*.md" | sed "s|$BUILD_DIR/|    |" | sort
 echo ""
 
-# Warn about unmapped models
+# Write unmapped models to file for install.sh to read
 if [ -n "$UNMAPPED_MODELS" ]; then
+    echo "$UNMAPPED_MODELS" | sort -u > "$BUILD_DIR/.unmapped-models"
     echo -e "${YELLOW}⚠ Warning: The following models were not mapped in $MODEL_MAPPINGS_FILE:${NC}"
-    echo "$UNMAPPED_MODELS" | sort -u | sed 's/^/  - /'
+    sed 's/^/  - /' "$BUILD_DIR/.unmapped-models"
     echo ""
     echo "These models will use their original opencode/ provider."
     echo "Add mappings to $MODEL_MAPPINGS_FILE if needed."
     echo ""
+else
+    rm -f -- "$BUILD_DIR/.unmapped-models"
 fi
 
 echo "Next step: Run ./install.sh to install these configs"

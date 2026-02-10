@@ -62,7 +62,7 @@ if [ -f "$CONFIG_FILE" ]; then
         echo -e "${YELLOW}Overwriting existing config...${NC}"
     else
         echo -e "${YELLOW}Config already exists: $CONFIG_FILE${NC}"
-        read -p "Overwrite? [y/N]: " choice
+        read -rp "Overwrite? [y/N]: " choice
         case "$choice" in
             y|Y)
                 echo "Overwriting..."
