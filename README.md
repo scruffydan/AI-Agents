@@ -79,7 +79,7 @@ By default, OpenCode agents use the `opencode` provider (OpenCode Zen). You can 
 ```
 
 Model mappings are configured in `source/model-mappings.json`. This allows you to map models like:
-- `opencode/claude-sonnet-4-5` → `google-vertex-anthropic/claude-sonnet-4-5@20250929`
+- `opencode/claude-sonnet-4-6` → `google-vertex-anthropic/claude-sonnet-4-5@20250929`
 - `opencode/gemini-3-pro` → `google-vertex/gemini-3-pro-preview`
 
 Or map to completely different models as needed. Unmapped models will show a warning during build.

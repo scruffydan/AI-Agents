@@ -3,10 +3,10 @@ description: Fetch and extract relevant documentation from URLs. Use this agent 
 type: subagent
 claude:
   tools: WebFetch
-  model: claude-sonnet-4-5
+  model: claude-sonnet-4-6
 opencode:
   mode: subagent
-  model: opencode/claude-sonnet-4-5
+  model: opencode/claude-sonnet-4-6
   permission:
     edit: deny
     bash: deny
