@@ -3,10 +3,10 @@ description: Explore and answer questions about the codebase. Use this agent to 
 type: subagent
 claude:
   tools: Glob, Grep, Read, List
-  model: claude-sonnet-4-5
+  model: claude-sonnet-4-6
 opencode:
   mode: subagent
-  model: opencode/claude-sonnet-4-5
+  model: opencode/claude-sonnet-4-6
   permission:
     edit: deny
     bash: deny

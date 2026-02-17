@@ -3,10 +3,10 @@ description: Generate conventional commit messages by analyzing git history and 
 type: subagent
 claude:
   tools: Bash, Read, Grep, Glob
-  model: claude-sonnet-4-5
+  model: claude-sonnet-4-6
 opencode:
   mode: subagent
-  model: opencode/claude-sonnet-4-5
+  model: opencode/claude-sonnet-4-6
   tools:
     bash: true
     read: true

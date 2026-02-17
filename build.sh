@@ -60,9 +60,9 @@ show_help() {
     echo "  --work             Use work environment model mappings"
     echo "  -h, --help         Show this help message"
     echo ""
-    echo "By default, OpenCode agents use the opencode provider (e.g. opencode/claude-sonnet-4-5)."
+    echo "By default, OpenCode agents use the opencode provider (e.g. opencode/claude-sonnet-4-6)."
     echo "With --work, models are remapped via source/model-mappings.json:"
-    echo "  opencode/claude-sonnet-4-5  ->  google-vertex-anthropic/claude-sonnet-4-5@20250929"
+    echo "  opencode/claude-sonnet-4-6  ->  google-vertex-anthropic/claude-sonnet-4-5@20250929"
     echo ""
 }
 
