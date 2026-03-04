@@ -3,7 +3,7 @@ description: Creative brainstorming mode with high temperature for generating di
 type: mode
 opencode:
   temperature: 0.8
-  model: opencode/gemini-3.1-pro
+  model: openai/gpt-5.3-codex
   permission:
     edit: deny
     bash: deny
