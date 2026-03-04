@@ -2,7 +2,10 @@
 description: Creative brainstorming mode with high temperature for generating diverse ideas and exploring unconventional solutions.
 type: mode
 opencode:
-  temperature: 0.8
+  temperature: 0.95
+  top_p: 0.92
+  frequency_penalty: 0.3
+  presence_penalty: 0.25
   model: openai/gpt-5.3-codex
   permission:
     edit: deny
