@@ -6,7 +6,7 @@ opencode:
   top_p: 0.92
   frequency_penalty: 0.3
   presence_penalty: 0.25
-  model: openai/gpt-5.3-codex
+  model: openai/gpt-5.4
   permission:
     edit: deny
     bash: deny
