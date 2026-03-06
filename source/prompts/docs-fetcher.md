@@ -6,7 +6,7 @@ claude:
   model: claude-sonnet-4-6
 opencode:
   mode: subagent
-  model: openai/gpt-5.3-codex
+  model: openai/gpt-5.4
   permission:
     edit: deny
     bash: deny

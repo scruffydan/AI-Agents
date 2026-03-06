@@ -3,7 +3,7 @@ description: Full code review orchestrating security, readability, performance, 
 type: command
 claude: {}
 opencode:
-  model: opencode/gpt-5.3-codex
+  model: opencode/gpt-5.4
 ---
 
 # Full Code Review

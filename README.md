@@ -81,7 +81,7 @@ By default, OpenCode agents use the `opencode` provider (OpenCode Zen). You can 
 Model mappings are configured in `source/model-mappings.json`. This allows you to map models like:
 - `opencode/claude-sonnet-4-6` → `google-vertex/gemini-3.1-pro-preview`
 - `opencode/gemini-3.1-pro` → `google-vertex/gemini-3.1-pro-preview`
-- `opencode/gpt-5.3-codex` → `google-vertex-anthropic/claude-opus-4-5@20251101`
+- `opencode/gpt-5.4` → `google-vertex-anthropic/claude-opus-4-5@20251101`
 
 Or map to completely different models as needed. Unmapped models will show a warning during build.
 
@@ -197,7 +197,7 @@ claude:
   model: opus
 opencode:
   mode: subagent
-  model: opencode/gpt-5.3-codex
+  model: opencode/gpt-5.4
   temperature: 0.8     # For modes: controls creativity (0.0-1.0)
   tools:
     write: false
