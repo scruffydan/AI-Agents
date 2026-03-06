@@ -238,6 +238,7 @@ generate_output() {
                     [ -n "$oc_mode" ] && echo "mode: $oc_mode"
                 fi
                 [ -n "$oc_model_transformed" ] && echo "model: $oc_model_transformed"
+                [ -n "$oc_reasoning_effort" ] && echo "reasoningEffort: $oc_reasoning_effort"
                 [ -n "$oc_permission" ] && { echo "permission:"; echo "$oc_permission"; }
             else
                 # command type
@@ -288,6 +289,7 @@ for prompt_file in "$SHARED_DIR"/*.md; do
     oc_model=$(yaml_get "$frontmatter" ".opencode.model")
     oc_subtask=$(yaml_get "$frontmatter" ".opencode.subtask")
     oc_temperature=$(yaml_get "$frontmatter" ".opencode.temperature")
+    oc_reasoning_effort=$(yaml_get "$frontmatter" ".opencode.reasoningEffort")
     oc_permission=$(format_yaml_object "$(yaml_get "$frontmatter" ".opencode.permission")")
     
     # Transform model and track unmapped models
