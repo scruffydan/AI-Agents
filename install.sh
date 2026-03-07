@@ -17,6 +17,7 @@ FORCE=false
 INSTALL_CLAUDE=false
 INSTALL_OPENCODE=false
 TARGET_SPECIFIED=false
+INTERACTIVE_INSTALL=false
 
 # Colors
 GREEN='\033[0;32m'
@@ -35,13 +36,16 @@ show_help() {
     echo "  --all              Install both Claude Code and OpenCode (default if no target specified)"
     echo "  --skip-build       Skip running build.sh (use existing build/)"
     echo "  --work             Use work environment model mappings for OpenCode"
+    echo "  --chatgpt-provider Use ChatGPT provider for OpenCode GPT models (openai|opencode)"
     echo "  -h, --help         Show this help message"
     echo ""
     echo "Examples:"
     echo "  ./install.sh                    # Interactive: prompts which to install"
     echo "  ./install.sh --claude           # Install only Claude Code"
     echo "  ./install.sh --opencode         # Install only OpenCode"
-    echo "  ./install.sh --opencode --work   # Install OpenCode with work model mappings"
+    echo "  ./install.sh --opencode --chatgpt-provider opencode"
+    echo "                                 # Install OpenCode with opencode GPT provider"
+    echo "  ./install.sh --opencode --work  # Install OpenCode with work model mappings"
     echo "  ./install.sh --all              # Install both without prompting"
     echo "  ./install.sh --claude -y        # Install Claude Code, force overwrite"
     echo ""
@@ -49,6 +53,7 @@ show_help() {
 
 SKIP_BUILD=false
 USE_WORK=false
+CHATGPT_PROVIDER=""
 
 while [ $# -gt 0 ]; do
     case $1 in
@@ -80,6 +85,22 @@ while [ $# -gt 0 ]; do
             USE_WORK=true
             shift
             ;;
+        --chatgpt-provider)
+            [ $# -lt 2 ] && {
+                echo "Error: --chatgpt-provider requires a value: openai or opencode"
+                exit 1
+            }
+            case "$2" in
+                openai|opencode)
+                    CHATGPT_PROVIDER="$2"
+                    ;;
+                *)
+                    echo "Error: Invalid ChatGPT provider '$2'. Use: openai or opencode"
+                    exit 1
+                    ;;
+            esac
+            shift 2
+            ;;
         -h|--help)
             show_help
             exit 0
@@ -94,6 +115,7 @@ done
 
 # Interactive selection if no target specified
 if [ "$TARGET_SPECIFIED" = false ]; then
+    INTERACTIVE_INSTALL=true
     echo -e "${YELLOW}Select what to install:${NC}"
     echo "  1) OpenCode only"
     echo "  2) Claude Code only"
@@ -116,6 +138,24 @@ if [ "$TARGET_SPECIFIED" = false ]; then
     echo ""
 fi
 
+if [ "$INTERACTIVE_INSTALL" = true ] && [ "$INSTALL_OPENCODE" = true ] && [ "$USE_WORK" = false ] && [ "$SKIP_BUILD" = false ] && [ -z "$CHATGPT_PROVIDER" ]; then
+    echo -e "${YELLOW}Select ChatGPT provider for OpenCode GPT models:${NC}"
+    echo "  1) openai (default)"
+    echo "  2) opencode"
+    echo ""
+    read -rp "Choice [1/2]: " chatgpt_provider_choice
+
+    case "$chatgpt_provider_choice" in
+        2)
+            CHATGPT_PROVIDER="opencode"
+            ;;
+        *)
+            CHATGPT_PROVIDER="openai"
+            ;;
+    esac
+    echo ""
+fi
+
 # Check for yq dependency (only if not skipping build)
 if [ "$SKIP_BUILD" = false ]; then
     if ! command -v yq &> /dev/null; then
@@ -133,6 +173,8 @@ if [ "$SKIP_BUILD" = false ]; then
     echo -e "${YELLOW}Running build.sh...${NC}"
     if [ "$USE_WORK" = true ]; then
         "$REPO_ROOT/build.sh" --work
+    elif [ -n "$CHATGPT_PROVIDER" ]; then
+        "$REPO_ROOT/build.sh" --chatgpt-provider "$CHATGPT_PROVIDER"
     else
         "$REPO_ROOT/build.sh"
     fi
@@ -152,10 +194,18 @@ if [ "$INSTALL_CLAUDE" = true ]; then
 fi
 if [ "$INSTALL_OPENCODE" = true ]; then
     echo "OpenCode target: $OPENCODE_DIR"
-    if [ "$USE_WORK" = true ]; then
-        echo "OpenCode provider: Work environment (model mappings)"
+    if [ "$SKIP_BUILD" = true ]; then
+        echo "OpenCode build source: existing build/"
+        if [ "$USE_WORK" = true ]; then
+            echo "OpenCode note: --work does not change an existing build/ when --skip-build is used"
+        elif [ -n "$CHATGPT_PROVIDER" ]; then
+            echo "OpenCode note: --chatgpt-provider does not change an existing build/ when --skip-build is used"
+        fi
+    elif [ "$USE_WORK" = true ]; then
+        echo "OpenCode mode: Work environment (model mappings)"
+        echo "ChatGPT provider selection: skipped in work mode"
     else
-        echo "OpenCode provider: OpenCode"
+        echo "ChatGPT provider: ${CHATGPT_PROVIDER:-openai}"
     fi
 fi
 if [ "$FORCE" = true ]; then
@@ -430,7 +480,7 @@ if [ -f "$BUILD_DIR/.unmapped-models" ] && [ -s "$BUILD_DIR/.unmapped-models" ];
     echo -e "${YELLOW}⚠ Warning: The following models were not mapped in source/model-mappings.json:${NC}"
     sed 's/^/  - /' "$BUILD_DIR/.unmapped-models"
     echo ""
-    echo "These models will use their original opencode/ provider."
+    echo "These models will use their original configured provider/model."
     echo "Add mappings to source/model-mappings.json if needed."
     echo ""
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"

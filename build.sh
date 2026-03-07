@@ -18,6 +18,7 @@ NC='\033[0m' # No Color
 
 WORK_MODE_ENABLED=false
 UNMAPPED_MODELS=""
+CHATGPT_PROVIDER="openai"
 
 # Model mappings file
 MODEL_MAPPINGS_FILE="$REPO_ROOT/source/model-mappings.json"
@@ -49,6 +50,27 @@ transform_model() {
     echo -e "$transformed\t$unmapped"
 }
 
+# Normalize ChatGPT model provider for non-work builds.
+# Only rewrites explicit openai/opencode GPT models and leaves all other models untouched.
+select_chatgpt_provider() {
+    local model="$1"
+    [ -z "$model" ] && return
+
+    if [ "$WORK_MODE_ENABLED" = true ]; then
+        echo "$model"
+        return
+    fi
+
+    case "$model" in
+        openai/gpt-*|opencode/gpt-*)
+            echo "$CHATGPT_PROVIDER/${model#*/}"
+            ;;
+        *)
+            echo "$model"
+            ;;
+    esac
+}
+
 # =============================================================================
 # Command-line Arguments
 # =============================================================================
@@ -58,10 +80,12 @@ show_help() {
     echo ""
     echo "Options:"
     echo "  --work             Use work environment model mappings"
+    echo "  --chatgpt-provider Set ChatGPT provider for OpenCode GPT models (openai|opencode)"
     echo "  -h, --help         Show this help message"
     echo ""
-    echo "By default, OpenCode agents use the opencode provider (e.g. opencode/claude-sonnet-4-6)."
-    echo "With --work, models are remapped via source/model-mappings.json:"
+    echo "By default, OpenCode GPT models are normalized to the openai provider."
+    echo "Use --chatgpt-provider opencode to normalize GPT models to opencode instead."
+    echo "With --work, provider selection is skipped and models are remapped via source/model-mappings.json:"
     echo "  opencode/claude-sonnet-4-6  ->  google-vertex-anthropic/claude-sonnet-4-5@20250929"
     echo ""
 }
@@ -71,6 +95,22 @@ while [ $# -gt 0 ]; do
         --work)
             WORK_MODE_ENABLED=true
             shift
+            ;;
+        --chatgpt-provider)
+            [ $# -lt 2 ] && {
+                echo "Error: --chatgpt-provider requires a value: openai or opencode"
+                exit 1
+            }
+            case "$2" in
+                openai|opencode)
+                    CHATGPT_PROVIDER="$2"
+                    ;;
+                *)
+                    echo "Error: Invalid ChatGPT provider '$2'. Use: openai or opencode"
+                    exit 1
+                    ;;
+            esac
+            shift 2
             ;;
         -h|--help)
             show_help
@@ -103,8 +143,10 @@ echo "Source: $SHARED_DIR"
 echo "Output: $BUILD_DIR"
 if [ "$WORK_MODE_ENABLED" = true ]; then
     echo "Mode: work (using model mappings from $MODEL_MAPPINGS_FILE)"
+    echo "ChatGPT provider selection: skipped in work mode"
 else
-    echo "Mode: opencode"
+    echo "Mode: standard"
+    echo "ChatGPT provider: $CHATGPT_PROVIDER"
 fi
 echo ""
 
@@ -287,19 +329,20 @@ for prompt_file in "$SHARED_DIR"/*.md; do
     # Extract OpenCode-specific values
     oc_mode=$(yaml_get "$frontmatter" ".opencode.mode")
     oc_model=$(yaml_get "$frontmatter" ".opencode.model")
+    oc_model_selected=$(select_chatgpt_provider "$oc_model")
     oc_subtask=$(yaml_get "$frontmatter" ".opencode.subtask")
     oc_temperature=$(yaml_get "$frontmatter" ".opencode.temperature")
     oc_reasoning_effort=$(yaml_get "$frontmatter" ".opencode.reasoningEffort")
     oc_permission=$(format_yaml_object "$(yaml_get "$frontmatter" ".opencode.permission")")
     
     # Transform model and track unmapped models
-    IFS=$'\t' read -r oc_model_transformed is_unmapped <<< "$(transform_model "$oc_model")"
-    if [ "$is_unmapped" = "1" ] && [ -n "$oc_model" ]; then
+    IFS=$'\t' read -r oc_model_transformed is_unmapped <<< "$(transform_model "$oc_model_selected")"
+    if [ "$is_unmapped" = "1" ] && [ -n "$oc_model_selected" ]; then
         if [ -z "$UNMAPPED_MODELS" ]; then
-            UNMAPPED_MODELS="$oc_model"
+            UNMAPPED_MODELS="$oc_model_selected"
         else
             UNMAPPED_MODELS="$UNMAPPED_MODELS
-$oc_model"
+$oc_model_selected"
         fi
     fi
     
@@ -384,7 +427,7 @@ if [ -n "$UNMAPPED_MODELS" ]; then
     echo -e "${YELLOW}⚠ Warning: The following models were not mapped in $MODEL_MAPPINGS_FILE:${NC}"
     sed 's/^/  - /' "$BUILD_DIR/.unmapped-models"
     echo ""
-    echo "These models will use their original opencode/ provider."
+    echo "These models will use their original configured provider/model."
     echo "Add mappings to $MODEL_MAPPINGS_FILE if needed."
     echo ""
 else
