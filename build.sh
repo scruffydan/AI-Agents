@@ -51,7 +51,7 @@ transform_model() {
 }
 
 # Normalize ChatGPT model provider for non-work builds.
-# Only rewrites explicit openai/opencode GPT models and leaves all other models untouched.
+# Only rewrites explicit openai/opencode/github-copilot GPT models and leaves all other models untouched.
 select_chatgpt_provider() {
     local model="$1"
     [ -z "$model" ] && return
@@ -62,7 +62,7 @@ select_chatgpt_provider() {
     fi
 
     case "$model" in
-        openai/gpt-*|opencode/gpt-*)
+        openai/gpt-*|opencode/gpt-*|github-copilot/gpt-*)
             echo "$CHATGPT_PROVIDER/${model#*/}"
             ;;
         *)
@@ -80,11 +80,12 @@ show_help() {
     echo ""
     echo "Options:"
     echo "  --work             Use work environment model mappings"
-    echo "  --chatgpt-provider Set ChatGPT provider for OpenCode GPT models (openai|opencode)"
+    echo "  --chatgpt-provider Set ChatGPT provider for OpenCode GPT models (openai|opencode|github-copilot)"
     echo "  -h, --help         Show this help message"
     echo ""
     echo "By default, OpenCode GPT models are normalized to the openai provider."
-    echo "Use --chatgpt-provider opencode to normalize GPT models to opencode instead."
+    echo "Use --chatgpt-provider opencode or --chatgpt-provider github-copilot"
+    echo "to normalize GPT models to a different provider instead."
     echo "With --work, provider selection is skipped and models are remapped via source/model-mappings.json:"
     echo "  opencode/claude-sonnet-4-6  ->  google-vertex-anthropic/claude-sonnet-4-5@20250929"
     echo ""
@@ -98,15 +99,15 @@ while [ $# -gt 0 ]; do
             ;;
         --chatgpt-provider)
             [ $# -lt 2 ] && {
-                echo "Error: --chatgpt-provider requires a value: openai or opencode"
+                echo "Error: --chatgpt-provider requires a value: openai, opencode, or github-copilot"
                 exit 1
             }
             case "$2" in
-                openai|opencode)
+                openai|opencode|github-copilot)
                     CHATGPT_PROVIDER="$2"
                     ;;
                 *)
-                    echo "Error: Invalid ChatGPT provider '$2'. Use: openai or opencode"
+                    echo "Error: Invalid ChatGPT provider '$2'. Use: openai, opencode, or github-copilot"
                     exit 1
                     ;;
             esac
@@ -329,7 +330,13 @@ for prompt_file in "$SHARED_DIR"/*.md; do
     # Extract OpenCode-specific values
     oc_mode=$(yaml_get "$frontmatter" ".opencode.mode")
     oc_model=$(yaml_get "$frontmatter" ".opencode.model")
-    oc_model_selected=$(select_chatgpt_provider "$oc_model")
+    if [ "$WORK_MODE_ENABLED" = true ]; then
+        # Keep the source provider intact so source/model-mappings.json continues
+        # to match the original prompt frontmatter in work mode.
+        oc_model_selected="$oc_model"
+    else
+        oc_model_selected=$(select_chatgpt_provider "$oc_model")
+    fi
     oc_subtask=$(yaml_get "$frontmatter" ".opencode.subtask")
     oc_temperature=$(yaml_get "$frontmatter" ".opencode.temperature")
     oc_reasoning_effort=$(yaml_get "$frontmatter" ".opencode.reasoningEffort")

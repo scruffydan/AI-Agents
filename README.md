@@ -67,6 +67,8 @@ This will:
 ./install.sh --opencode      # Only install OpenCode
 ./install.sh --chatgpt-provider opencode
                           # Use opencode for OpenCode GPT models
+./install.sh --chatgpt-provider github-copilot
+                          # Use GitHub Copilot for OpenCode GPT models
 ./install.sh --work          # Use work environment model mappings for OpenCode
 ./install.sh --skip-build    # Use existing build/ (skip regeneration)
 ```
@@ -78,7 +80,10 @@ By default, OpenCode GPT models are normalized to the `openai` provider. You can
 ```bash
 ./install.sh --opencode --chatgpt-provider openai    # Default behavior
 ./install.sh --opencode --chatgpt-provider opencode  # Use opencode for GPT models
+./install.sh --opencode --chatgpt-provider github-copilot
+                                                    # Use GitHub Copilot for GPT models
 ./build.sh --chatgpt-provider opencode               # Build only, using opencode GPT models
+./build.sh --chatgpt-provider github-copilot         # Build only, using GitHub Copilot GPT models
 ```
 
 If you use `--work`, provider selection is skipped and model mapping still happens through `source/model-mappings.json`:
@@ -120,6 +125,8 @@ This installs a `opencode.json` to `~/.config/opencode/` with sensible security 
 ./build.sh                   # Just generate configs (defaults GPT models to openai)
 ./build.sh --chatgpt-provider opencode
                             # Generate configs with opencode GPT models
+./build.sh --chatgpt-provider github-copilot
+                            # Generate configs with GitHub Copilot GPT models
 ./build.sh --work            # Generate configs using work model mappings
 ```
 
