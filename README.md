@@ -65,13 +65,23 @@ This will:
 ./install.sh -y              # Force overwrite without prompts
 ./install.sh --claude        # Only install Claude Code
 ./install.sh --opencode      # Only install OpenCode
+./install.sh --chatgpt-provider opencode
+                          # Use opencode for OpenCode GPT models
 ./install.sh --work          # Use work environment model mappings for OpenCode
 ./install.sh --skip-build    # Use existing build/ (skip regeneration)
 ```
 
 ### Model Provider Selection
 
-By default, OpenCode agents use the `opencode` provider (OpenCode Zen). You can alternatively use **work environment model mappings** for different providers (e.g., Google Vertex AI):
+By default, OpenCode GPT models are normalized to the `openai` provider. You can override that in either script, or choose interactively during `./install.sh` when OpenCode is selected:
+
+```bash
+./install.sh --opencode --chatgpt-provider openai    # Default behavior
+./install.sh --opencode --chatgpt-provider opencode  # Use opencode for GPT models
+./build.sh --chatgpt-provider opencode               # Build only, using opencode GPT models
+```
+
+If you use `--work`, provider selection is skipped and model mapping still happens through `source/model-mappings.json`:
 
 ```bash
 ./install.sh --opencode --work    # Install OpenCode with work model mappings
@@ -82,8 +92,9 @@ Model mappings are configured in `source/model-mappings.json`. This allows you t
 - `opencode/claude-sonnet-4-6` → `google-vertex/gemini-3.1-pro-preview`
 - `opencode/gemini-3.1-pro` → `google-vertex/gemini-3.1-pro-preview`
 - `opencode/gpt-5.4` → `google-vertex-anthropic/claude-opus-4-5@20251101`
+- `openai/gpt-5.4` → `google-vertex/gemini-3.1-pro-preview`
 
-Or map to completely different models as needed. Unmapped models will show a warning during build.
+Non-GPT models keep the provider defined in the prompt frontmatter. Unmapped models will show a warning during build and keep their original configured provider/model.
 
 **Work Mode Setup Requirements:**
 - Set `GOOGLE_CLOUD_PROJECT` environment variable (if using Vertex AI)
@@ -106,7 +117,9 @@ This installs a `opencode.json` to `~/.config/opencode/` with sensible security 
 ### Manual Build Only
 
 ```bash
-./build.sh                   # Just generate configs (uses OpenCode provider)
+./build.sh                   # Just generate configs (defaults GPT models to openai)
+./build.sh --chatgpt-provider opencode
+                            # Generate configs with opencode GPT models
 ./build.sh --work            # Generate configs using work model mappings
 ```
 
