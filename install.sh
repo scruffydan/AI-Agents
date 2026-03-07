@@ -36,7 +36,7 @@ show_help() {
     echo "  --all              Install both Claude Code and OpenCode (default if no target specified)"
     echo "  --skip-build       Skip running build.sh (use existing build/)"
     echo "  --work             Use work environment model mappings for OpenCode"
-    echo "  --chatgpt-provider Use ChatGPT provider for OpenCode GPT models (openai|opencode)"
+    echo "  --chatgpt-provider Use ChatGPT provider for OpenCode GPT models (openai|opencode|github-copilot)"
     echo "  -h, --help         Show this help message"
     echo ""
     echo "Examples:"
@@ -45,6 +45,8 @@ show_help() {
     echo "  ./install.sh --opencode         # Install only OpenCode"
     echo "  ./install.sh --opencode --chatgpt-provider opencode"
     echo "                                 # Install OpenCode with opencode GPT provider"
+    echo "  ./install.sh --opencode --chatgpt-provider github-copilot"
+    echo "                                 # Install OpenCode with GitHub Copilot GPT provider"
     echo "  ./install.sh --opencode --work  # Install OpenCode with work model mappings"
     echo "  ./install.sh --all              # Install both without prompting"
     echo "  ./install.sh --claude -y        # Install Claude Code, force overwrite"
@@ -87,15 +89,15 @@ while [ $# -gt 0 ]; do
             ;;
         --chatgpt-provider)
             [ $# -lt 2 ] && {
-                echo "Error: --chatgpt-provider requires a value: openai or opencode"
+                echo "Error: --chatgpt-provider requires a value: openai, opencode, or github-copilot"
                 exit 1
             }
             case "$2" in
-                openai|opencode)
+                openai|opencode|github-copilot)
                     CHATGPT_PROVIDER="$2"
                     ;;
                 *)
-                    echo "Error: Invalid ChatGPT provider '$2'. Use: openai or opencode"
+                    echo "Error: Invalid ChatGPT provider '$2'. Use: openai, opencode, or github-copilot"
                     exit 1
                     ;;
             esac
@@ -142,12 +144,16 @@ if [ "$INTERACTIVE_INSTALL" = true ] && [ "$INSTALL_OPENCODE" = true ] && [ "$US
     echo -e "${YELLOW}Select ChatGPT provider for OpenCode GPT models:${NC}"
     echo "  1) openai (default)"
     echo "  2) opencode"
+    echo "  3) github-copilot"
     echo ""
-    read -rp "Choice [1/2]: " chatgpt_provider_choice
+    read -rp "Choice [1/2/3]: " chatgpt_provider_choice
 
     case "$chatgpt_provider_choice" in
         2)
             CHATGPT_PROVIDER="opencode"
+            ;;
+        3)
+            CHATGPT_PROVIDER="github-copilot"
             ;;
         *)
             CHATGPT_PROVIDER="openai"
