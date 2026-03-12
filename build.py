@@ -196,6 +196,14 @@ def build(
             )
         print()
 
+    # Copy opencode.json for OpenCode harness
+    opencode_json = SOURCE / "opencode.json"
+    if opencode_json.exists() and "opencode" in harness_names:
+        print(f"{YELLOW}Copying OpenCode config...{NC}")
+        shutil.copy(opencode_json, BUILD / "opencode" / "opencode.json")
+        print(f"  {YELLOW}Created:{NC} opencode/opencode.json")
+        print()
+
     # Summary
     print(f"{GREEN}{'=' * 60}{NC}")
     print(f"{GREEN}Build complete!{NC}")
