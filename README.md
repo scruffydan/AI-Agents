@@ -60,7 +60,23 @@ This will:
 ./build.py claude --install      # Build and install Claude Code only
 ./build.py opencode --install    # Build and install OpenCode only
 ./build.py --work --install      # Use work environment model mappings
+./build.py --init-config --install  # Also install opencode.json (first-time setup)
 ```
+
+### OpenCode Permission Config (First-Time Setup)
+
+The `opencode.json` file contains security and permission defaults:
+- Blocks dangerous commands (`rm -rf`, etc.)
+- Blocks sensitive files (`.env`, keys, credentials)
+- Allows safe read-only commands (`ls`, `cat`, `git status`, etc.)
+
+This file is **not** installed by default (to avoid overwriting your customizations). To install it:
+
+```bash
+./build.py opencode --init-config --install   # First-time setup
+```
+
+After initial setup, you can customize `~/.config/opencode/opencode.json` and it won't be overwritten by future installs.
 
 ### Model Provider Selection
 

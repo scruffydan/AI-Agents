@@ -139,7 +139,10 @@ def emit_file(harness: str, category: str, name: str, config: dict, content: str
 
 
 def build(
-    harness_names: list[str], model_map: dict | None = None, install: bool = False
+    harness_names: list[str],
+    model_map: dict | None = None,
+    install: bool = False,
+    include_config: bool = False,
 ):
     """Build configs for specified harnesses."""
     print(f"{GREEN}Building AI-Agents configs...{NC}")
@@ -196,9 +199,9 @@ def build(
             )
         print()
 
-    # Copy opencode.json for OpenCode harness
+    # Copy opencode.json for OpenCode harness (only with --init-config flag)
     opencode_json = SOURCE / "opencode.json"
-    if opencode_json.exists() and "opencode" in harness_names:
+    if include_config and opencode_json.exists() and "opencode" in harness_names:
         print(f"{YELLOW}Copying OpenCode config...{NC}")
         shutil.copy(opencode_json, BUILD / "opencode" / "opencode.json")
         print(f"  {YELLOW}Created:{NC} opencode/opencode.json")
@@ -246,6 +249,11 @@ def main():
     parser.add_argument(
         "--work", action="store_true", help="Use work environment model mappings"
     )
+    parser.add_argument(
+        "--init-config",
+        action="store_true",
+        help="Include opencode.json (permission defaults) - usually only needed once",
+    )
     args = parser.parse_args()
 
     # Handle empty harnesses list (means build all)
@@ -262,7 +270,7 @@ def main():
             print(f"{YELLOW}Using work model mappings from {mappings_file}{NC}")
             print()
 
-    build(args.harnesses, model_map, args.install)
+    build(args.harnesses, model_map, args.install, args.init_config)
 
 
 if __name__ == "__main__":
