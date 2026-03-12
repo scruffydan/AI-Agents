@@ -37,36 +37,29 @@ Some skills are sourced from [obra/superpowers](https://github.com/obra/superpow
 
 ## Requirements
 
-- **yq** (v4) - YAML processor for build script
-  ```bash
-  brew install yq
-  ```
-- **jq** - JSON processor for work mode model mappings
-  ```bash
-  brew install jq
-  ```
+- **Python 3.11+** (uses `tomllib` from stdlib - no external dependencies)
 
 ## Installation
 
 ### Quick Install
 
 ```bash
-./install.sh
+./build.py --install
 ```
 
 This will:
-1. Run `build.sh` to generate tool-specific configs
+1. Build tool-specific configs from source prompts
 2. Install Claude Code configs to `~/.claude/` (agents, commands, skills)
 3. Install OpenCode configs to `~/.config/opencode/` (agents, commands, skills)
 
 ### Options
 
 ```bash
-./install.sh -y              # Force overwrite without prompts
-./install.sh --claude        # Only install Claude Code
-./install.sh --opencode      # Only install OpenCode
-./install.sh --work          # Use work environment model mappings for OpenCode
-./install.sh --skip-build    # Use existing build/ (skip regeneration)
+./build.py                       # Build only (no install)
+./build.py --install             # Build and install all harnesses
+./build.py claude --install      # Build and install Claude Code only
+./build.py opencode --install    # Build and install OpenCode only
+./build.py --work --install      # Use work environment model mappings
 ```
 
 ### Model Provider Selection
@@ -74,8 +67,8 @@ This will:
 By default, OpenCode agents use the `opencode` provider (OpenCode Zen). You can alternatively use **work environment model mappings** for different providers (e.g., Google Vertex AI):
 
 ```bash
-./install.sh --opencode --work    # Install OpenCode with work model mappings
-./build.sh --work                 # Build only, using work model mappings
+./build.py opencode --work --install    # Install OpenCode with work model mappings
+./build.py --work                       # Build only, using work model mappings
 ```
 
 Model mappings are configured in `source/model-mappings.json`. This allows you to map models like:
@@ -83,32 +76,12 @@ Model mappings are configured in `source/model-mappings.json`. This allows you t
 - `opencode/gemini-3.1-pro` → `google-vertex/gemini-3.1-pro-preview`
 - `opencode/gpt-5.4` → `google-vertex-anthropic/claude-opus-4-5@20251101`
 
-Or map to completely different models as needed. Unmapped models will show a warning during build.
+Or map to completely different models as needed.
 
 **Work Mode Setup Requirements:**
 - Set `GOOGLE_CLOUD_PROJECT` environment variable (if using Vertex AI)
 - Authenticate via `gcloud auth application-default login` or set `GOOGLE_APPLICATION_CREDENTIALS`
 - Optionally set `VERTEX_LOCATION` (defaults to `global`)
-
-### OpenCode Config (Optional)
-
-```bash
-./opencode-init.sh           # Install opencode.json with secure permission defaults
-./opencode-init.sh -y        # Force overwrite without prompts
-```
-
-This installs a `opencode.json` to `~/.config/opencode/` with sensible security defaults:
-- Sharing disabled
-- Dangerous commands require approval (rm -rf, git push, npm install, etc.)
-- Safe read-only commands allowed (ls, cat, head, tail, echo, git status, etc.)
-- Sensitive files blocked (*.env, *.key, secrets, credentials, etc.)
-
-### Manual Build Only
-
-```bash
-./build.sh                   # Just generate configs (uses OpenCode provider)
-./build.sh --work            # Generate configs using work model mappings
-```
 
 ## Usage
 
@@ -184,44 +157,65 @@ Main agent commits with approved message
 
 ### Editing Instructions
 
-All agent/command logic lives in `source/prompts/`. Edit these files to customize behavior, then run `./install.sh` to rebuild and reinstall.
+All agent/command logic lives in `source/prompts/`. Edit these files to customize behavior, then run `./build.py --install` to rebuild and reinstall.
 
-Each prompt file uses **combined frontmatter**:
+Each prompt file uses **TOML frontmatter**:
 
-```yaml
----
-description: What this agent does...
-type: subagent    # or "command" or "mode"
-claude:
-  tools: Read, Glob, Grep
-  model: opus
-opencode:
-  mode: subagent
-  model: opencode/gpt-5.4
-  temperature: 0.8     # For modes: controls creativity (0.0-1.0)
-  tools:
-    write: false
-    edit: false
-    bash: false
----
+```toml
++++
+description = "What this agent does..."
+type = "subagent"    # or "command" or "mode"
+
+[claude]
+tools = "Read, Glob, Grep"
+model = "claude-opus-4-5"
+
+[opencode]
+mode = "subagent"
+model = "opencode/gpt-5.4"
+temperature = 0.8     # For modes: controls creativity (0.0-1.0)
+
+[opencode.permission]
+edit = "deny"
+bash = "deny"
++++
 
 # Prompt content here...
 
 $ARGUMENTS
 ```
 
-The `build.sh` script parses this and generates the appropriate format for each tool.
+The `build.py` script parses this and generates the appropriate format for each harness.
 
 ### Adding New Agents
 
-1. Create `source/prompts/my-agent.md` with combined frontmatter
-2. Run `./install.sh` to rebuild and install
+1. Create `source/prompts/my-agent.md` with TOML frontmatter
+2. Run `./build.py --install` to rebuild and install
+
+### Adding New Harnesses
+
+To add support for a new AI coding tool (e.g., Codex), edit `build.py` and add an entry to the `HARNESSES` dict:
+
+```python
+HARNESSES = {
+    # ... existing harnesses ...
+    "codex": {
+        "agents_dir": "agents",
+        "commands_dir": "commands",
+        "skills_dir": "skills",
+        "base_file": "CODEX.md",
+        "install_path": Path.home() / ".codex",
+    },
+}
+```
+
+Then run: `./build.py codex --install`
 
 ### Adding New Skills
 
 1. Create `source/skills/my-skill/SKILL.md` following the [Agent Skills format](https://github.com/anthropics/anthropic-sdk-typescript/tree/main/agents-api)
 2. Reference from agents: `Load skill \`my-skill\` when...`
-3. Run `./install.sh`
+3. Run `./build.py --install`
 
 ### Base Instructions
 
@@ -233,7 +227,7 @@ The `build.sh` script parses this and generates the appropriate format for each 
 
 ### Build Process
 
-`build.sh` reads each prompt in `source/prompts/` and generates:
+`build.py` reads each prompt in `source/prompts/` and generates:
 
 **For Claude Code:**
 - `build/claude/agents/{name}.md` - Agent with Claude-specific frontmatter
@@ -244,7 +238,6 @@ The `build.sh` script parses this and generates the appropriate format for each 
 **For OpenCode:**
 - `build/opencode/agent/{name}.md` - Agent with OpenCode-specific frontmatter
 - `build/opencode/command/{name}.md` - Command that references the agent
-- `build/opencode/mode/{name}.md` - Mode with temperature and tool settings
 - `build/opencode/skill/{name}/SKILL.md` - Skills (copied from `source/skills/`)
 - `build/opencode/AGENTS.md` - From `AGENTS.md`
 
