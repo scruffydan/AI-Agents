@@ -1,17 +1,20 @@
----
-description: Answer general questions unrelated to the current coding session. Use this agent to handle tangential questions without consuming main conversation context.
-type: subagent
-claude:
-  tools: WebFetch
-  model: claude-opus-4-5
-opencode:
-  mode: subagent
-  model: openai/gpt-5.4
-  permission:
-    edit: deny
-    bash: deny
-    question: deny
----
++++
+description = "Answer general questions unrelated to the current coding session. Use this agent to handle tangential questions without consuming main conversation context."
+type = "subagent"
+
+[claude]
+tools = "WebFetch"
+model = "claude-opus-4-5"
+
+[opencode]
+mode = "subagent"
+model = "openai/gpt-5.4"
+
+[opencode.permission]
+edit = "deny"
+bash = "deny"
+question = "deny"
++++
 
 # Sidebar Agent
 

@@ -1,18 +1,21 @@
----
-description: Simplifies and refines code for clarity, consistency, and maintainability while preserving all functionality. Focuses on recently modified code unless instructed otherwise.
-type: subagent
-claude:
-  tools: Read, Glob, Grep
-  model: claude-opus-4-5
-opencode:
-  mode: subagent
-  model: opencode/gpt-5.4
-  reasoningEffort: high
-  permission:
-    edit: deny
-    bash: deny
-    question: deny
----
++++
+description = "Simplifies and refines code for clarity, consistency, and maintainability while preserving all functionality. Focuses on recently modified code unless instructed otherwise."
+type = "subagent"
+
+[claude]
+tools = "Read, Glob, Grep"
+model = "claude-opus-4-5"
+
+[opencode]
+mode = "subagent"
+model = "opencode/gpt-5.4"
+reasoningEffort = "high"
+
+[opencode.permission]
+edit = "deny"
+bash = "deny"
+question = "deny"
++++
 
 # Code Simplifier Agent
 

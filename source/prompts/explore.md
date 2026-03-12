@@ -1,18 +1,21 @@
----
-description: Explore and answer questions about the codebase. Use this agent to find files, search code, understand implementations, and trace dependencies without consuming main conversation context.
-type: subagent
-claude:
-  tools: Glob, Grep, Read, List
-  model: claude-sonnet-4-6
-opencode:
-  mode: subagent
-  model: openai/gpt-5.4
-  reasoningEffort: high
-  permission:
-    edit: deny
-    bash: deny
-    question: deny
----
++++
+description = "Explore and answer questions about the codebase. Use this agent to find files, search code, understand implementations, and trace dependencies without consuming main conversation context."
+type = "subagent"
+
+[claude]
+tools = "Glob, Grep, Read, List"
+model = "claude-sonnet-4-6"
+
+[opencode]
+mode = "subagent"
+model = "openai/gpt-5.4"
+reasoningEffort = "high"
+
+[opencode.permission]
+edit = "deny"
+bash = "deny"
+question = "deny"
++++
 
 # Codebase Explorer Agent
 

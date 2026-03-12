@@ -1,18 +1,21 @@
----
-description: Code readability and maintainability specialist. Invoke for reviewing naming conventions, code structure, formatting, and documentation quality.
-type: subagent
-claude:
-  tools: Read, Glob, Grep
-  model: claude-opus-4-5
-opencode:
-  mode: subagent
-  model: opencode/gpt-5.4
-  reasoningEffort: high
-  permission:
-    edit: deny
-    bash: deny
-    question: deny
----
++++
+description = "Code readability and maintainability specialist. Invoke for reviewing naming conventions, code structure, formatting, and documentation quality."
+type = "subagent"
+
+[claude]
+tools = "Read, Glob, Grep"
+model = "claude-opus-4-5"
+
+[opencode]
+mode = "subagent"
+model = "opencode/gpt-5.4"
+reasoningEffort = "high"
+
+[opencode.permission]
+edit = "deny"
+bash = "deny"
+question = "deny"
++++
 
 # Code Readability & Maintainability Agent
 

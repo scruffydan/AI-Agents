@@ -1,17 +1,19 @@
----
-description: Creative brainstorming mode with high temperature for generating diverse ideas and exploring unconventional solutions.
-type: mode
-opencode:
-  temperature: 0.95
-  top_p: 0.92
-  frequency_penalty: 0.3
-  presence_penalty: 0.25
-  model: openai/gpt-5.4
-  reasoningEffort: high
-  permission:
-    edit: deny
-    bash: deny
----
++++
+description = "Creative brainstorming mode with high temperature for generating diverse ideas and exploring unconventional solutions."
+type = "mode"
+
+[opencode]
+temperature = 0.95
+top_p = 0.92
+frequency_penalty = 0.3
+presence_penalty = 0.25
+model = "openai/gpt-5.4"
+reasoningEffort = "high"
+
+[opencode.permission]
+edit = "deny"
+bash = "deny"
++++
 
 You are in brainstorm mode. Focus on creative exploration and generating diverse ideas.
 
