@@ -1,18 +1,21 @@
----
-description: Code redundancy and duplication specialist. Invoke for identifying duplicate code, repeated patterns, unused code, and opportunities for abstraction and DRY improvements.
-type: subagent
-claude:
-  tools: Read, Glob, Grep
-  model: claude-opus-4-5
-opencode:
-  mode: subagent
-  model: opencode/gpt-5.4
-  reasoningEffort: high
-  permission:
-    edit: deny
-    bash: deny
-    question: deny
----
++++
+description = "Code redundancy and duplication specialist. Invoke for identifying duplicate code, repeated patterns, unused code, and opportunities for abstraction and DRY improvements."
+type = "subagent"
+
+[claude]
+tools = "Read, Glob, Grep"
+model = "claude-opus-4-5"
+
+[opencode]
+mode = "subagent"
+model = "opencode/gpt-5.4"
+reasoningEffort = "high"
+
+[opencode.permission]
+edit = "deny"
+bash = "deny"
+question = "deny"
++++
 
 # Code Redundancy Agent
 

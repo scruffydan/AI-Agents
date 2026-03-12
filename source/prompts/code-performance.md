@@ -1,18 +1,21 @@
----
-description: Performance optimization specialist. Invoke for identifying bottlenecks, optimizing algorithms, memory usage, I/O operations, and concurrency patterns.
-type: subagent
-claude:
-  tools: Read, Glob, Grep
-  model: claude-opus-4-5
-opencode:
-  mode: subagent
-  model: opencode/gpt-5.4
-  reasoningEffort: high
-  permission:
-    edit: deny
-    bash: deny
-    question: deny
----
++++
+description = "Performance optimization specialist. Invoke for identifying bottlenecks, optimizing algorithms, memory usage, I/O operations, and concurrency patterns."
+type = "subagent"
+
+[claude]
+tools = "Read, Glob, Grep"
+model = "claude-opus-4-5"
+
+[opencode]
+mode = "subagent"
+model = "opencode/gpt-5.4"
+reasoningEffort = "high"
+
+[opencode.permission]
+edit = "deny"
+bash = "deny"
+question = "deny"
++++
 
 # Code Performance Agent
 

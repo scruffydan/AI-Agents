@@ -1,18 +1,21 @@
----
-description: Generate conventional commit messages by analyzing git history and staged changes. Use when the user wants to commit changes, says "commit", or needs a commit message that follows repository conventions.
-type: subagent
-claude:
-  tools: Bash, Read, Grep, Glob
-  model: claude-sonnet-4-6
-opencode:
-  mode: subagent
-  model: openai/gpt-5.4
-  tools:
-    bash: true
-    read: true
-    grep: true
-    glob: true
----
++++
+description = "Generate conventional commit messages by analyzing git history and staged changes. Use when the user wants to commit changes, says \"commit\", or needs a commit message that follows repository conventions."
+type = "subagent"
+
+[claude]
+tools = "Bash, Read, Grep, Glob"
+model = "claude-sonnet-4-6"
+
+[opencode]
+mode = "subagent"
+model = "openai/gpt-5.4"
+
+[opencode.tools]
+bash = true
+read = true
+grep = true
+glob = true
++++
 
 # Git Commit Agent
 

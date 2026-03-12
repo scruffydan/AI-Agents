@@ -1,11 +1,13 @@
----
-description: Full code review orchestrating security, readability, performance, redundancy, and simplifier agents. Spawns all 5 specialist agents in parallel and synthesizes their findings.
-type: command
-claude: {}
-opencode:
-  model: opencode/gpt-5.4
-  reasoningEffort: high
----
++++
+description = "Full code review orchestrating security, readability, performance, redundancy, and simplifier agents. Spawns all 5 specialist agents in parallel and synthesizes their findings."
+type = "command"
+
+[claude]
+
+[opencode]
+model = "opencode/gpt-5.4"
+reasoningEffort = "high"
++++
 
 # Full Code Review
 
