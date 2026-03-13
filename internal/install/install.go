@@ -91,6 +91,19 @@ func Run(opts Options) error {
 		return fmt.Errorf("build directory %s is not available: %w", opts.BuildDir, err)
 	}
 
+	fmt.Fprintln(opts.Stdout, "Install plan")
+	fmt.Fprintf(opts.Stdout, "- build dir: %s\n", opts.BuildDir)
+	if opts.SkipBuild {
+		fmt.Fprintln(opts.Stdout, "- build step: skipped")
+	} else {
+		fmt.Fprintln(opts.Stdout, "- build step: executed")
+	}
+	if opts.WorkMode {
+		fmt.Fprintln(opts.Stdout, "- model mode: work mappings")
+	} else {
+		fmt.Fprintf(opts.Stdout, "- ChatGPT provider: %s\n", opts.ChatGPTProvider)
+	}
+
 	if opts.InstallClaude {
 		if err := installClaude(opts, reader); err != nil {
 			return err
@@ -150,7 +163,6 @@ func selectProvider(reader *bufio.Reader, stdout io.Writer) (string, error) {
 
 func installClaude(opts Options, reader *bufio.Reader) error {
 	target := filepath.Join(opts.HomeDir, ".claude")
-	fmt.Fprintf(opts.Stdout, "Installing Claude Code config into %s\n", target)
 
 	agents, err := copyMarkdownDir(filepath.Join(opts.BuildDir, "claude", "agents"), filepath.Join(target, "agents"), "agents", opts, reader)
 	if err != nil {
@@ -168,13 +180,17 @@ func installClaude(opts Options, reader *bufio.Reader) error {
 		return err
 	}
 
-	fmt.Fprintf(opts.Stdout, "Claude install complete: %d agents, %d commands, %d skills\n", agents, commands, skills)
+	fmt.Fprintln(opts.Stdout, "Claude Code")
+	fmt.Fprintf(opts.Stdout, "- target: %s\n", target)
+	fmt.Fprintf(opts.Stdout, "- agents: %d\n", agents)
+	fmt.Fprintf(opts.Stdout, "- commands: %d\n", commands)
+	fmt.Fprintf(opts.Stdout, "- skills: %d\n", skills)
+	fmt.Fprintln(opts.Stdout, "- base instructions: updated")
 	return nil
 }
 
 func installOpenCode(opts Options, reader *bufio.Reader) error {
 	target := filepath.Join(opts.HomeDir, ".config", "opencode")
-	fmt.Fprintf(opts.Stdout, "Installing OpenCode config into %s\n", target)
 
 	agents, err := copyMarkdownDir(filepath.Join(opts.BuildDir, "opencode", "agent"), filepath.Join(target, "agent"), "agent", opts, reader)
 	if err != nil {
@@ -192,7 +208,12 @@ func installOpenCode(opts Options, reader *bufio.Reader) error {
 		return err
 	}
 
-	fmt.Fprintf(opts.Stdout, "OpenCode install complete: %d agents, %d commands, %d skills\n", agents, commands, skills)
+	fmt.Fprintln(opts.Stdout, "OpenCode")
+	fmt.Fprintf(opts.Stdout, "- target: %s\n", target)
+	fmt.Fprintf(opts.Stdout, "- agents: %d\n", agents)
+	fmt.Fprintf(opts.Stdout, "- commands: %d\n", commands)
+	fmt.Fprintf(opts.Stdout, "- skills: %d\n", skills)
+	fmt.Fprintln(opts.Stdout, "- base instructions: updated")
 	return nil
 }
 
@@ -293,7 +314,6 @@ func copyWithOverwrite(src, dst, label string, opts Options, reader *bufio.Reade
 			return false, err
 		}
 	}
-	fmt.Fprintf(opts.Stdout, "Installed %s\n", label)
 	return true, nil
 }
 

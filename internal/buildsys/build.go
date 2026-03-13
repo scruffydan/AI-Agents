@@ -107,12 +107,14 @@ func Run(opts Options) error {
 		return err
 	}
 
-	fmt.Fprintf(opts.Stdout, "Built %d prompts into %s\n", len(docs), outputDir)
-	fmt.Fprintf(opts.Stdout, "Wrote %d generated artifacts\n", artifactCount)
+	fmt.Fprintln(opts.Stdout, "Build complete")
+	fmt.Fprintf(opts.Stdout, "- prompts: %d\n", len(docs))
+	fmt.Fprintf(opts.Stdout, "- artifacts: %d\n", artifactCount)
+	fmt.Fprintf(opts.Stdout, "- output: %s\n", outputDir)
 	if opts.WorkMode {
-		fmt.Fprintln(opts.Stdout, "Mode: work mappings enabled")
+		fmt.Fprintln(opts.Stdout, "- mode: work mappings enabled")
 	} else {
-		fmt.Fprintf(opts.Stdout, "ChatGPT provider: %s\n", opts.ChatGPTProvider)
+		fmt.Fprintf(opts.Stdout, "- ChatGPT provider: %s\n", opts.ChatGPTProvider)
 	}
 	return nil
 }

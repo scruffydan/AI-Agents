@@ -62,6 +62,8 @@ func InitOpenCode(opts InitOptions) error {
 		return err
 	}
 
-	fmt.Fprintf(opts.Stdout, "Installed OpenCode config to %s\n", target)
+	fmt.Fprintln(opts.Stdout, "OpenCode config")
+	fmt.Fprintf(opts.Stdout, "- target: %s\n", target)
+	fmt.Fprintln(opts.Stdout, "- status: installed")
 	return nil
 }
