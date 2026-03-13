@@ -79,6 +79,90 @@ Any new implementation should follow these rules:
 5. documentation must describe actual CLI behavior, not intended behavior
 6. renderer configuration should be declarative and easy to extend
 
+## Behavioral Contract To Preserve
+
+The third branch should treat these behaviors as required unless there is an explicit decision to change them:
+
+### Commands
+
+- `build` generates Claude and OpenCode artifacts from `source/prompts/` and copies shared skills and base instructions
+- `install` can install Claude only, OpenCode only, or both
+- `init-opencode` installs `source/opencode.json` into the user's OpenCode config directory with overwrite confirmation
+
+### Build flags
+
+- `--work` switches model selection to `source/model-mappings.json`
+- `--chatgpt-provider` rewrites GPT-family OpenCode models for non-work builds
+- build output lands in `build/` by default
+
+### Install guarantees
+
+- overwrite prompts must remain explicit unless the user passes a force flag
+- `--skip-build` must reuse the current build directory without silently changing its contents
+- OpenCode config installation must remain opt-in and should not overwrite customized config without confirmation
+
+### Output structure
+
+- Claude output:
+  - `build/claude/agents/*.md`
+  - `build/claude/commands/*.md`
+  - `build/claude/skills/*`
+  - `build/claude/CLAUDE.md`
+- OpenCode output:
+  - `build/opencode/agent/*.md`
+  - `build/opencode/command/*.md`
+  - `build/opencode/skill/*`
+  - `build/opencode/AGENTS.md`
+- modes must render with the correct OpenCode metadata, including `mode: primary`
+
+## Shared Domain Model
+
+Regardless of implementation language, the core logic should be based on a small explicit domain model.
+
+### Core entities
+
+- `PromptDoc`
+  - `name`
+  - `description`
+  - `type` (`subagent`, `command`, `mode`)
+  - `body`
+  - `claude_config`
+  - `opencode_config`
+  - `source_path`
+- `HarnessSpec`
+  - harness name
+  - output directories
+  - base instructions filename
+  - install target path
+- `BuildOptions`
+  - repo root
+  - output dir
+  - work mode flag
+  - ChatGPT provider
+  - optional selected harnesses
+- `InstallOptions`
+  - repo root
+  - build dir
+  - home dir
+  - target selection
+  - force flag
+  - skip-build flag
+
+### Pipeline stages
+
+1. locate repo root
+2. load prompt files
+3. parse frontmatter
+4. expand includes
+5. validate prompt metadata
+6. apply provider selection and work mappings
+7. render harness-specific frontmatter and content
+8. write artifacts
+9. copy base instructions and skills
+10. optionally install to user config locations
+
+Keeping these stages explicit matters more than the language choice. Most regressions in the reviewed branches came from stage drift, not from syntax.
+
 ## Python Architecture Option
 
 Recommended when the primary maintainer is substantially more fluent in Python.
@@ -122,6 +206,24 @@ tests/
 - `build/service.py` - orchestrates load, transform, render, and write
 - `install/service.py` - interactive overwrite flow and safe installation behavior
 - `fs.py` - atomic-ish writes, copy helpers, reset helpers, and directory utilities
+
+### Suggested internal APIs
+
+- `repo.find_repo_root(start: Path | None = None) -> Path`
+- `loader.load_prompts(prompts_dir: Path) -> list[PromptDoc]`
+- `mappings.select_model(model: str, provider: str, work_mode: bool, mapping_table: dict[str, str]) -> tuple[str, bool]`
+- `render_claude(doc: PromptDoc) -> Artifact | None`
+- `render_opencode(doc: PromptDoc, selected_model: str) -> Artifact | None`
+- `build_project(opts: BuildOptions) -> BuildReport`
+- `install_targets(opts: InstallOptions) -> InstallReport`
+
+### Python implementation notes
+
+- Use `argparse` for command shape parity and predictable help output
+- Use `dataclasses` and `Enum` to avoid loose dict-heavy code
+- Keep rendering pure: functions should take `PromptDoc` plus options and return artifacts, not write files directly
+- Use fixture directories for golden output tests so behavior changes are obvious in diffs
+- If TOML or YAML support changes in the future, isolate that behind the parser module so renderer and install code stay untouched
 
 ### Why this Python option is viable
 
@@ -170,6 +272,24 @@ internal/
 - `internal/install` - overwrite prompting, installation, and `opencode.json` initialization
 - `internal/files` - filesystem helpers and copy primitives
 
+### Suggested internal APIs
+
+- `repo.Root() (string, error)` or `repo.Find(start string) (string, error)`
+- `prompts.LoadAll(dir string) ([]PromptDoc, error)`
+- `prompts.ResolveModel(model string, provider string, workMode bool, mappings ModelMappings) (string, bool)`
+- `platforms.ClaudeArtifact(doc PromptDoc) (*Artifact, error)`
+- `platforms.OpenCodeArtifact(doc PromptDoc, model string) (*Artifact, error)`
+- `buildsys.Run(opts Options) error`
+- `install.Run(opts Options) error`
+
+### Go implementation notes
+
+- Use concrete structs rather than deeply nested `map[string]any` beyond the parsing boundary
+- Keep repo-root detection in one package and pass resolved paths through options instead of re-reading `cwd`
+- Keep command handlers thin; all meaningful logic should live below the CLI layer
+- Prefer package seams that reflect the pipeline stages rather than creating interfaces preemptively
+- Golden tests should exercise the public orchestration layer, not only unit helpers
+
 ### Why this Go option is viable
 
 - Strong package boundaries fit a growing CLI well
@@ -196,6 +316,111 @@ Build the third branch in Python, but use Go-style architectural discipline:
 ### If long-term CLI robustness is the top priority
 
 Continue from the Go refactor branch, then simplify its renderer and configuration model using the best ideas from the Python branch.
+
+## Migration Plan
+
+The third branch should be implemented in phases so parity is proven before cleanup work expands scope.
+
+### Phase 1 - lock the contract
+
+- capture sample output from `main` for representative prompts, commands, and modes
+- define golden fixtures for Claude and OpenCode artifacts
+- document exact command help text and expected overwrite prompts
+- record current behavior for `--work`, `--chatgpt-provider`, and `--skip-build`
+
+Exit criteria:
+
+- fixtures exist for all current prompt types
+- expected output tree is checked into tests or fixtures
+- behavior differences from `main` are explicitly documented
+
+### Phase 2 - build the new core pipeline
+
+- implement repo-root discovery independent of `cwd`
+- implement prompt loading, include expansion, and model selection
+- implement Claude and OpenCode renderers
+- generate build output identical or intentionally equivalent to `main`
+
+Exit criteria:
+
+- golden output tests pass
+- mode generation parity is explicitly verified
+- provider selection and work mapping tests pass
+
+### Phase 3 - build install and wrapper compatibility
+
+- implement install target selection
+- implement overwrite prompts and force behavior
+- implement `init-opencode`
+- convert shell wrappers into strict pass-through compatibility shims
+
+Exit criteria:
+
+- wrapper tests pass from repo root and non-repo directories
+- install overwrite tests pass for accept, decline, and force cases
+- `opencode.json` remains opt-in
+
+### Phase 4 - simplify and document
+
+- remove duplicated or transitional code
+- update README examples to match actual behavior
+- add extension notes for future harness support
+
+Exit criteria:
+
+- README examples are verified against command help output
+- architecture doc and contribution notes are current
+- no undocumented behavioral drift remains
+
+## Test Strategy
+
+The third branch should have both narrow unit tests and broad behavioral tests.
+
+### Unit tests
+
+- frontmatter parsing
+- include expansion, including cycle detection
+- model provider selection
+- work mapping behavior
+- harness-specific metadata rendering
+
+### Golden tests
+
+- full build output for a representative prompt set
+- OpenCode mode files with `mode: primary`
+- command artifacts and agent artifacts for both harnesses
+- base instructions and skill copying
+
+### Behavioral integration tests
+
+- `build` from repo root
+- `build` from outside repo root via wrapper
+- `install --skip-build`
+- `install --work`
+- `install --chatgpt-provider <provider>`
+- `init-opencode` overwrite decline and confirm flows
+
+### Documentation verification
+
+- help output snapshot tests for all commands
+- README command examples exercised by tests where practical
+- explicit assertions that documented flags exist and behave as described
+
+## Decision Framework
+
+Choose the implementation language using these criteria, in this order:
+
+1. maintainer fluency
+2. likelihood of preserving behavioral parity quickly
+3. testability of the implementation
+4. expected contributor pool
+5. appetite for a compiled long-term CLI
+
+Under that framework:
+
+- choose Python if maintainer velocity and readability dominate
+- choose Go if long-term compiled CLI stability and broader package-scale refactoring dominate
+- in either case, reject the design if it weakens parity or safety to gain aesthetic simplicity
 
 ## Minimum Acceptance Criteria For Any Third Branch
 
