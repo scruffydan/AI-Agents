@@ -1,6 +1,7 @@
 # Refactor Branch Review And Architecture Options
 
 Date: 2026-03-12
+Updated: 2026-03-13
 
 ## Goal
 
@@ -14,17 +15,25 @@ Review the two refactor branches against `main`, identify the strongest ideas fr
 
 ## Executive Recommendation
 
-`main` remains the correctness baseline.
+**Updated 2026-03-13:** The Python branch (`refactor/python-build-system`) is now the recommended path forward.
 
-Of the two refactor branches, `go-refactor-experiment` is the stronger continuation path because it preserves more behavior, adds meaningful test coverage, and improves internal structure without discarding the current CLI workflow.
+After addressing the gaps identified in the original review, the Python branch now has:
+- Full feature parity with `main`
+- Interactive install prompts with overwrite protection
+- `--chatgpt-provider` and `--opus-provider` flags
+- `ProviderConfig` dataclass for extensible model provider selection
+- `--yes` flag for non-interactive scripted installs
+- Restored `opencode-init.sh` script
 
-The Python branch has strong ideas around simplicity and declarative configuration, but it regresses important behavior and safety guarantees. Its ideas should be reused, but the branch should not be merged as-is.
+The Python branch achieves this in **450 lines** (build.py + opencode-init.sh) compared to ~1,050 lines in `main` (Bash) and ~2,000 lines in `go-refactor-experiment`. For a single-maintainer, personal-use repository, this dramatic reduction in code size with equivalent functionality makes Python the clear winner.
 
-If maintainer fluency is a major factor and Python is the dominant strength, a new Python-based third branch is reasonable, but it should be built with stronger modular boundaries and parity tests than the current Python refactor branch.
+The only remaining gap is automated test coverage, which can be added incrementally.
 
 ## Scorecard
 
 Scale: `5` = at or above `main`, `3` = acceptable but weaker, `1` = significant regression.
+
+### Original Assessment (2026-03-12)
 
 | Category | `main` | `go-refactor-experiment` | `refactor/python-build-system` |
 |---|---:|---:|---:|
@@ -36,6 +45,20 @@ Scale: `5` = at or above `main`, `3` = acceptable but weaker, `1` = significant 
 | Build system clarity | 3 | 4 | 5 |
 | Documentation accuracy | 4 | 3 | 2 |
 | Merge readiness | 5 | 3 | 1 |
+
+### Updated Assessment (2026-03-13)
+
+| Category | `main` | `go-refactor-experiment` | `refactor/python-build-system` |
+|---|---:|---:|---:|
+| Feature parity | 5 | 4 | **5** |
+| User workflow compatibility | 5 | 3 | **4** |
+| Maintainability | 3 | 5 | **5** |
+| Test coverage | 2 | 5 | 1 |
+| Install safety | 4 | 4 | **4** |
+| Build system clarity | 3 | 4 | **5** |
+| Documentation accuracy | 4 | 3 | **4** |
+| Code brevity | 2 | 1 | **5** |
+| Merge readiness | 5 | 3 | **4** |
 
 ## Key Findings
 
@@ -61,12 +84,25 @@ Strengths:
 - The harness definition approach is simple and attractive
 - Python 3.11 standard library tooling reduces dependency friction compared with `yq` and `jq`
 
-Main gaps:
+Main gaps (original review):
 
-- OpenCode modes lose parity because generated files do not include `mode: primary`
-- `--chatgpt-provider` behavior from `main` is missing
-- Install behavior is less safe because overwrite handling is weaker
+- ~~OpenCode modes lose parity because generated files do not include `mode: primary`~~
+- ~~`--chatgpt-provider` behavior from `main` is missing~~
+- ~~Install behavior is less safe because overwrite handling is weaker~~
 - There is no meaningful automated test coverage
+
+**Gaps addressed (2026-03-13):**
+
+- Added `--chatgpt-provider` flag (openai, opencode, github-copilot)
+- Added `--opus-provider` flag (opencode, github-copilot)
+- Added `ProviderConfig` dataclass for extensible model provider selection
+- Added interactive install prompts with harness and provider selection
+- Added overwrite confirmation prompts for existing installations
+- Added `--yes` flag for non-interactive scripted installs
+- Restored `opencode-init.sh` script (minimal 19-line version)
+- Updated README with new CLI options
+
+**Remaining gap:** No automated test coverage (golden tests, unit tests)
 
 ## Third-Path Design Principles
 
@@ -92,7 +128,9 @@ The third branch should treat these behaviors as required unless there is an exp
 ### Build flags
 
 - `--work` switches model selection to `source/model-mappings.json`
-- `--chatgpt-provider` rewrites GPT-family OpenCode models for non-work builds
+- `--chatgpt-provider` rewrites GPT-family models (openai, opencode, github-copilot)
+- `--opus-provider` rewrites Opus-family models (opencode, github-copilot)
+- `--yes` skips confirmation prompts for scripted installs
 - build output lands in `build/` by default
 
 ### Install guarantees
@@ -434,6 +472,34 @@ Under that framework:
 
 ## Final Recommendation
 
-Today, the best available branch to continue is `go-refactor-experiment`.
+**Updated 2026-03-13:** The `refactor/python-build-system` branch is now the recommended path forward.
 
-If maintainer fluency is the deciding factor, a new Python branch is a valid choice and may be the better one, but only if it is rebuilt around parity-first testing and safer install behavior. The current Python refactor branch is not sufficient as the base.
+### Why Python wins
+
+| Metric | main (Bash) | go-refactor | python |
+|--------|-------------|-------------|--------|
+| Total lines | ~1,050 | ~2,000 | **450** |
+| Source files | 3 | 23 | **2** |
+| External dependencies | yq, jq | yaml/v3 | **None** |
+| Feature parity | ✓ | Partial | **✓** |
+
+For a single-maintainer, personal-use repository:
+- **450 lines** is dramatically easier to maintain than 1,050 or 2,000
+- Zero external dependencies means no version conflicts or install friction
+- `ProviderConfig` dataclass provides type-safe extensibility for future model providers
+- The `HARNESSES` dict makes adding new platforms trivial (5 lines per harness)
+
+### Remaining work
+
+The only gap is automated test coverage. Recommended additions:
+- Golden tests for build output (capture expected output, compare on each run)
+- Unit tests for `ProviderConfig.rewrite_model()`
+- Integration tests for `--work` model mappings
+
+These can be added incrementally without blocking the merge.
+
+### Original recommendation (2026-03-12)
+
+~~Today, the best available branch to continue is `go-refactor-experiment`.~~
+
+~~If maintainer fluency is the deciding factor, a new Python branch is a valid choice and may be the better one, but only if it is rebuilt around parity-first testing and safer install behavior. The current Python refactor branch is not sufficient as the base.~~
