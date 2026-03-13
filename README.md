@@ -56,10 +56,12 @@ This will:
 
 ```bash
 ./build.py                       # Build only (no install)
-./build.py --install             # Build and install all harnesses
+./build.py --install             # Build and install (interactive)
+./build.py --install --yes       # Build and install without prompts
 ./build.py claude --install      # Build and install Claude Code only
 ./build.py opencode --install    # Build and install OpenCode only
 ./build.py --work --install      # Use work environment model mappings
+./build.py --chatgpt-provider github-copilot --install  # Use GitHub Copilot for GPT models
 ./build.py --init-config --install  # Also install opencode.json (first-time setup)
 ```
 
@@ -80,7 +82,15 @@ After initial setup, you can customize `~/.config/opencode/opencode.json` and it
 
 ### Model Provider Selection
 
-By default, OpenCode agents use the `opencode` provider (OpenCode Zen). You can alternatively use **work environment model mappings** for different providers (e.g., Google Vertex AI):
+By default, GPT models use `openai` and Opus models use `opencode`. You can override these per model family:
+
+```bash
+./build.py --chatgpt-provider opencode      # GPT models via OpenCode
+./build.py --chatgpt-provider github-copilot # GPT models via GitHub Copilot
+./build.py --opus-provider github-copilot   # Opus models via GitHub Copilot
+```
+
+For **work environments** with different providers (e.g., Google Vertex AI), use model mappings:
 
 ```bash
 ./build.py opencode --work --install    # Install OpenCode with work model mappings
