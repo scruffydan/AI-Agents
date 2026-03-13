@@ -2,10 +2,12 @@
 """AI-Agents build system - generates configs for multiple agent harnesses.
 
 Usage:
-    ./build.py                    # Build all harnesses
-    ./build.py claude opencode    # Build specific harnesses
-    ./build.py --install          # Build and install
-    ./build.py --work             # Use work model mappings
+    ./build.py                              # Build all (interactive)
+    ./build.py claude opencode              # Build specific harnesses
+    ./build.py --install                    # Build and install (interactive)
+    ./build.py --install --yes              # Install without prompts
+    ./build.py --work                       # Use work model mappings
+    ./build.py --chatgpt-provider opencode  # Set ChatGPT provider
 
 Requires Python 3.11+ (uses tomllib from stdlib).
 """
@@ -14,6 +16,7 @@ import argparse
 import json
 import re
 import shutil
+import sys
 import tomllib
 from pathlib import Path
 
@@ -26,6 +29,8 @@ GREEN = "\033[0;32m"
 YELLOW = "\033[1;33m"
 RED = "\033[0;31m"
 NC = "\033[0m"
+
+CHATGPT_PROVIDERS = ["openai", "opencode", "github-copilot"]
 
 # Harness configurations - add new harnesses here (e.g., codex)
 HARNESSES = {
@@ -54,7 +59,21 @@ HARNESSES = {
 }
 
 
-def parse_prompt(path: Path, model_map: dict | None = None) -> tuple[dict, str]:
+def select_chatgpt_provider(model: str, provider: str) -> str:
+    """Rewrite GPT model prefixes to use specified provider."""
+    if not model:
+        return model
+    for prefix in ["openai/gpt-", "opencode/gpt-", "github-copilot/gpt-"]:
+        if model.startswith(prefix):
+            return f"{provider}/{model.split('/', 1)[1]}"
+    return model
+
+
+def parse_prompt(
+    path: Path,
+    model_map: dict | None = None,
+    chatgpt_provider: str | None = None,
+) -> tuple[dict, str]:
     """Parse TOML frontmatter (+++ delimited) and content from a prompt file."""
     text = path.read_text()
     parts = text.split("+++", 2)
@@ -74,10 +93,14 @@ def parse_prompt(path: Path, model_map: dict | None = None) -> tuple[dict, str]:
 
     content = re.sub(r"\{\{include:(.+?)\}\}", include, content)
 
-    # Apply model mappings
-    if model_map and (oc := config.get("opencode", {})):
+    # Apply model transformations (chatgpt-provider first, then work mappings)
+    if oc := config.get("opencode", {}):
         if model := oc.get("model"):
-            oc["model"] = model_map.get(model, model)
+            if chatgpt_provider and not model_map:
+                model = select_chatgpt_provider(model, chatgpt_provider)
+            if model_map:
+                model = model_map.get(model, model)
+            oc["model"] = model
 
     return config, content.strip()
 
@@ -141,14 +164,18 @@ def emit_file(harness: str, category: str, name: str, config: dict, content: str
 def build(
     harness_names: list[str],
     model_map: dict | None = None,
+    chatgpt_provider: str | None = None,
     install: bool = False,
     include_config: bool = False,
+    auto_yes: bool = False,
 ):
     """Build configs for specified harnesses."""
     print(f"{GREEN}Building AI-Agents configs...{NC}")
     print(f"Source: {SOURCE}")
     print(f"Output: {BUILD}")
     print(f"Harnesses: {', '.join(harness_names)}")
+    if chatgpt_provider:
+        print(f"ChatGPT provider: {chatgpt_provider}")
     print()
 
     # Clean build directory
@@ -163,7 +190,7 @@ def build(
             continue
 
         print(f"{YELLOW}Processing:{NC} {prompt.name}")
-        config, content = parse_prompt(prompt, model_map)
+        config, content = parse_prompt(prompt, model_map, chatgpt_provider)
         name = prompt.stem
         ptype = config["type"]
 
@@ -224,12 +251,48 @@ def build(
         for harness in harness_names:
             dest = HARNESSES[harness]["install_path"]
             src = BUILD / harness
+
+            # Check for existing installation
+            if dest.exists() and not auto_yes:
+                print(f"  {YELLOW}Destination exists:{NC} {dest}")
+                try:
+                    choice = input("  Overwrite? [y/N]: ").strip().lower()
+                except (EOFError, KeyboardInterrupt):
+                    print("\n  Skipping...")
+                    continue
+                if choice not in ("y", "yes"):
+                    print("  Skipping...")
+                    continue
+
             shutil.copytree(src, dest, dirs_exist_ok=True)
             print(f"  {GREEN}Installed:{NC} {harness} -> {dest}")
         print()
         print(f"{GREEN}Installation complete!{NC}")
     else:
         print("Next step: Run ./build.py --install to install configs")
+
+
+def prompt_choice(prompt: str, options: list[str], default: int = 0) -> str:
+    """Interactive menu selection. Returns selected option."""
+    print(f"{YELLOW}{prompt}{NC}")
+    for i, opt in enumerate(options, 1):
+        marker = " (default)" if i == default + 1 else ""
+        print(f"  {i}) {opt}{marker}")
+    print()
+    try:
+        choice = input(f"Choice [1-{len(options)}]: ").strip()
+    except (EOFError, KeyboardInterrupt):
+        print()
+        return options[default]
+    if not choice:
+        return options[default]
+    try:
+        idx = int(choice) - 1
+        if 0 <= idx < len(options):
+            return options[idx]
+    except ValueError:
+        pass
+    return options[default]
 
 
 def main():
@@ -239,15 +302,23 @@ def main():
     parser.add_argument(
         "harnesses",
         nargs="*",
-        default=list(HARNESSES.keys()),
+        default=[],
         choices=list(HARNESSES.keys()) + [[]],
-        help="Harnesses to build (default: all)",
+        help="Harnesses to build (default: prompt or all)",
     )
     parser.add_argument(
         "--install", "-i", action="store_true", help="Install configs after building"
     )
     parser.add_argument(
+        "--yes", "-y", action="store_true", help="Skip confirmation prompts"
+    )
+    parser.add_argument(
         "--work", action="store_true", help="Use work environment model mappings"
+    )
+    parser.add_argument(
+        "--chatgpt-provider",
+        choices=CHATGPT_PROVIDERS,
+        help="ChatGPT provider for OpenCode GPT models",
     )
     parser.add_argument(
         "--init-config",
@@ -256,9 +327,39 @@ def main():
     )
     args = parser.parse_args()
 
-    # Handle empty harnesses list (means build all)
+    interactive = sys.stdin.isatty() and not args.yes
+
+    # Interactive harness selection if none specified
     if not args.harnesses:
-        args.harnesses = list(HARNESSES.keys())
+        if interactive and args.install:
+            choice = prompt_choice(
+                "Select what to install:",
+                ["Both (claude + opencode)", "OpenCode only", "Claude only"],
+            )
+            if "OpenCode" in choice and "claude" not in choice.lower():
+                args.harnesses = ["opencode"]
+            elif "Claude" in choice and "opencode" not in choice.lower():
+                args.harnesses = ["claude"]
+            else:
+                args.harnesses = list(HARNESSES.keys())
+            print()
+        else:
+            args.harnesses = list(HARNESSES.keys())
+
+    # Interactive ChatGPT provider selection for OpenCode
+    chatgpt_provider = args.chatgpt_provider
+    if (
+        interactive
+        and args.install
+        and "opencode" in args.harnesses
+        and not args.work
+        and not chatgpt_provider
+    ):
+        chatgpt_provider = prompt_choice(
+            "Select ChatGPT provider for OpenCode GPT models:",
+            CHATGPT_PROVIDERS,
+        )
+        print()
 
     # Load model mappings if --work specified
     model_map = None
@@ -270,7 +371,14 @@ def main():
             print(f"{YELLOW}Using work model mappings from {mappings_file}{NC}")
             print()
 
-    build(args.harnesses, model_map, args.install, args.init_config)
+    build(
+        args.harnesses,
+        model_map,
+        chatgpt_provider,
+        args.install,
+        args.init_config,
+        args.yes,
+    )
 
 
 if __name__ == "__main__":
