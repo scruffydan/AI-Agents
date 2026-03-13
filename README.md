@@ -37,14 +37,7 @@ Some skills are sourced from [obra/superpowers](https://github.com/obra/superpow
 
 ## Requirements
 
-- **yq** (v4) - YAML processor for build script
-  ```bash
-  brew install yq
-  ```
-- **jq** - JSON processor for work mode model mappings
-  ```bash
-  brew install jq
-  ```
+- **Go** 1.26+ - used by the `ai-agents` CLI and the compatibility wrapper scripts
 
 ## Installation
 
@@ -55,9 +48,11 @@ Some skills are sourced from [obra/superpowers](https://github.com/obra/superpow
 ```
 
 This will:
-1. Run `build.sh` to generate tool-specific configs
+1. Run the Go-backed build pipeline to generate tool-specific configs
 2. Install Claude Code configs to `~/.claude/` (agents, commands, skills)
 3. Install OpenCode configs to `~/.config/opencode/` (agents, commands, skills)
+
+The shell scripts are now thin compatibility wrappers around `go run ./cmd/ai-agents ...`, so you can keep using `./build.sh`, `./install.sh`, and `./opencode-init.sh` or call the Go CLI directly.
 
 ### Options
 
@@ -230,7 +225,7 @@ opencode:
 $ARGUMENTS
 ```
 
-The `build.sh` script parses this and generates the appropriate format for each tool.
+The Go build command parses this and generates the appropriate format for each tool.
 
 ### Adding New Agents
 
@@ -253,7 +248,7 @@ The `build.sh` script parses this and generates the appropriate format for each 
 
 ### Build Process
 
-`build.sh` reads each prompt in `source/prompts/` and generates:
+`ai-agents build` reads each prompt in `source/prompts/` and generates:
 
 **For Claude Code:**
 - `build/claude/agents/{name}.md` - Agent with Claude-specific frontmatter
@@ -262,9 +257,8 @@ The `build.sh` script parses this and generates the appropriate format for each 
 - `build/claude/CLAUDE.md` - From `AGENTS.md`
 
 **For OpenCode:**
-- `build/opencode/agent/{name}.md` - Agent with OpenCode-specific frontmatter
+- `build/opencode/agent/{name}.md` - Subagents and modes both land here with OpenCode frontmatter
 - `build/opencode/command/{name}.md` - Command that references the agent
-- `build/opencode/mode/{name}.md` - Mode with temperature and tool settings
 - `build/opencode/skill/{name}/SKILL.md` - Skills (copied from `source/skills/`)
 - `build/opencode/AGENTS.md` - From `AGENTS.md`
 
