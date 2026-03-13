@@ -7,7 +7,8 @@ Usage:
     ./build.py --install                    # Build and install (interactive)
     ./build.py --install --yes              # Install without prompts
     ./build.py --work                       # Use work model mappings
-    ./build.py --chatgpt-provider opencode  # Set ChatGPT provider
+    ./build.py --chatgpt-provider opencode  # Set GPT provider
+    ./build.py --opus-provider github-copilot  # Set Opus provider
 
 Requires Python 3.11+ (uses tomllib from stdlib).
 """
@@ -18,6 +19,7 @@ import re
 import shutil
 import sys
 import tomllib
+from dataclasses import dataclass, field
 from pathlib import Path
 
 REPO = Path(__file__).parent
@@ -30,7 +32,40 @@ YELLOW = "\033[1;33m"
 RED = "\033[0;31m"
 NC = "\033[0m"
 
-CHATGPT_PROVIDERS = ["openai", "opencode", "github-copilot"]
+# Valid providers per model family
+PROVIDERS = {
+    "gpt": ["openai", "opencode", "github-copilot"],
+    "opus": ["opencode", "github-copilot"],
+}
+
+
+@dataclass
+class ProviderConfig:
+    """Per-model-family provider overrides.
+
+    When --work mode is active, these are ignored and model-mappings.json is used instead.
+    """
+
+    gpt: str = "openai"  # --chatgpt-provider
+    opus: str = "opencode"  # --opus-provider
+
+    def rewrite_model(self, model: str) -> str:
+        """Rewrite model string to use configured provider for its family."""
+        if not model:
+            return model
+
+        # GPT models: */gpt-*
+        if "/gpt-" in model:
+            model_name = model.split("/", 1)[1]
+            return f"{self.gpt}/{model_name}"
+
+        # Opus models: */claude-opus*
+        if "/claude-opus" in model:
+            model_name = model.split("/", 1)[1]
+            return f"{self.opus}/{model_name}"
+
+        return model
+
 
 # Harness configurations - add new harnesses here (e.g., codex)
 HARNESSES = {
@@ -72,7 +107,7 @@ def select_chatgpt_provider(model: str, provider: str) -> str:
 def parse_prompt(
     path: Path,
     model_map: dict | None = None,
-    chatgpt_provider: str | None = None,
+    providers: ProviderConfig | None = None,
 ) -> tuple[dict, str]:
     """Parse TOML frontmatter (+++ delimited) and content from a prompt file."""
     text = path.read_text()
@@ -93,11 +128,11 @@ def parse_prompt(
 
     content = re.sub(r"\{\{include:(.+?)\}\}", include, content)
 
-    # Apply model transformations (chatgpt-provider first, then work mappings)
+    # Apply model transformations (provider rewrite first, then work mappings)
     if oc := config.get("opencode", {}):
         if model := oc.get("model"):
-            if chatgpt_provider and not model_map:
-                model = select_chatgpt_provider(model, chatgpt_provider)
+            if providers and not model_map:
+                model = providers.rewrite_model(model)
             if model_map:
                 model = model_map.get(model, model)
             oc["model"] = model
@@ -164,7 +199,7 @@ def emit_file(harness: str, category: str, name: str, config: dict, content: str
 def build(
     harness_names: list[str],
     model_map: dict | None = None,
-    chatgpt_provider: str | None = None,
+    providers: ProviderConfig | None = None,
     install: bool = False,
     include_config: bool = False,
     auto_yes: bool = False,
@@ -174,8 +209,8 @@ def build(
     print(f"Source: {SOURCE}")
     print(f"Output: {BUILD}")
     print(f"Harnesses: {', '.join(harness_names)}")
-    if chatgpt_provider:
-        print(f"ChatGPT provider: {chatgpt_provider}")
+    if providers:
+        print(f"Providers: gpt={providers.gpt}, opus={providers.opus}")
     print()
 
     # Clean build directory
@@ -190,7 +225,7 @@ def build(
             continue
 
         print(f"{YELLOW}Processing:{NC} {prompt.name}")
-        config, content = parse_prompt(prompt, model_map, chatgpt_provider)
+        config, content = parse_prompt(prompt, model_map, providers)
         name = prompt.stem
         ptype = config["type"]
 
@@ -317,8 +352,13 @@ def main():
     )
     parser.add_argument(
         "--chatgpt-provider",
-        choices=CHATGPT_PROVIDERS,
-        help="ChatGPT provider for OpenCode GPT models",
+        choices=PROVIDERS["gpt"],
+        help="Provider for GPT models (openai, opencode, github-copilot)",
+    )
+    parser.add_argument(
+        "--opus-provider",
+        choices=PROVIDERS["opus"],
+        help="Provider for Claude Opus models (opencode, github-copilot)",
     )
     parser.add_argument(
         "--init-config",
@@ -346,18 +386,24 @@ def main():
         else:
             args.harnesses = list(HARNESSES.keys())
 
-    # Interactive ChatGPT provider selection for OpenCode
-    chatgpt_provider = args.chatgpt_provider
+    # Build provider config from CLI args
+    provider_config = ProviderConfig()
+    if args.chatgpt_provider:
+        provider_config.gpt = args.chatgpt_provider
+    if args.opus_provider:
+        provider_config.opus = args.opus_provider
+
+    # Interactive provider selection for OpenCode (only if no CLI args provided)
     if (
         interactive
         and args.install
         and "opencode" in args.harnesses
         and not args.work
-        and not chatgpt_provider
+        and not args.chatgpt_provider
     ):
-        chatgpt_provider = prompt_choice(
-            "Select ChatGPT provider for OpenCode GPT models:",
-            CHATGPT_PROVIDERS,
+        provider_config.gpt = prompt_choice(
+            "Select provider for GPT models:",
+            PROVIDERS["gpt"],
         )
         print()
 
@@ -374,7 +420,7 @@ def main():
     build(
         args.harnesses,
         model_map,
-        chatgpt_provider,
+        provider_config if not args.work else None,
         args.install,
         args.init_config,
         args.yes,
