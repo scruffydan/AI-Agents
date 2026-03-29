@@ -40,25 +40,13 @@ def install_project(options: InstallOptions, prompt: Prompt = input) -> InstallR
         )
 
     plan = build_install_plan(harnesses, build_dir, home_dir, options.selected_components)
-    installed: list[str] = []
-    if not options.dry_run:
-        for harness in harnesses:
-            installed.extend(
-                install_harness(
-                    harness,
-                    build_dir,
-                    home_dir,
-                    options.force,
-                    prompt,
-                    options.selected_components,
-                )
-            )
+    installed = execute_install_plan(plan, force=options.force, prompt=prompt) if not options.dry_run else ()
 
     return InstallReport(
         build_dir=build_dir,
         harnesses=harnesses,
         plan=plan,
-        installed_targets=tuple(installed),
+        installed_targets=installed,
         dry_run=options.dry_run,
     )
 
@@ -90,43 +78,21 @@ def build_install_plan(
     return InstallPlan(build_dir=build_dir, actions=tuple(actions))
 
 
-def install_harness(
-    harness: HarnessSpec,
-    build_dir: Path,
-    home_dir: Path,
-    force: bool,
-    prompt: Prompt,
-    selected_components: tuple[str, ...],
-) -> list[str]:
+def execute_install_plan(plan: InstallPlan, force: bool, prompt: Prompt) -> tuple[str, ...]:
     installed: list[str] = []
-    build_root = build_dir / harness.output_layout.root
-
-    for entry in harness.install_entries_for(selected_components or None):
-        source = resolve_relative_to(build_root, entry.source, f"install source for {harness.name}")
-        destination = home_dir / entry.destination
-        if entry.kind == "tree":
-            installed.extend(install_tree(source, destination, force, prompt, label=entry.label))
+    for action in plan.actions:
+        if action.status != "ready":
             continue
-        installed.extend(install_file(source, destination, force, prompt, label=entry.label))
-    return installed
-
-
-def install_tree(source: Path, destination: Path, force: bool, prompt: Prompt, label: str) -> list[str]:
-    if not source.exists():
-        return []
-    if not should_write(destination, force, prompt, label=label):
-        return []
-    replace_tree(source, destination)
-    return [str(destination)]
-
-
-def install_file(source: Path, destination: Path, force: bool, prompt: Prompt, label: str) -> list[str]:
-    if not source.exists():
-        return []
-    if not should_write(destination, force, prompt, label=label):
-        return []
-    replace_file(source, destination)
-    return [str(destination)]
+        if not should_write(action.destination, force, prompt, label=action.label):
+            continue
+        if action.kind == "tree":
+            replace_tree(action.source, action.destination)
+        elif action.kind == "file":
+            replace_file(action.source, action.destination)
+        else:
+            raise ValueError(f"unknown install action kind {action.kind!r}")
+        installed.append(str(action.destination))
+    return tuple(installed)
 
 
 def should_write(path: Path, force: bool, prompt: Prompt, label: str | None = None) -> bool:
