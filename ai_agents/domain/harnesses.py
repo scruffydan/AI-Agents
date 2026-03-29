@@ -14,7 +14,6 @@ OutputComponent = Literal["base", "documents", "skills"]
 class OutputLayout:
     root: str
     kind_directories: dict[DocumentKind, str]
-    skills_dir: str
 
 
 @dataclass(frozen=True)
@@ -50,7 +49,10 @@ class HarnessSpec:
         return Path(self.output_layout.root) / self.base_filename
 
     def skill_output_path(self, skill_name: str) -> Path:
-        return Path(self.output_layout.root) / self.output_layout.skills_dir / skill_name
+        skill_dir = self.output_dir_for(DocumentKind.SKILL)
+        if skill_dir is None:
+            raise ValueError(f"harness {self.name!r} does not define a skill output directory")
+        return Path(self.output_layout.root) / skill_dir / skill_name
 
     def install_entries_for(self, components: tuple[OutputComponent, ...] | None = None) -> tuple[InstallEntry, ...]:
         if not components:
@@ -79,7 +81,6 @@ HARNESS_REGISTRY: dict[str, HarnessSpec] = {
                 DocumentKind.SKILL: "skill",
                 DocumentKind.BASE: ".",
             },
-            skills_dir="skill",
         ),
         install_entries=(
             InstallEntry(
@@ -147,7 +148,6 @@ HARNESS_REGISTRY: dict[str, HarnessSpec] = {
                 DocumentKind.SKILL: "skills",
                 DocumentKind.BASE: ".",
             },
-            skills_dir="skills",
         ),
         install_entries=(
             InstallEntry(
@@ -201,7 +201,6 @@ HARNESS_REGISTRY: dict[str, HarnessSpec] = {
                 DocumentKind.SKILL: ".agents/skills",
                 DocumentKind.BASE: ".",
             },
-            skills_dir=".agents/skills",
         ),
         install_entries=(
             InstallEntry(
