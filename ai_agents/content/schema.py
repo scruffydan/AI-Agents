@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import re
 import tomllib
 from pathlib import Path
 from typing import Any
@@ -12,10 +11,7 @@ from ai_agents.domain.documents import Document, DocumentKind, TargetOverride
 def parse_document(path: Path, include_dir: Path | None = None) -> Document:
     frontmatter, body = split_frontmatter(path.read_text(), path)
     data = tomllib.loads(frontmatter)
-
-    if "kind" in data and "targets" in data:
-        return parse_v2_document(path, data, body, include_dir)
-    return parse_legacy_document(path, data, body, include_dir)
+    return parse_v2_document(path, data, body, include_dir)
 
 
 def parse_v2_document(path: Path, data: dict[str, Any], body: str, include_dir: Path | None) -> Document:
@@ -46,45 +42,6 @@ def parse_v2_document(path: Path, data: dict[str, Any], body: str, include_dir: 
         body=content,
         model_profile=model_profile,
         shared_metadata=shared_metadata,
-        targets=targets,
-        source_path=path,
-    )
-
-
-def parse_legacy_document(path: Path, data: dict[str, Any], body: str, include_dir: Path | None) -> Document:
-    description = require_string(data, "description", path)
-    kind_value = require_string(data, "type", path)
-    try:
-        kind = DocumentKind(kind_value)
-    except ValueError as exc:
-        expected = ", ".join(kind.value for kind in DocumentKind if kind != DocumentKind.SKILL and kind != DocumentKind.BASE)
-        raise ValueError(f"{path}: invalid legacy type {kind_value!r}; expected one of: {expected}") from exc
-
-    claude_values = require_table(data, "claude", default={}, path=path)
-    opencode_values = require_table(data, "opencode", default={}, path=path)
-    model_profile = infer_legacy_model_profile(path.stem, kind, claude_values, opencode_values)
-
-    targets: dict[str, TargetOverride] = {
-        "opencode": TargetOverride(metadata=normalize_legacy_metadata(opencode_values)),
-        "codex": TargetOverride(metadata=default_codex_metadata(kind)),
-    }
-
-    if kind != DocumentKind.MODE or claude_values:
-        targets["claude"] = TargetOverride(metadata=normalize_legacy_metadata(claude_values))
-    elif kind == DocumentKind.MODE:
-        targets["claude"] = TargetOverride(metadata={})
-
-    content = body.strip()
-    if include_dir is not None:
-        content = expand_includes(content, include_dir)
-
-    return Document(
-        name=path.stem,
-        description=description,
-        kind=kind,
-        body=content,
-        model_profile=model_profile,
-        shared_metadata={},
         targets=targets,
         source_path=path,
     )
@@ -170,65 +127,3 @@ def require_string_list(
     if not isinstance(value, list) or not all(isinstance(item, str) and item for item in value):
         raise ValueError(f"{path}: field {scope}.{key} must be a list of non-empty strings")
     return tuple(value)
-
-
-LEGACY_PROFILE_OVERRIDES = {
-    "brainstorm": "creative",
-    "thorough-plan": "planner",
-    "code-full-review": "deep_review",
-    "code-performance": "deep_review",
-    "code-readability": "deep_review",
-    "code-redundancy": "deep_review",
-    "code-security": "deep_review",
-    "code-simplifier": "deep_review",
-    "sidebar": "deep_review",
-    "docs-fetcher": "default",
-    "explore": "default",
-    "git-commit": "default",
-}
-
-
-def infer_legacy_model_profile(
-    name: str,
-    kind: DocumentKind,
-    claude_values: dict[str, Any],
-    opencode_values: dict[str, Any],
-) -> str:
-    if name in LEGACY_PROFILE_OVERRIDES:
-        return LEGACY_PROFILE_OVERRIDES[name]
-
-    if kind == DocumentKind.MODE:
-        return "planner"
-
-    claude_model = str(claude_values.get("model", ""))
-    opencode_reasoning = str(opencode_values.get("reasoningEffort", ""))
-    if "opus" in claude_model or opencode_reasoning == "high":
-        return "deep_review"
-    return "default"
-
-
-def normalize_legacy_metadata(values: dict[str, Any]) -> dict[str, Any]:
-    normalized: dict[str, Any] = {}
-    for key, value in values.items():
-        normalized[to_snake_case(key)] = normalize_legacy_value(value)
-    return normalized
-
-
-def normalize_legacy_value(value: Any) -> Any:
-    if isinstance(value, dict):
-        return {to_snake_case(str(key)): normalize_legacy_value(nested) for key, nested in value.items()}
-    if isinstance(value, list):
-        return [normalize_legacy_value(item) for item in value]
-    return value
-
-
-def to_snake_case(value: str) -> str:
-    return re.sub(r"(?<!^)(?=[A-Z])", "_", value).lower()
-
-
-def default_codex_metadata(kind: DocumentKind) -> dict[str, Any]:
-    if kind == DocumentKind.SUBAGENT:
-        return {"sandbox": "workspace-write", "approval_policy": "on-request"}
-    if kind == DocumentKind.MODE:
-        return {"sandbox": "read-only", "approval_policy": "on-request"}
-    return {"sandbox": "workspace-write", "approval_policy": "on-request"}

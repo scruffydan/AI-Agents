@@ -14,7 +14,7 @@ class DocumentKind(str, Enum):
     BASE = "base"
 
 
-@dataclass(frozen=True)
+@dataclass
 class TargetOverride:
     enabled: bool = True
     metadata: dict[str, Any] = field(default_factory=dict)
@@ -23,7 +23,7 @@ class TargetOverride:
     partials: tuple[str, ...] = ()
 
 
-@dataclass(frozen=True)
+@dataclass
 class Document:
     name: str
     description: str

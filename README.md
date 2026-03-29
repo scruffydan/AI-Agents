@@ -105,9 +105,13 @@ Use the existing helper script:
 ./opencode-init.sh
 ```
 
+The helper refuses to overwrite symlink targets and installs `opencode.json` with mode `600`.
+
 ## Output Layout
 
 Build output is written to `build/` by default.
+
+Custom build output paths may point elsewhere when creating a fresh directory, but existing output directories must stay inside `build/`.
 
 ### OpenCode
 
@@ -144,14 +148,11 @@ build/codex/
 - `source/skills/` contains reusable skill directories
 - `source/model-profiles.toml` contains logical model profiles for default and work environments
 
-The build system supports:
-
-- the new harness-neutral schema with `kind`, `model_profile`, and `targets.<harness>`
-- the legacy prompt schema already present in `source/prompts/`, which is normalized during build
+Prompt sources use the harness-neutral schema with `kind`, `model_profile`, and `targets.<harness>`.
 
 ## Model Profiles
 
-Model selection is driven by logical profiles instead of prompt-local provider rewrites.
+Model selection and reusable harness tuning are driven by logical profiles instead of prompt-local provider rewrites.
 
 Examples:
 

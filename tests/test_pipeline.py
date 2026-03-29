@@ -8,12 +8,13 @@ from ai_agents.content.validation import validate_document
 from ai_agents.domain.harnesses import get_harness
 from ai_agents.profiles.resolver import load_model_profiles, resolve_model_profile
 from ai_agents.render.opencode import render_document
+from tests.helpers import fixtures_dir, repo_root
 
 
 class PipelineTests(unittest.TestCase):
     def setUp(self) -> None:
-        self.repo_root = Path(__file__).resolve().parent.parent
-        self.fixtures = self.repo_root / "tests" / "fixtures"
+        self.repo_root = repo_root()
+        self.fixtures = fixtures_dir()
         self.profiles = load_model_profiles(self.repo_root / "source" / "model-profiles.toml")
 
     def test_parses_valid_harness_neutral_document(self) -> None:

@@ -15,10 +15,6 @@ def load_model_profiles(path: Path) -> dict[str, dict[str, dict[str, dict[str, A
     return profiles
 
 
-def profile_names(profiles: dict[str, dict[str, dict[str, dict[str, Any]]]]) -> list[str]:
-    return sorted(profiles)
-
-
 def resolve_model_profile(
     profiles: dict[str, dict[str, dict[str, dict[str, Any]]]],
     profile_name: str,

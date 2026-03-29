@@ -11,7 +11,6 @@ class BuildOptions:
     selected_harnesses: tuple[str, ...] = ()
     environment: str = "default"
     include_skills: bool = True
-    include_base_files: bool = True
 
 
 @dataclass(frozen=True)

@@ -1,20 +1,22 @@
 +++
 description = "Simplifies and refines code for clarity, consistency, and maintainability while preserving all functionality. Focuses on recently modified code unless instructed otherwise."
-type = "subagent"
+kind = "subagent"
+model_profile = "deep_review"
 
-[claude]
-tools = "Read, Glob, Grep"
-model = "claude-opus-4-5"
-
-[opencode]
+[targets.opencode]
 mode = "subagent"
-model = "opencode/gpt-5.4"
-reasoningEffort = "high"
 
-[opencode.permission]
+[targets.opencode.permission]
 edit = "deny"
 bash = "deny"
 question = "deny"
+
+[targets.claude]
+tools = "Read, Glob, Grep"
+
+[targets.codex]
+sandbox = "workspace-write"
+approval_policy = "on-request"
 +++
 
 # Code Simplifier Agent
