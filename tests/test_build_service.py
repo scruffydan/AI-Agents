@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 import tempfile
 import unittest
@@ -33,3 +34,34 @@ class BuildServiceTests(unittest.TestCase):
             self.assertTrue((output_dir / "codex" / ".agents" / "skills" / "command-code-full-review" / "SKILL.md").exists())
             self.assertTrue((output_dir / "codex" / ".agents" / "skills" / "git-commit" / "SKILL.md").exists())
             self.assertTrue((output_dir / "codex" / "AGENTS.md").exists())
+            self.assertEqual(report.manifest_path.resolve(), (output_dir / "manifest.json").resolve())
+
+            manifest = json.loads((output_dir / "manifest.json").read_text())
+            self.assertEqual(manifest["schema_version"], 1)
+            self.assertEqual(manifest["environment"], "default")
+            self.assertEqual(manifest["harnesses"], ["opencode", "claude", "codex"])
+            self.assertIn("source/prompts/code-security.md", manifest["documents"])
+
+            opencode_security = next(
+                artifact
+                for artifact in manifest["artifacts"]
+                if artifact["relative_output_path"] == "opencode/agent/code-security.md"
+            )
+            codex_skill = next(
+                artifact
+                for artifact in manifest["artifacts"]
+                if artifact["relative_output_path"] == "codex/.agents/skills/git-commit"
+            )
+            codex_base = next(
+                artifact
+                for artifact in manifest["artifacts"]
+                if artifact["relative_output_path"] == "codex/AGENTS.md"
+            )
+
+            self.assertEqual(opencode_security["component"], "documents")
+            self.assertEqual(opencode_security["source_path"], "source/prompts/code-security.md")
+            self.assertEqual(opencode_security["model_profile"], "deep_review")
+            self.assertEqual(codex_skill["component"], "skills")
+            self.assertEqual(codex_skill["source_path"], "source/skills/git-commit")
+            self.assertIsNone(codex_skill["model_profile"])
+            self.assertEqual(codex_base["component"], "base")
