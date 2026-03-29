@@ -40,6 +40,11 @@ class HarnessRegistryTests(unittest.TestCase):
         self.assertEqual([entry.label for entry in base_entries], ["codex base instructions"])
         self.assertEqual([entry.label for entry in skill_entries], ["codex skills"])
 
+    def test_install_entries_without_filter_return_all_components(self) -> None:
+        spec = get_harness("opencode")
+
+        self.assertEqual(spec.install_entries_for(), spec.install_entries)
+
     def test_unknown_harness_raises_clear_error(self) -> None:
         with self.assertRaisesRegex(ValueError, "unknown harness"):
             get_harness("unknown")

@@ -60,7 +60,7 @@ def build_install_plan(
     actions: list[InstallAction] = []
     for harness in harnesses:
         build_root = build_dir / harness.output_layout.root
-        for entry in harness.install_entries_for(selected_components or None):
+        for entry in harness.install_entries_for(selected_components):
             source = resolve_relative_to(build_root, entry.source, f"install source for {harness.name}")
             destination = home_dir / entry.destination
             status = "ready" if source.exists() else "missing_source"
