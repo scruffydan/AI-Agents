@@ -8,6 +8,7 @@ from ai_agents.content.schema import parse_document
 from ai_agents.content.validation import validate_document
 from ai_agents.domain.harnesses import get_harness
 from ai_agents.profiles.resolver import load_model_profiles, resolve_model_profile
+from ai_agents.render import claude as render_claude
 from ai_agents.render.opencode import render_document
 from tests.helpers import fixtures_dir, repo_root
 
@@ -47,6 +48,27 @@ class PipelineTests(unittest.TestCase):
         self.assertIsNotNone(artifact)
         self.assertIn("reasoningEffort", artifact.content)
         self.assertNotIn("reasoning_effort", artifact.content)
+
+    def test_opencode_command_omits_reasoning_setting(self) -> None:
+        document = parse_document(self.repo_root / "source" / "prompts" / "code-full-review.md")
+        resolved = resolve_model_profile(self.profiles, document.model_profile, "default", "opencode")
+
+        artifact = render_document(document, resolved, harness=get_harness("opencode"))
+
+        self.assertIsNotNone(artifact)
+        self.assertIn('model: "openai/gpt-5.4"', artifact.content)
+        self.assertNotIn("reasoningEffort", artifact.content)
+
+    def test_claude_subagent_uses_full_model_without_implicit_effort(self) -> None:
+        document = parse_document(self.repo_root / "source" / "prompts" / "code-security.md")
+        resolved = resolve_model_profile(self.profiles, document.model_profile, "default", "claude")
+
+        artifact = render_claude.render_document(document, resolved, harness=get_harness("claude"))
+
+        self.assertIsNotNone(artifact)
+        self.assertIn('model: "claude-opus-4-5"', artifact.content)
+        self.assertNotIn('model: "opus"', artifact.content)
+        self.assertNotIn("effort:", artifact.content)
 
     def test_validate_rejects_unknown_metadata_key(self) -> None:
         document = parse_document(self.fixtures / "source" / "security-review.md")

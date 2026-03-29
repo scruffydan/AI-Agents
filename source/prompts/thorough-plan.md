@@ -9,8 +9,6 @@ model_profile = "planner"
 edit = "deny"
 bash = "deny"
 
-[targets.claude]
-
 [targets.codex]
 sandbox = "read-only"
 approval_policy = "on-request"

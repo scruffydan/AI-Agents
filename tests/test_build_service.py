@@ -29,7 +29,7 @@ class BuildServiceTests(unittest.TestCase):
             self.assertGreater(report.document_count, 0)
             self.assertTrue((output_dir / "opencode" / "agent" / "code-security.md").exists())
             self.assertTrue((output_dir / "claude" / "agents" / "code-security.md").exists())
-            self.assertTrue((output_dir / "claude" / "commands" / "brainstorm.md").exists())
+            self.assertFalse((output_dir / "claude" / "commands" / "brainstorm.md").exists())
             self.assertTrue((output_dir / "codex" / ".codex" / "agents" / "code-security.toml").exists())
             self.assertTrue((output_dir / "codex" / ".agents" / "skills" / "command-code-full-review" / "SKILL.md").exists())
             self.assertTrue((output_dir / "codex" / ".agents" / "skills" / "git-commit" / "SKILL.md").exists())
@@ -65,3 +65,5 @@ class BuildServiceTests(unittest.TestCase):
             self.assertEqual(codex_skill["source_path"], "source/skills/git-commit")
             self.assertIsNone(codex_skill["model_profile"])
             self.assertEqual(codex_base["component"], "base")
+
+            self.assertNotIn("claude/commands/brainstorm.md", [artifact["relative_output_path"] for artifact in manifest["artifacts"]])

@@ -1,8 +1,8 @@
 ---
 description: "Security review specialist for identifying vulnerabilities and secure coding issues."
-model: "openai/gpt-5.4"
 role: "agent"
 mode: "subagent"
+model: "openai/gpt-5.4"
 reasoningEffort: "high"
 permission:
   edit: "deny"

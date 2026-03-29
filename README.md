@@ -185,6 +185,8 @@ Unsupported compatibility-only fields such as top-level `[shared]` blocks or tar
 
 Harness-specific compatibility rules live in `ai_agents/domain/harnesses.py`. The harness registry is also the source of truth for logical output/install components such as `base`, `documents`, and `skills`.
 
+Mode prompts currently render for OpenCode only. Claude builds subagents, commands, skills, and base instructions from the shared source tree.
+
 ## Model Profiles
 
 Model selection and reusable harness tuning are driven by logical profiles instead of prompt-local provider rewrites.

@@ -135,7 +135,6 @@ HARNESS_REGISTRY: dict[str, HarnessSpec] = {
         supported_kinds=(
             DocumentKind.SUBAGENT,
             DocumentKind.COMMAND,
-            DocumentKind.MODE,
             DocumentKind.SKILL,
             DocumentKind.BASE,
         ),
@@ -144,7 +143,6 @@ HARNESS_REGISTRY: dict[str, HarnessSpec] = {
             kind_directories={
                 DocumentKind.SUBAGENT: "agents",
                 DocumentKind.COMMAND: "commands",
-                DocumentKind.MODE: "commands",
                 DocumentKind.SKILL: "skills",
                 DocumentKind.BASE: ".",
             },
