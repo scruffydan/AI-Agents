@@ -52,3 +52,10 @@ class CliTests(unittest.TestCase):
         self.assertIn("Harnesses: opencode", output)
         self.assertIn("Components: base", output)
         self.assertRegex(output, r"Planned actions: [1-9]\d*")
+
+    def test_doctor_json_output(self) -> None:
+        exit_code, output = self.run_cli("doctor", "--json")
+
+        self.assertEqual(exit_code, 0)
+        self.assertIn('"checked"', output)
+        self.assertIn('"ok": true', output)

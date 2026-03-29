@@ -7,6 +7,7 @@ from typing import Sequence
 from ai_agents.build.service import build_project
 from ai_agents.content.loader import load_documents
 from ai_agents.content.validation import lint_shared_content, validate_document
+from ai_agents.doctor import render_doctor_report, run_doctor
 from ai_agents.domain.harnesses import OutputComponent, all_harnesses, select_harnesses
 from ai_agents.domain.options import BuildOptions, InstallOptions
 from ai_agents.install.service import install_project
@@ -70,6 +71,10 @@ def build_parser() -> argparse.ArgumentParser:
         help="Install only selected components. Repeatable.",
     )
 
+    doctor_parser = subparsers.add_parser("doctor", help="Verify source, build, and installed state")
+    doctor_parser.add_argument("--installed", action="store_true", help="Verify installed targets under the home directory")
+    doctor_parser.add_argument("--json", action="store_true", help="Emit machine-readable JSON")
+
     subparsers.add_parser("lint", help="Validate source content and harness neutrality")
     return parser
 
@@ -84,6 +89,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         return handle_list_harnesses()
     if args.command == "install":
         return handle_install(args)
+    if args.command == "doctor":
+        return handle_doctor(args)
     if args.command == "lint":
         return handle_lint()
 
@@ -175,3 +182,14 @@ def handle_lint() -> int:
     print(f"Documents: {len(documents)}")
     print("Lint passed")
     return 0
+
+
+def handle_doctor(args: argparse.Namespace) -> int:
+    report = run_doctor(REPO_ROOT, verify_installed=args.installed)
+    if args.json:
+        import json
+
+        print(json.dumps(report.to_dict(), indent=2))
+    else:
+        print(render_doctor_report(report))
+    return 0 if report.ok else 1
