@@ -1,19 +1,22 @@
 +++
 description = "Answer general questions unrelated to the current coding session. Use this agent to handle tangential questions without consuming main conversation context."
-type = "subagent"
+kind = "subagent"
+model_profile = "deep_review"
 
-[claude]
-tools = "WebFetch"
-model = "claude-opus-4-5"
-
-[opencode]
+[targets.opencode]
 mode = "subagent"
-model = "openai/gpt-5.4"
 
-[opencode.permission]
+[targets.opencode.permission]
 edit = "deny"
 bash = "deny"
 question = "deny"
+
+[targets.claude]
+tools = "WebFetch"
+
+[targets.codex]
+sandbox = "workspace-write"
+approval_policy = "on-request"
 +++
 
 # Sidebar Agent

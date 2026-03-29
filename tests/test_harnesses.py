@@ -8,12 +8,12 @@ from ai_agents.domain.harnesses import get_harness, select_harnesses
 
 class HarnessRegistryTests(unittest.TestCase):
     def test_default_selection_is_opencode_only(self) -> None:
-        selected = select_harnesses((), all_harnesses=False)
+        selected = select_harnesses((), include_all=False)
 
         self.assertEqual([spec.name for spec in selected], ["opencode"])
 
     def test_all_selection_returns_every_registered_harness(self) -> None:
-        selected = select_harnesses((), all_harnesses=True)
+        selected = select_harnesses((), include_all=True)
 
         self.assertEqual([spec.name for spec in selected], ["opencode", "claude", "codex"])
 

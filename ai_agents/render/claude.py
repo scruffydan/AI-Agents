@@ -3,8 +3,7 @@ from __future__ import annotations
 from ai_agents.domain.documents import Document, DocumentKind, TargetOverride
 from ai_agents.domain.harnesses import HarnessSpec, get_harness
 from ai_agents.domain.models import ResolvedModelConfig
-from ai_agents.render.base import Artifact, to_yaml
-from ai_agents.render.opencode import merge_body
+from ai_agents.render.base import Artifact, merge_body, render_markdown_artifact
 
 
 def render_document(document: Document, resolved: ResolvedModelConfig, harness: HarnessSpec | None = None) -> Artifact | None:
@@ -19,8 +18,7 @@ def render_document(document: Document, resolved: ResolvedModelConfig, harness: 
 
     frontmatter = build_frontmatter(document, override, resolved)
     body = merge_body(document, override)
-    content = f"---\n{to_yaml(frontmatter)}\n---\n\n{body}\n"
-    return Artifact(relative_path=f"{spec.output_layout.root}/{output_dir}/{document.name}.md", content=content)
+    return render_markdown_artifact(f"{spec.output_layout.root}/{output_dir}/{document.name}.md", frontmatter, body)
 
 
 def build_frontmatter(

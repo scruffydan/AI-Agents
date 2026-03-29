@@ -4,11 +4,12 @@ from pathlib import Path
 import unittest
 
 from ai_agents.profiles.resolver import load_model_profiles, resolve_model_profile
+from tests.helpers import repo_root
 
 
 class ProfileResolverTests(unittest.TestCase):
     def setUp(self) -> None:
-        self.repo_root = Path(__file__).resolve().parent.parent
+        self.repo_root = repo_root()
         self.profiles = load_model_profiles(self.repo_root / "source" / "model-profiles.toml")
 
     def test_resolves_default_opencode_profile(self) -> None:

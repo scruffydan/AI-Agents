@@ -83,7 +83,7 @@ def main(argv: Sequence[str] | None = None) -> int:
 
 
 def handle_build(args: argparse.Namespace) -> int:
-    selected = select_harnesses(args.harnesses, all_harnesses=args.all)
+    selected = select_harnesses(args.harnesses, include_all=args.all)
     options = BuildOptions(
         repo_root=REPO_ROOT,
         output_dir=args.output,
@@ -115,7 +115,7 @@ def handle_list_harnesses() -> int:
 
 
 def handle_install(args: argparse.Namespace) -> int:
-    selected = select_harnesses(args.harnesses, all_harnesses=args.all)
+    selected = select_harnesses(args.harnesses, include_all=args.all)
     report = install_project(
         InstallOptions(
             repo_root=REPO_ROOT,

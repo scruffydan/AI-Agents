@@ -6,11 +6,12 @@ import unittest
 
 from ai_agents.domain.options import InstallOptions
 from ai_agents.install.service import install_project
+from tests.helpers import repo_root
 
 
 class InstallServiceTests(unittest.TestCase):
     def setUp(self) -> None:
-        self.repo_root = Path(__file__).resolve().parent.parent
+        self.repo_root = repo_root()
 
     def test_install_project_installs_all_harnesses(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

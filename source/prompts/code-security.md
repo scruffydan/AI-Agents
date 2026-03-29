@@ -1,20 +1,22 @@
 +++
 description = "Security review specialist for identifying vulnerabilities and ensuring secure coding practices. Invoke for security audits, vulnerability assessments, and OWASP compliance checks."
-type = "subagent"
+kind = "subagent"
+model_profile = "deep_review"
 
-[claude]
-tools = "Read, Glob, Grep"
-model = "claude-opus-4-5"
-
-[opencode]
+[targets.opencode]
 mode = "subagent"
-model = "opencode/gpt-5.4"
-reasoningEffort = "high"
 
-[opencode.permission]
+[targets.opencode.permission]
 edit = "deny"
 bash = "deny"
 question = "deny"
+
+[targets.claude]
+tools = "Read, Glob, Grep"
+
+[targets.codex]
+sandbox = "workspace-write"
+approval_policy = "on-request"
 +++
 
 # Code Security Agent

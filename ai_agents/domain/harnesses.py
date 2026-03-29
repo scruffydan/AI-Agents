@@ -2,11 +2,12 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Literal
 
 from ai_agents.domain.documents import DocumentKind
 
 
-@dataclass(frozen=True)
+@dataclass
 class OutputLayout:
     root: str
     kind_directories: dict[DocumentKind, str]
@@ -15,6 +16,14 @@ class OutputLayout:
 
 
 @dataclass(frozen=True)
+class InstallEntry:
+    source: Path
+    destination: Path
+    kind: Literal["tree", "file"]
+    label: str
+
+
+@dataclass
 class HarnessSpec:
     name: str
     default_selected: bool
@@ -22,6 +31,7 @@ class HarnessSpec:
     supported_kinds: tuple[DocumentKind, ...]
     output_layout: OutputLayout
     install_target: Path
+    install_entries: tuple[InstallEntry, ...]
     base_filename: str
     capabilities: tuple[str, ...]
     supported_metadata_keys: frozenset[str]
@@ -54,6 +64,14 @@ HARNESS_REGISTRY: dict[str, HarnessSpec] = {
             skills_dir="skill",
         ),
         install_target=Path.home() / ".config" / "opencode",
+        install_entries=(
+            InstallEntry(
+                source=Path("."),
+                destination=Path(".config") / "opencode",
+                kind="tree",
+                label="opencode",
+            ),
+        ),
         base_filename="AGENTS.md",
         capabilities=("modes", "permissions", "skills"),
         supported_metadata_keys=frozenset(
@@ -95,6 +113,14 @@ HARNESS_REGISTRY: dict[str, HarnessSpec] = {
             skills_dir="skills",
         ),
         install_target=Path.home() / ".claude",
+        install_entries=(
+            InstallEntry(
+                source=Path("."),
+                destination=Path(".claude"),
+                kind="tree",
+                label="claude",
+            ),
+        ),
         base_filename="CLAUDE.md",
         capabilities=("skills", "tools"),
         supported_metadata_keys=frozenset({"role", "tools", "model"}),
@@ -123,6 +149,26 @@ HARNESS_REGISTRY: dict[str, HarnessSpec] = {
             commands_as_skills=True,
         ),
         install_target=Path.home() / ".codex",
+        install_entries=(
+            InstallEntry(
+                source=Path(".codex"),
+                destination=Path(".codex"),
+                kind="tree",
+                label="codex agents",
+            ),
+            InstallEntry(
+                source=Path(".agents") / "skills",
+                destination=Path(".agents") / "skills",
+                kind="tree",
+                label="codex skills",
+            ),
+            InstallEntry(
+                source=Path("AGENTS.md"),
+                destination=Path(".codex") / "AGENTS.md",
+                kind="file",
+                label="codex base instructions",
+            ),
+        ),
         base_filename="AGENTS.md",
         capabilities=("sandbox", "approval_policy", "skills"),
         supported_metadata_keys=frozenset({"role", "model", "sandbox", "approval_policy"}),
@@ -146,9 +192,9 @@ def get_harness(name: str) -> HarnessSpec:
         raise ValueError(f"unknown harness {name!r}; expected one of: {known}") from exc
 
 
-def select_harnesses(requested: list[str] | tuple[str, ...] | None, all_harnesses: bool) -> tuple[HarnessSpec, ...]:
-    if all_harnesses:
-        return all_harnesses_fn()
+def select_harnesses(requested: list[str] | tuple[str, ...] | None, include_all: bool) -> tuple[HarnessSpec, ...]:
+    if include_all:
+        return all_harnesses()
 
     if not requested:
         return default_harnesses()
@@ -161,7 +207,3 @@ def select_harnesses(requested: list[str] | tuple[str, ...] | None, all_harnesse
         seen.add(name)
         selected.append(get_harness(name))
     return tuple(selected)
-
-
-def all_harnesses_fn() -> tuple[HarnessSpec, ...]:
-    return all_harnesses()

@@ -1,20 +1,22 @@
 +++
 description = "Explore and answer questions about the codebase. Use this agent to find files, search code, understand implementations, and trace dependencies without consuming main conversation context."
-type = "subagent"
+kind = "subagent"
+model_profile = "default"
 
-[claude]
-tools = "Glob, Grep, Read, List"
-model = "claude-sonnet-4-6"
-
-[opencode]
+[targets.opencode]
 mode = "subagent"
-model = "openai/gpt-5.4"
-reasoningEffort = "high"
 
-[opencode.permission]
+[targets.opencode.permission]
 edit = "deny"
 bash = "deny"
 question = "deny"
+
+[targets.claude]
+tools = "Glob, Grep, Read, List"
+
+[targets.codex]
+sandbox = "workspace-write"
+approval_policy = "on-request"
 +++
 
 # Codebase Explorer Agent

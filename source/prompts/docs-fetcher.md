@@ -1,20 +1,22 @@
 +++
 description = "Fetch and extract relevant documentation from URLs. Use this agent when you need specific information from external documentation without flooding the main context with entire pages."
-type = "subagent"
+kind = "subagent"
+model_profile = "default"
 
-[claude]
-tools = "WebFetch"
-model = "claude-sonnet-4-6"
-
-[opencode]
+[targets.opencode]
 mode = "subagent"
-model = "openai/gpt-5.4"
-reasoningEffort = "high"
 
-[opencode.permission]
+[targets.opencode.permission]
 edit = "deny"
 bash = "deny"
 question = "deny"
+
+[targets.claude]
+tools = "WebFetch"
+
+[targets.codex]
+sandbox = "workspace-write"
+approval_policy = "on-request"
 +++
 
 # Documentation Fetcher Agent
