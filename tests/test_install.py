@@ -5,7 +5,7 @@ import tempfile
 import unittest
 
 from ai_agents.domain.options import InstallOptions
-from ai_agents.install.service import init_opencode_config, install_project
+from ai_agents.install.service import install_project
 
 
 class InstallServiceTests(unittest.TestCase):
@@ -35,11 +35,3 @@ class InstallServiceTests(unittest.TestCase):
             self.assertTrue((home_dir / ".codex" / "agents" / "code-security.toml").exists())
             self.assertTrue((home_dir / ".agents" / "skills" / "command-code-full-review" / "SKILL.md").exists())
             self.assertTrue((home_dir / ".codex" / "AGENTS.md").exists())
-
-    def test_init_opencode_config_copies_default_config(self) -> None:
-        with tempfile.TemporaryDirectory() as tmp:
-            home_dir = Path(tmp) / "home"
-            destination = init_opencode_config(self.repo_root, force=True, home_dir=home_dir)
-
-            self.assertEqual(destination, (home_dir / ".config" / "opencode" / "opencode.json").resolve())
-            self.assertTrue(destination.exists())

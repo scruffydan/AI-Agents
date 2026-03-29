@@ -44,19 +44,6 @@ def install_project(options: InstallOptions, prompt: Prompt = input) -> InstallR
     return InstallReport(build_dir=build_dir, harnesses=harnesses, installed_targets=tuple(installed))
 
 
-def init_opencode_config(repo_root: Path, force: bool = False, prompt: Prompt = input, home_dir: Path | None = None) -> Path | None:
-    source = repo_root / "source" / "opencode.json"
-    target_home = home_dir.resolve() if home_dir else Path.home()
-    destination = target_home / ".config" / "opencode" / "opencode.json"
-    if not source.exists():
-        raise ValueError(f"missing source config: {source}")
-    if not should_write(destination, force, prompt):
-        return None
-    ensure_dir(destination.parent)
-    shutil.copy2(source, destination)
-    return destination
-
-
 def install_harness(harness: HarnessSpec, build_dir: Path, home_dir: Path, force: bool, prompt: Prompt) -> list[str]:
     if harness.name == "opencode":
         return install_tree(build_dir / "opencode", home_dir / ".config" / "opencode", force, prompt, label="opencode")
