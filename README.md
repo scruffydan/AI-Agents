@@ -10,7 +10,7 @@ This repository keeps prompts, subagents, commands, modes, and skills in one sou
 - Claude and Codex are first-class targets
 - `--work` switches model resolution to work profiles from `source/model-profiles.toml`
 - the primary interface is the Python CLI in `ai_agents/`
-- `opencode-init.sh` remains available for OpenCode config initialization
+- `opencode-init.sh` remains the OpenCode config initialization path
 
 ## Requirements
 
@@ -99,16 +99,10 @@ python3 -m ai_agents list harnesses
 
 ### OpenCode Config
 
-The existing helper script still works:
+Use the existing helper script:
 
 ```bash
 ./opencode-init.sh
-```
-
-The new CLI also supports initialization:
-
-```bash
-python3 -m ai_agents init opencode
 ```
 
 ## Output Layout

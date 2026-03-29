@@ -9,7 +9,7 @@ from ai_agents.content.loader import load_documents
 from ai_agents.content.validation import lint_shared_content, validate_document
 from ai_agents.domain.harnesses import all_harnesses, select_harnesses
 from ai_agents.domain.options import BuildOptions, InstallOptions
-from ai_agents.install.service import init_opencode_config, install_project
+from ai_agents.install.service import install_project
 from ai_agents.repo import find_repo_root
 
 
@@ -61,11 +61,6 @@ def build_parser() -> argparse.ArgumentParser:
     install_parser.add_argument("--skip-build", action="store_true", help="Use existing build output")
     install_parser.add_argument("--force", action="store_true", help="Overwrite without prompts")
 
-    init_parser = subparsers.add_parser("init", help="Initialize harness-specific config")
-    init_subparsers = init_parser.add_subparsers(dest="init_command", required=True)
-    init_opencode = init_subparsers.add_parser("opencode", help="Initialize OpenCode config")
-    init_opencode.add_argument("--force", action="store_true", help="Overwrite without prompts")
-
     subparsers.add_parser("lint", help="Validate source content and harness neutrality")
     return parser
 
@@ -80,8 +75,6 @@ def main(argv: Sequence[str] | None = None) -> int:
         return handle_list_harnesses()
     if args.command == "install":
         return handle_install(args)
-    if args.command == "init" and args.init_command == "opencode":
-        return handle_init_opencode(args)
     if args.command == "lint":
         return handle_lint()
 
@@ -135,15 +128,6 @@ def handle_install(args: argparse.Namespace) -> int:
     print(f"Build dir: {report.build_dir}")
     print(f"Harnesses: {', '.join(spec.name for spec in report.harnesses)}")
     print(f"Installed targets: {len(report.installed_targets)}")
-    return 0
-
-
-def handle_init_opencode(args: argparse.Namespace) -> int:
-    destination = init_opencode_config(REPO_ROOT, force=args.force)
-    if destination is None:
-        print("OpenCode config initialization skipped.")
-        return 0
-    print(f"Initialized OpenCode config: {destination}")
     return 0
 
 
