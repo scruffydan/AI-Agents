@@ -123,10 +123,7 @@ def handle_list_harnesses() -> int:
     for spec in all_harnesses():
         kinds = ",".join(kind.value for kind in spec.supported_kinds)
         default_flag = "yes" if spec.default_selected else "no"
-        print(
-            f"{spec.name}: default={default_flag} install={spec.install_target} "
-            f"base={spec.base_filename} kinds={kinds}"
-        )
+        print(f"{spec.name}: default={default_flag} base={spec.base_filename} kinds={kinds}")
     return 0
 
 

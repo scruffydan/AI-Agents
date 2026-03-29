@@ -42,10 +42,6 @@ def validate_document(document: Document, harnesses: tuple[HarnessSpec, ...] | N
                 f"{document.source_path}: harness {harness_name!r} does not support metadata keys: {names}"
             )
 
-        if document.kind.value == "mode" and not spec.supports_modes:
-            raise ValueError(f"{document.source_path}: harness {harness_name!r} does not support modes")
-
-
 def lint_shared_content(repo_root: Path) -> LintReport:
     files = list((repo_root / "source" / "prompts").glob("*.md"))
     files.extend((repo_root / "source" / "skills").glob("**/*.md"))

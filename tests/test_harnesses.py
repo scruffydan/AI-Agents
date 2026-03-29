@@ -17,10 +17,9 @@ class HarnessRegistryTests(unittest.TestCase):
 
         self.assertEqual([spec.name for spec in selected], ["opencode", "claude", "codex"])
 
-    def test_opencode_supports_modes(self) -> None:
+    def test_opencode_mode_documents_use_agent_directory(self) -> None:
         spec = get_harness("opencode")
 
-        self.assertTrue(spec.supports_modes)
         self.assertEqual(spec.output_dir_for(DocumentKind.MODE), "agent")
 
     def test_harness_contract_exposes_component_paths(self) -> None:
