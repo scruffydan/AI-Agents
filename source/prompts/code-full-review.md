@@ -92,36 +92,30 @@ Use this to guide recommendations:
 
 ### Step 1: Invoke Specialist Agents
 
-**For Claude Code:**
-Use the Task tool to spawn all five specialist agents **in parallel** (in a single message with multiple Task tool calls):
+Use the current harness's subagent delegation mechanism to invoke the five specialist review agents.
+
+Run them in parallel when the harness supports parallel subagent execution. If the harness only supports sequential invocation, run all five before synthesizing the result.
+
+Use these prompts, replacing `[TARGET_FILES]` with the files or directories specified by the user:
 
 ```
-Task 1 - Security Agent:
-  prompt: "Run a security review on [TARGET_FILES]. Return a structured report with findings, severity, and file:line references. Do NOT apply fixes - report only."
+Security Agent:
+  Run a security review on [TARGET_FILES]. Return a structured report with findings, severity, and file:line references. Do NOT apply fixes - report only.
 
-Task 2 - Readability Agent:
-  prompt: "Run a readability review on [TARGET_FILES]. Return a structured report with findings, severity, and file:line references. Do NOT apply fixes - report only."
+Readability Agent:
+  Run a readability review on [TARGET_FILES]. Return a structured report with findings, severity, and file:line references. Do NOT apply fixes - report only.
 
-Task 3 - Performance Agent:
-  prompt: "Run a performance review on [TARGET_FILES]. Return a structured report with findings, severity, and file:line references. Do NOT apply fixes - report only."
+Performance Agent:
+  Run a performance review on [TARGET_FILES]. Return a structured report with findings, severity, and file:line references. Do NOT apply fixes - report only.
 
-Task 4 - Redundancy Agent:
-  prompt: "Run a redundancy review on [TARGET_FILES]. Return a structured report with duplicates, dead code, and abstraction opportunities with file:line references. Do NOT apply fixes - report only."
+Redundancy Agent:
+  Run a redundancy review on [TARGET_FILES]. Return a structured report with duplicates, dead code, and abstraction opportunities with file:line references. Do NOT apply fixes - report only.
 
-Task 5 - Simplifier Agent:
-  prompt: "Run a code simplification review on [TARGET_FILES]. Return a structured report with complexity issues, naming improvements, and readability enhancements with file:line references. Do NOT apply fixes - report only."
+Simplifier Agent:
+  Run a code simplification review on [TARGET_FILES]. Return a structured report with complexity issues, naming improvements, and readability enhancements with file:line references. Do NOT apply fixes - report only.
 ```
 
-**For OpenCode:**
-Invoke the five specialist agents using @ mentions:
-
-- @code-security - Run security analysis on the target files and return findings
-- @code-readability - Run readability analysis on the target files and return findings
-- @code-performance - Run performance analysis on the target files and return findings
-- @code-redundancy - Run redundancy analysis on the target files and return findings
-- @code-simplifier - Run code simplification analysis on the target files and return findings
-
-Replace `[TARGET_FILES]` with the files/directories specified by the user.
+Use the specialized subagents named `code-security`, `code-readability`, `code-performance`, `code-redundancy`, and `code-simplifier`.
 
 Wait for all five agents to complete, then collect their findings.
 

@@ -42,7 +42,7 @@ This agent exists to:
 
 - Writing or modifying code (use main assistant)
 - Running tests or builds (use main assistant)
-- General knowledge questions unrelated to this codebase (use @sidebar)
+- General knowledge questions unrelated to this codebase (use the `sidebar` subagent)
 
 ## Response Guidelines
 

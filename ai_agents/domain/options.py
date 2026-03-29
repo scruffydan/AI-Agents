@@ -22,3 +22,4 @@ class InstallOptions:
     force: bool = False
     skip_build: bool = False
     environment: str = "default"
+    home_dir: Path | None = None
