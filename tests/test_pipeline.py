@@ -56,7 +56,7 @@ class PipelineTests(unittest.TestCase):
         artifact = render_document(document, resolved, harness=get_harness("opencode"))
 
         self.assertIsNotNone(artifact)
-        self.assertIn('model: "openai/gpt-5.4"', artifact.content)
+        self.assertIn("model: openai/gpt-5.4", artifact.content)
         self.assertNotIn("reasoningEffort", artifact.content)
 
     def test_claude_subagent_uses_full_model_without_implicit_effort(self) -> None:
@@ -66,8 +66,8 @@ class PipelineTests(unittest.TestCase):
         artifact = render_claude.render_document(document, resolved, harness=get_harness("claude"))
 
         self.assertIsNotNone(artifact)
-        self.assertIn('model: "claude-opus-4-5"', artifact.content)
-        self.assertNotIn('model: "opus"', artifact.content)
+        self.assertIn("model: claude-opus-4-5", artifact.content)
+        self.assertNotIn("model: opus", artifact.content)
         self.assertNotIn("effort:", artifact.content)
 
     def test_validate_rejects_unknown_metadata_key(self) -> None:
