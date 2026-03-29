@@ -9,5 +9,7 @@ class ResolvedModelConfig:
     profile_name: str
     environment: str
     harness: str
+    provider: str | None
+    model_name: str
     model: str
     settings: dict[str, Any] = field(default_factory=dict)
