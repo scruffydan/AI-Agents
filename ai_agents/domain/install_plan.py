@@ -21,7 +21,3 @@ class InstallAction:
 class InstallPlan:
     build_dir: Path
     actions: tuple[InstallAction, ...]
-
-    @property
-    def actionable(self) -> tuple[InstallAction, ...]:
-        return tuple(action for action in self.actions if action.status != "missing_source")

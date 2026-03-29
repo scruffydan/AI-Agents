@@ -15,7 +15,6 @@ class OutputLayout:
     root: str
     kind_directories: dict[DocumentKind, str]
     skills_dir: str
-    commands_as_skills: bool = False
 
 
 @dataclass(frozen=True)
@@ -31,21 +30,14 @@ class InstallEntry:
 class HarnessSpec:
     name: str
     default_selected: bool
-    supports_modes: bool
     supported_kinds: tuple[DocumentKind, ...]
     output_layout: OutputLayout
-    install_target: Path
     install_entries: tuple[InstallEntry, ...]
     base_filename: str
-    capabilities: tuple[str, ...]
     supported_metadata_keys: frozenset[str]
 
     def output_dir_for(self, kind: DocumentKind) -> str | None:
         return self.output_layout.kind_directories.get(kind)
-
-    @property
-    def supported_components(self) -> tuple[OutputComponent, ...]:
-        return ("base", "documents", "skills")
 
     def component_for_kind(self, kind: DocumentKind) -> OutputComponent:
         if kind == DocumentKind.BASE:
@@ -71,7 +63,6 @@ HARNESS_REGISTRY: dict[str, HarnessSpec] = {
     "opencode": HarnessSpec(
         name="opencode",
         default_selected=True,
-        supports_modes=True,
         supported_kinds=(
             DocumentKind.SUBAGENT,
             DocumentKind.COMMAND,
@@ -90,7 +81,6 @@ HARNESS_REGISTRY: dict[str, HarnessSpec] = {
             },
             skills_dir="skill",
         ),
-        install_target=Path.home() / ".config" / "opencode",
         install_entries=(
             InstallEntry(
                 source=Path("AGENTS.md"),
@@ -122,7 +112,6 @@ HARNESS_REGISTRY: dict[str, HarnessSpec] = {
             ),
         ),
         base_filename="AGENTS.md",
-        capabilities=("modes", "permissions", "skills"),
         supported_metadata_keys=frozenset(
             {
                 "role",
@@ -142,7 +131,6 @@ HARNESS_REGISTRY: dict[str, HarnessSpec] = {
     "claude": HarnessSpec(
         name="claude",
         default_selected=False,
-        supports_modes=True,
         supported_kinds=(
             DocumentKind.SUBAGENT,
             DocumentKind.COMMAND,
@@ -161,7 +149,6 @@ HARNESS_REGISTRY: dict[str, HarnessSpec] = {
             },
             skills_dir="skills",
         ),
-        install_target=Path.home() / ".claude",
         install_entries=(
             InstallEntry(
                 source=Path("CLAUDE.md"),
@@ -193,13 +180,11 @@ HARNESS_REGISTRY: dict[str, HarnessSpec] = {
             ),
         ),
         base_filename="CLAUDE.md",
-        capabilities=("skills", "tools"),
         supported_metadata_keys=frozenset({"role", "tools", "model"}),
     ),
     "codex": HarnessSpec(
         name="codex",
         default_selected=False,
-        supports_modes=True,
         supported_kinds=(
             DocumentKind.SUBAGENT,
             DocumentKind.COMMAND,
@@ -217,9 +202,7 @@ HARNESS_REGISTRY: dict[str, HarnessSpec] = {
                 DocumentKind.BASE: ".",
             },
             skills_dir=".agents/skills",
-            commands_as_skills=True,
         ),
-        install_target=Path.home() / ".codex",
         install_entries=(
             InstallEntry(
                 source=Path(".codex"),
@@ -244,7 +227,6 @@ HARNESS_REGISTRY: dict[str, HarnessSpec] = {
             ),
         ),
         base_filename="AGENTS.md",
-        capabilities=("sandbox", "approval_policy", "skills"),
         supported_metadata_keys=frozenset({"role", "model", "sandbox", "approval_policy"}),
     ),
 }
