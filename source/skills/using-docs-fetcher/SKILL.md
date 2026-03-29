@@ -1,13 +1,13 @@
 ---
 name: using-docs-fetcher
-description: How to use `docs-fetcher` to pull current, targeted external documentation (APIs, SDKs, configs, errors, version changes). Use when you need authoritative docs or examples instead of relying on memory.
+description: How to use @docs-fetcher to pull current, targeted external documentation (APIs, SDKs, configs, errors, version changes). Use when you need authoritative docs or examples instead of relying on memory.
 ---
 
 # Using the Documentation Fetcher
 
-When you need to look up external documentation (APIs, libraries, frameworks, configuration options, or any technical reference), use the `docs-fetcher` subagent to fetch and extract only the relevant portions. This keeps the main context clean and avoids flooding it with entire documentation pages.
+When you need to look up external documentation (APIs, libraries, frameworks, configuration options, or any technical reference), use the `@docs-fetcher` agent to fetch and extract only the relevant portions. This keeps the main context clean and avoids flooding it with entire documentation pages.
 
-## When to Use `docs-fetcher`
+## When to Use @docs-fetcher
 
 Use the docs-fetcher agent when you need to:
 
@@ -17,23 +17,23 @@ Use the docs-fetcher agent when you need to:
 - **Research version-specific features or breaking changes** - Understanding what changed between versions
 - **Troubleshoot errors with official documentation** - Finding solutions to error messages or unexpected behavior
 
-## How to Use `docs-fetcher`
+## How to Use @docs-fetcher
 
 ### Basic Pattern
 
 ```
-docs-fetcher: Fetch the Stripe Payment Intents API documentation,
+@docs-fetcher: Fetch the Stripe Payment Intents API documentation,
 specifically how to create a payment intent with metadata.
 ```
 
 ### Version-Specific Queries
 
 ```
-docs-fetcher: Get the Next.js 13 App Router documentation about
+@docs-fetcher: Get the Next.js 13 App Router documentation about
 server components and data fetching patterns.
 ```
 
-## Benefits of Using `docs-fetcher`
+## Benefits of Using @docs-fetcher
 
 - **Reduces context bloat** - Only relevant portions are retrieved
 - **Ensures current information** - Fetches latest docs, not training data
@@ -51,11 +51,11 @@ server components and data fetching patterns.
 ## Example
 
 ```
-docs-fetcher: Fetch the PostgreSQL documentation for the JSONB
+@docs-fetcher: Fetch the PostgreSQL documentation for the JSONB
 data type, specifically the containment operators and indexing strategies.
 ```
 
-## When NOT to Use `docs-fetcher`
+## When NOT to Use @docs-fetcher
 
 - For well-known, stable APIs you're confident about
 - When you just need a quick syntax reminder for common operations

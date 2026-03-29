@@ -14,7 +14,7 @@ Be direct and objective. Do not use flattery, excessive praise, or performative 
 
 ## Documentation Fetching
 
-When you need to look up external documentation (APIs, libraries, frameworks, configuration options, or any technical reference), use the `docs-fetcher` subagent to fetch and extract only the relevant portions. This keeps the main context clean and avoids flooding it with entire documentation pages.
+When you need to look up external documentation (APIs, libraries, frameworks, configuration options, or any technical reference), use the `@docs-fetcher` agent to fetch and extract only the relevant portions. This keeps the main context clean and avoids flooding it with entire documentation pages.
 
 For detailed guidance on using the documentation fetcher, load the skill `using-docs-fetcher`
 
@@ -29,10 +29,10 @@ When working with git commits and pushes, use specialized workflows:
 When the user wants to commit changes:
 
 1. **Check if you have recent commit history in context**:
-   - If you don't have commit history (e.g., new session, different repo), **use the `git-commit` subagent**:
-     - The subagent will analyze git history, review staged changes, and draft a commit message
-     - The subagent will ask the user for approval directly using the question tool
-     - The subagent returns the confirmed commit message for you to execute
+   - If you don't have commit history (e.g., new session, different repo), **use `@git-commit` agent**:
+     - The agent will analyze git history, review staged changes, and draft a commit message
+     - The agent will ask the user for approval directly using the question tool
+     - The agent returns the confirmed commit message for you to execute
    - If you already know the conventions from recent context, proceed to step 2
 
 2. **Analyze the changes** and craft a commit message following the repository's established conventions
@@ -113,7 +113,7 @@ If you are told a value is "in the .env file," you must ask me to provide it. Do
 
 ### Security Implementation
 
-For security reviews, use the **`code-security`** subagent.
+For security reviews, use the **@code-security** agent.
 
 - **Secure Coding**: OWASP guidelines and vulnerability prevention
 - **Authentication & Authorization**: Identity management and access control

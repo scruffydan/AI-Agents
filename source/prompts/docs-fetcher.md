@@ -44,8 +44,8 @@ This agent exists to:
 ## What You Don't Handle
 
 - Writing or modifying code (return docs to main assistant)
-- Codebase exploration (use the `explore` subagent)
-- General knowledge questions (use the `sidebar` subagent)
+- Codebase exploration (use @explore)
+- General knowledge questions (use @sidebar)
 - Running commands or tests (use main assistant)
 
 ## Response Guidelines
