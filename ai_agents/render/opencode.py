@@ -25,7 +25,7 @@ def build_frontmatter(
     override: TargetOverride,
     resolved: ResolvedModelConfig,
 ) -> dict[str, object]:
-    frontmatter: dict[str, object] = {"description": document.description, "model": resolved.model}
+    frontmatter: dict[str, object] = {"description": document.description}
 
     role = override.metadata.get("role")
     if role is not None:
@@ -36,15 +36,23 @@ def build_frontmatter(
     elif "mode" in override.metadata:
         frontmatter["mode"] = override.metadata["mode"]
 
-    for key, value in resolved.settings.items():
-        frontmatter[normalize_frontmatter_key(key)] = value
+    frontmatter["model"] = str(override.metadata.get("model") or resolved.model)
+
+    if document.kind != DocumentKind.COMMAND:
+        merge_settings(frontmatter, resolved.settings)
+
     for key, value in override.metadata.items():
-        if key in {"role", "mode"}:
+        if key in {"role", "mode", "model"}:
             continue
-        if key == "model":
+        if document.kind == DocumentKind.COMMAND and key != "subtask":
             continue
         frontmatter[normalize_frontmatter_key(key)] = value
     return frontmatter
+
+
+def merge_settings(frontmatter: dict[str, object], settings: dict[str, object]) -> None:
+    for key, value in settings.items():
+        frontmatter[normalize_frontmatter_key(key)] = value
 
 
 def normalize_frontmatter_key(key: str) -> str:

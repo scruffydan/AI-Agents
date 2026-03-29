@@ -25,27 +25,21 @@ def build_frontmatter(
     override: TargetOverride,
     resolved: ResolvedModelConfig,
 ) -> dict[str, object]:
-    frontmatter: dict[str, object] = {"description": document.description}
+    frontmatter: dict[str, object] = {}
 
     if document.kind == DocumentKind.SUBAGENT:
         frontmatter["name"] = document.name
-    if document.kind in {DocumentKind.SUBAGENT, DocumentKind.COMMAND, DocumentKind.MODE}:
-        frontmatter["model"] = normalize_claude_model(str(override.metadata.get("model") or resolved.model))
+    frontmatter["description"] = document.description
 
     if "tools" in override.metadata:
         frontmatter["tools"] = override.metadata["tools"]
+
+    model = override.metadata.get("model")
+    if model is None and document.kind == DocumentKind.SUBAGENT:
+        model = resolved.model
+    if model is not None:
+        frontmatter["model"] = str(model)
+
     if "effort" in override.metadata:
         frontmatter["effort"] = override.metadata["effort"]
-    elif resolved.settings.get("reasoning_effort"):
-        frontmatter["effort"] = resolved.settings["reasoning_effort"]
     return frontmatter
-
-
-def normalize_claude_model(model: str) -> str:
-    if model.startswith("claude-opus"):
-        return "opus"
-    if model.startswith("claude-sonnet"):
-        return "sonnet"
-    if model.startswith("claude-haiku"):
-        return "haiku"
-    return model
