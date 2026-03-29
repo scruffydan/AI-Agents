@@ -1,297 +1,202 @@
 # AI-Agents
 
-A collection of specialized agents, commands, and modes for **Claude Code** and **OpenCode**.
+Multi-harness prompt generation for **OpenCode**, **Claude Code**, and **Codex**.
 
-## What's Included
+This repository keeps prompts, subagents, commands, modes, and skills in one source tree and renders them into harness-specific output.
 
-| Name | Type | Purpose |
-|------|------|---------|
-| `code-security` | Subagent | Security vulnerability detection, OWASP Top 10 compliance |
-| `code-readability` | Subagent | Code clarity, naming, structure, documentation review |
-| `code-performance` | Subagent | Performance bottlenecks, algorithm optimization |
-| `code-redundancy` | Subagent | Duplicate code, repeated patterns, DRY improvements |
-| `code-simplifier` | Subagent | Simplifies code for clarity, consistency, and maintainability |
-| `code-full-review` | Command | Orchestrates all review agents, synthesizes findings with trade-off debates |
-| `explore` | Subagent | Codebase exploration, file search, dependency tracing |
-| `docs-fetcher` | Subagent | Fetch and extract relevant documentation from URLs |
-| `git-commit` | Subagent | Analyzes git history, drafts commit message for user verification |
-| `sidebar` | Subagent | Answer general questions unrelated to coding session |
-| `brainstorm` | Mode (OpenCode only) | High-temperature creative mode for generating diverse ideas |
-| `thorough-plan` | Mode (OpenCode only) | Planning mode that asks clarifying questions before proceeding |
-| `five-whys` | Skill | Root cause analysis using Toyota's Five Whys technique |
-| `brainstorming` | Skill | Creative ideation guidance before building |
-| `implementation-workflow` | Skill | 6-phase development methodology |
-| `executing-plans` | Skill | Execute pre-written plans with checkpoints |
-| `git-commit` | Skill | Analyzes last 10 commits to match repo conventions |
-| `git-push` | Skill | Pre-push checklist (README updates, tests, security) |
-| `receiving-code-review` | Skill | Implement review feedback with verification |
-| `subagent-driven-development` | Skill | Run independent tasks with subagents |
-| `systematic-debugging` | Skill | Structured debugging before proposing fixes |
-| `update-readme` | Skill | Reminds to update README before committing changes |
-| `using-docs-fetcher` | Skill | When/how to use `@docs-fetcher` |
-| `using-code-review` | Skill | Using all 5 code review agents |
-| `verification-before-completion` | Skill | Verify before claiming completion |
-| `writing-skills` | Skill | Author and validate skill definitions |
+## Current Direction
 
-Some skills are sourced from [obra/superpowers](https://github.com/obra/superpowers). Skills follow the [Agent Skills standard](https://github.com/anthropics/anthropic-sdk-typescript/tree/main/agents-api).
+- OpenCode is the default harness
+- Claude and Codex are first-class targets
+- `--work` switches model resolution to work profiles from `source/model-profiles.toml`
+- the primary interface is the Python CLI in `ai_agents/`
+- `opencode-init.sh` remains available for OpenCode config initialization
 
 ## Requirements
 
-- **Python 3.11+** (uses `tomllib` from stdlib - no external dependencies)
+- Python 3.11+
+- no third-party Python dependencies
 
-## Installation
+## Commands
 
-### Quick Install
-
-```bash
-./build.py --install
-```
-
-This will:
-1. Build tool-specific configs from source prompts
-2. Install Claude Code configs to `~/.claude/` (agents, commands, skills)
-3. Install OpenCode configs to `~/.config/opencode/` (agents, commands, skills)
-
-### Options
+Run through the module:
 
 ```bash
-./build.py                       # Build only (no install)
-./build.py --install             # Build and install (interactive)
-./build.py --install --yes       # Build and install without prompts
-./build.py claude --install      # Build and install Claude Code only
-./build.py opencode --install    # Build and install OpenCode only
-./build.py --work --install      # Use work environment model mappings
-./build.py --chatgpt-provider github-copilot --install  # Use GitHub Copilot for GPT models
-./build.py --init-config --install  # Also install opencode.json (first-time setup)
+python3 -m ai_agents <command>
 ```
 
-### OpenCode Permission Config (First-Time Setup)
-
-The `opencode.json` file contains security and permission defaults:
-- Blocks dangerous commands (`rm -rf`, etc.)
-- Blocks sensitive files (`.env`, keys, credentials)
-- Allows safe read-only commands (`ls`, `cat`, `git status`, etc.)
-
-This file is **not** installed by default (to avoid overwriting your customizations). To install it:
+Or use the compatibility entrypoint:
 
 ```bash
-./build.py opencode --init-config --install   # First-time setup
+python3 build.py <command>
 ```
 
-After initial setup, you can customize `~/.config/opencode/opencode.json` and it won't be overwritten by future installs.
+### Build
 
-### Model Provider Selection
-
-By default, GPT models use `openai` and Opus models use `opencode`. You can override these per model family:
+Build OpenCode only:
 
 ```bash
-./build.py --chatgpt-provider opencode      # GPT models via OpenCode
-./build.py --chatgpt-provider github-copilot # GPT models via GitHub Copilot
-./build.py --opus-provider github-copilot   # Opus models via GitHub Copilot
+python3 -m ai_agents build
 ```
 
-For **work environments** with different providers (e.g., Google Vertex AI), use model mappings:
+Build all harnesses:
 
 ```bash
-./build.py opencode --work --install    # Install OpenCode with work model mappings
-./build.py --work                       # Build only, using work model mappings
+python3 -m ai_agents build --all
 ```
 
-Model mappings are configured in `source/model-mappings.json`. This allows you to map models like:
-- `opencode/claude-sonnet-4-6` → `google-vertex/gemini-3.1-pro-preview`
-- `opencode/gemini-3.1-pro` → `google-vertex/gemini-3.1-pro-preview`
-- `opencode/gpt-5.4` → `google-vertex-anthropic/claude-opus-4-5@20251101`
+Build a specific harness set:
 
-Or map to completely different models as needed.
-
-**Work Mode Setup Requirements:**
-- Set `GOOGLE_CLOUD_PROJECT` environment variable (if using Vertex AI)
-- Authenticate via `gcloud auth application-default login` or set `GOOGLE_APPLICATION_CREDENTIALS`
-- Optionally set `VERTEX_LOCATION` (defaults to `global`)
-
-## Usage
-
-### Claude Code
-
-**Commands** (manual):
 ```bash
-/code-security src/auth/login.ts
-/code-readability src/utils/
-/code-performance src/data-processor.ts
-/code-full-review src/api/
+python3 -m ai_agents build --harness claude --harness codex
 ```
 
-**Agents** (automatic):
-- "Review this code for security issues" → triggers `code-security`
-- "Is this code readable?" → triggers `code-readability`
-- "Optimize this function" → triggers `code-performance`
+Build with work model profiles:
+
+```bash
+python3 -m ai_agents build --all --work
+```
+
+### Install
+
+Install OpenCode only:
+
+```bash
+python3 -m ai_agents install
+```
+
+Install all harnesses:
+
+```bash
+python3 -m ai_agents install --all
+```
+
+Install using existing build output:
+
+```bash
+python3 -m ai_agents install --all --skip-build
+```
+
+Force overwrite during install:
+
+```bash
+python3 -m ai_agents install --all --force
+```
+
+### Lint
+
+Validate prompt metadata and check for harness-coupled content patterns:
+
+```bash
+python3 -m ai_agents lint
+```
+
+### List Harnesses
+
+```bash
+python3 -m ai_agents list harnesses
+```
+
+### OpenCode Config
+
+The existing helper script still works:
+
+```bash
+./opencode-init.sh
+```
+
+The new CLI also supports initialization:
+
+```bash
+python3 -m ai_agents init opencode
+```
+
+## Output Layout
+
+Build output is written to `build/` by default.
 
 ### OpenCode
 
-**Agents** (via @ mentions):
-```
-@code-security src/auth/login.ts
-@code-readability src/utils/
-@code-performance src/data-processor.ts
-@git-commit                          # Analyzes changes, proposes commit message
-```
-
-**Commands**:
-```
-/code-full-review src/api/
+```text
+build/opencode/
+  AGENTS.md
+  agent/*.md
+  command/*.md
+  skill/*
 ```
 
-**Modes** (switch with Tab):
-```
-brainstorm    # High-temperature creative mode
-```
+### Claude
 
-Note: In OpenCode, the individual review agents are invoked via `@` mentions. Only `code-full-review` is a slash command since it orchestrates all 5 specialist agents. Modes change the AI's behavior and are switched using the Tab key.
-
-## Special Workflows
-
-### Git Commit Workflow
-
-The `@git-commit` agent provides a safe, verified commit workflow:
-
-1. **Analyze**: The agent analyzes your git history (last 10 commits) to understand repository conventions
-2. **Prepare**: Drafts a commit message that matches your repo's style and reviews staged changes
-3. **Verify**: Returns the proposed commit message and file list for your approval
-4. **Commit**: After you approve, the main agent runs the commit
-
-**Example:**
-```
-You: @git-commit
-  ↓
-Agent analyzes git history and returns:
-  • Proposed message: "feat(auth): add JWT validation"
-  • Files: src/auth/jwt.ts, tests/auth.test.ts
-  • Convention found: Uses conventional commits with scope
-  ↓
-You approve
-  ↓
-Main agent commits with approved message
+```text
+build/claude/
+  CLAUDE.md
+  agents/*.md
+  commands/*.md
+  skills/*
 ```
 
-**Benefits:**
-- Keeps main context clean (analysis happens in subagent)
-- Automatically matches your repository's commit style
-- You verify every commit before it happens
-- No accidental commits
+### Codex
 
-## Customization
-
-### Editing Instructions
-
-All agent/command logic lives in `source/prompts/`. Edit these files to customize behavior, then run `./build.py --install` to rebuild and reinstall.
-
-Each prompt file uses **TOML frontmatter**:
-
-```toml
-+++
-description = "What this agent does..."
-type = "subagent"    # or "command" or "mode"
-
-[claude]
-tools = "Read, Glob, Grep"
-model = "claude-opus-4-5"
-
-[opencode]
-mode = "subagent"
-model = "opencode/gpt-5.4"
-temperature = 0.8     # For modes: controls creativity (0.0-1.0)
-
-[opencode.permission]
-edit = "deny"
-bash = "deny"
-+++
-
-# Prompt content here...
-
-$ARGUMENTS
+```text
+build/codex/
+  AGENTS.md
+  .codex/agents/*.toml
+  .agents/skills/*
 ```
 
-The `build.py` script parses this and generates the appropriate format for each harness.
+## Source Layout
 
-### Adding New Agents
+- `source/prompts/` contains prompt documents and base instructions
+- `source/skills/` contains reusable skill directories
+- `source/model-profiles.toml` contains logical model profiles for default and work environments
 
-1. Create `source/prompts/my-agent.md` with TOML frontmatter
-2. Run `./build.py --install` to rebuild and install
+The build system supports:
 
-### Adding New Harnesses
+- the new harness-neutral schema with `kind`, `model_profile`, and `targets.<harness>`
+- the legacy prompt schema already present in `source/prompts/`, which is normalized during build
 
-To add support for a new AI coding tool (e.g., Codex), edit `build.py` and add an entry to the `HARNESSES` dict:
+## Model Profiles
 
-```python
-HARNESSES = {
-    # ... existing harnesses ...
-    "codex": {
-        "agents_dir": "agents",
-        "commands_dir": "commands",
-        "skills_dir": "skills",
-        "base_file": "CODEX.md",
-        "install_path": Path.home() / ".codex",
-    },
-}
+Model selection is driven by logical profiles instead of prompt-local provider rewrites.
+
+Examples:
+
+- `default`
+- `deep_review`
+- `creative`
+- `planner`
+
+Each profile resolves per harness and per environment.
+
+`--work` switches from `default` environment values to `work` environment values.
+
+## Installed Locations
+
+### OpenCode
+
+- `~/.config/opencode/`
+
+### Claude
+
+- `~/.claude/`
+
+### Codex
+
+- `~/.codex/AGENTS.md`
+- `~/.codex/agents/`
+- `~/.agents/skills/`
+
+## Development
+
+Run tests:
+
+```bash
+python3 -m unittest discover -s tests
 ```
 
-Then run: `./build.py codex --install`
+Run a full build verification:
 
-### Adding New Skills
-
-1. Create `source/skills/my-skill/SKILL.md` following the [Agent Skills format](https://github.com/anthropics/anthropic-sdk-typescript/tree/main/agents-api)
-2. Reference from agents: `Load skill \`my-skill\` when...`
-3. Run `./build.py --install`
-
-### Base Instructions
-
-`source/prompts/AGENTS.md` generates:
-- Claude Code: `~/.claude/CLAUDE.md` (global instructions)
-- OpenCode: `~/.config/opencode/AGENTS.md` (global instructions)
-
-## How It Works
-
-### Build Process
-
-`build.py` reads each prompt in `source/prompts/` and generates:
-
-**For Claude Code:**
-- `build/claude/agents/{name}.md` - Agent with Claude-specific frontmatter
-- `build/claude/commands/{name}.md` - Raw prompt for slash commands
-- `build/claude/skills/{name}/SKILL.md` - Skills (copied from `source/skills/`)
-- `build/claude/CLAUDE.md` - From `AGENTS.md`
-
-**For OpenCode:**
-- `build/opencode/agent/{name}.md` - Agent with OpenCode-specific frontmatter
-- `build/opencode/command/{name}.md` - Command that references the agent
-- `build/opencode/skill/{name}/SKILL.md` - Skills (copied from `source/skills/`)
-- `build/opencode/AGENTS.md` - From `AGENTS.md`
-
-### Agent vs Command vs Mode
-
-| Type | Claude Code | OpenCode |
-|------|-------------|----------|
-| Agent | Auto-invoked when relevant | Called via `@agent-name` |
-| Command | Manual via `/command-name` | Manual via `/command-name` |
-| Mode | N/A | Switch via Tab key, changes behavior |
-
-Prompts with type `subagent` create both Claude agents and OpenCode agents. Prompts with type `command` create commands only (like `code-full-review` which orchestrates sub-agents). Prompts with type `mode` create OpenCode modes only (like `brainstorm` for creative exploration).
-
-## Workflow
-
-All review agents use a hybrid workflow:
-
-1. **Analyze** - Read target files and identify issues
-2. **Report** - Present findings with severity and recommendations
-3. **Get Approval** - Ask user which fixes to apply
-4. **Apply Fixes** - Only after user approval
-
-The `code-full-review` command:
-1. Spawns all review specialists in parallel
-2. Collects their findings
-3. Presents debates where recommendations conflict
-4. Helps user make informed trade-off decisions
-
-## License
-
-MIT
+```bash
+python3 -m ai_agents lint
+python3 -m ai_agents build --all --work
+```

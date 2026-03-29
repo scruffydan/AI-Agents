@@ -5,8 +5,11 @@ from pathlib import Path
 from typing import Sequence
 
 from ai_agents.build.service import build_project
+from ai_agents.content.loader import load_documents
+from ai_agents.content.validation import lint_shared_content, validate_document
 from ai_agents.domain.harnesses import all_harnesses, select_harnesses
-from ai_agents.domain.options import BuildOptions
+from ai_agents.domain.options import BuildOptions, InstallOptions
+from ai_agents.install.service import init_opencode_config, install_project
 from ai_agents.repo import find_repo_root
 
 
@@ -76,14 +79,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     if args.command == "list" and args.list_command == "harnesses":
         return handle_list_harnesses()
     if args.command == "install":
-        print("install is not implemented yet; Phase 1 is focused on core architecture scaffolding.")
-        return 2
+        return handle_install(args)
     if args.command == "init" and args.init_command == "opencode":
-        print("init opencode is not implemented yet; install safety work lands in a later phase.")
-        return 2
+        return handle_init_opencode(args)
     if args.command == "lint":
-        print("lint is not implemented yet; source migration and harness-neutrality checks land next.")
-        return 2
+        return handle_lint()
 
     parser.error("unknown command")
     return 2
@@ -118,4 +118,48 @@ def handle_list_harnesses() -> int:
             f"{spec.name}: default={default_flag} install={spec.install_target} "
             f"base={spec.base_filename} kinds={kinds}"
         )
+    return 0
+
+
+def handle_install(args: argparse.Namespace) -> int:
+    selected = select_harnesses(args.harnesses, all_harnesses=args.all)
+    report = install_project(
+        InstallOptions(
+            repo_root=REPO_ROOT,
+            selected_harnesses=tuple(spec.name for spec in selected),
+            environment="work" if args.work else "default",
+            skip_build=args.skip_build,
+            force=args.force,
+        )
+    )
+    print(f"Build dir: {report.build_dir}")
+    print(f"Harnesses: {', '.join(spec.name for spec in report.harnesses)}")
+    print(f"Installed targets: {len(report.installed_targets)}")
+    return 0
+
+
+def handle_init_opencode(args: argparse.Namespace) -> int:
+    destination = init_opencode_config(REPO_ROOT, force=args.force)
+    if destination is None:
+        print("OpenCode config initialization skipped.")
+        return 0
+    print(f"Initialized OpenCode config: {destination}")
+    return 0
+
+
+def handle_lint() -> int:
+    prompts_dir = REPO_ROOT / "source" / "prompts"
+    documents = load_documents(prompts_dir, include_dir=prompts_dir)
+    for document in documents:
+        validate_document(document)
+
+    report = lint_shared_content(REPO_ROOT)
+    if report.violations:
+        for violation in report.violations:
+            print(violation)
+        return 1
+
+    print(f"Checked files: {report.checked_files}")
+    print(f"Documents: {len(documents)}")
+    print("Lint passed")
     return 0

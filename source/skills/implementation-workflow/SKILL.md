@@ -55,7 +55,7 @@ This document outlines the systematic approach for implementing complex technica
 ### 5. Security Review
 **Vulnerability assessment and security best practices implementation**
 
-For automated security review, invoke the **@code-security** agent with target files.
+For automated security review, invoke the **`code-security`** subagent with target files.
 
 For manual review, verify:
 - Review code for common vulnerabilities (OWASP Top 10)

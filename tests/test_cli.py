@@ -38,3 +38,9 @@ class CliTests(unittest.TestCase):
         self.assertIn("Environment: work", output)
         self.assertIn("Harnesses: opencode, claude, codex", output)
         self.assertIn("Artifacts: 36", output)
+
+    def test_lint_passes(self) -> None:
+        exit_code, output = self.run_cli("lint")
+
+        self.assertEqual(exit_code, 0)
+        self.assertIn("Lint passed", output)
