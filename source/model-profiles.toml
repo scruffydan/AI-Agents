@@ -1,0 +1,91 @@
+[profiles.default.default.opencode]
+model = "openai/gpt-5.4"
+reasoning_effort = "medium"
+
+[profiles.default.work.opencode]
+model = "google-vertex/gemini-3.1-pro-preview"
+reasoning_effort = "medium"
+
+[profiles.default.default.claude]
+model = "claude-sonnet-4-6"
+
+[profiles.default.work.claude]
+model = "claude-sonnet-4-6"
+
+[profiles.default.default.codex]
+model = "openai/gpt-5.4"
+sandbox = "read-only"
+
+[profiles.default.work.codex]
+model = "openai/gpt-5.4"
+sandbox = "read-only"
+
+[profiles.deep_review.default.opencode]
+model = "openai/gpt-5.4"
+reasoning_effort = "high"
+
+[profiles.deep_review.work.opencode]
+model = "google-vertex-anthropic/claude-opus-4-5@20251101"
+reasoning_effort = "high"
+
+[profiles.deep_review.default.claude]
+model = "claude-opus-4-5"
+
+[profiles.deep_review.work.claude]
+model = "claude-opus-4-5"
+
+[profiles.deep_review.default.codex]
+model = "openai/gpt-5.4"
+sandbox = "read-only"
+approval_policy = "on-request"
+
+[profiles.deep_review.work.codex]
+model = "openai/gpt-5.4"
+sandbox = "read-only"
+approval_policy = "on-request"
+
+[profiles.creative.default.opencode]
+model = "openai/gpt-5.4"
+reasoning_effort = "high"
+temperature = 0.95
+
+[profiles.creative.work.opencode]
+model = "google-vertex/gemini-3.1-pro-preview"
+reasoning_effort = "high"
+temperature = 0.95
+
+[profiles.creative.default.claude]
+model = "claude-opus-4-5"
+
+[profiles.creative.work.claude]
+model = "claude-opus-4-5"
+
+[profiles.creative.default.codex]
+model = "openai/gpt-5.4"
+sandbox = "read-only"
+
+[profiles.creative.work.codex]
+model = "openai/gpt-5.4"
+sandbox = "read-only"
+
+[profiles.planner.default.opencode]
+model = "openai/gpt-5.4"
+reasoning_effort = "high"
+
+[profiles.planner.work.opencode]
+model = "google-vertex-anthropic/claude-opus-4-5@20251101"
+reasoning_effort = "high"
+
+[profiles.planner.default.claude]
+model = "claude-sonnet-4-6"
+
+[profiles.planner.work.claude]
+model = "claude-sonnet-4-6"
+
+[profiles.planner.default.codex]
+model = "openai/gpt-5.4"
+sandbox = "workspace-write"
+
+[profiles.planner.work.codex]
+model = "openai/gpt-5.4"
+sandbox = "workspace-write"
