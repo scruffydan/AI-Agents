@@ -22,6 +22,8 @@ For detailed guidance on using the documentation fetcher, load the skill `using-
 
 When working with git commits and pushes, use specialized workflows:
 
+- REQUIRED: Make small, logical commits as work progresses. Do not batch unrelated changes into one large commit.
+
 ### Git Commit Workflow
 
 When the user wants to commit changes:
