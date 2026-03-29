@@ -47,7 +47,7 @@ def install_harness(harness: HarnessSpec, build_dir: Path, home_dir: Path, force
     installed: list[str] = []
     build_root = build_dir / harness.output_layout.root
 
-    for entry in harness.install_entries:
+    for entry in harness.install_entries_for():
         source = resolve_relative_to(build_root, entry.source, f"install source for {harness.name}")
         destination = home_dir / entry.destination
         if entry.kind == "tree":
