@@ -172,7 +172,9 @@ build/codex/
 - `source/skills/` contains reusable skill directories
 - `source/model-profiles.toml` contains logical model profiles for default and work environments
 
-Prompt sources use the harness-neutral schema with `kind`, `model_profile`, and `targets.<harness>`.
+Prompt sources use a minimal harness-neutral schema: `description`, `kind`, `model_profile`, and `targets.<harness>`.
+
+Unsupported compatibility-only fields such as top-level `[shared]` blocks or target `partials` are rejected until there is a real consumer for them.
 
 Harness-specific compatibility rules live in `ai_agents/domain/harnesses.py`. The harness registry is also the source of truth for logical output/install components such as `base`, `documents`, and `skills`.
 

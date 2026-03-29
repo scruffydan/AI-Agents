@@ -20,7 +20,6 @@ class TargetOverride:
     metadata: dict[str, Any] = field(default_factory=dict)
     body_prepend: str = ""
     body_append: str = ""
-    partials: tuple[str, ...] = ()
 
 
 @dataclass
@@ -30,6 +29,5 @@ class Document:
     kind: DocumentKind
     body: str
     model_profile: str
-    shared_metadata: dict[str, Any] = field(default_factory=dict)
     targets: dict[str, TargetOverride] = field(default_factory=dict)
     source_path: Path | None = None

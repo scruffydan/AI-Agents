@@ -18,13 +18,13 @@ def parse_v2_document(path: Path, data: dict[str, Any], body: str, include_dir: 
     description = require_string(data, "description", path)
     model_profile = require_string(data, "model_profile", path)
     kind_value = require_string(data, "kind", path)
+    reject_unsupported_key(data, "shared", path, scope="root")
     try:
         kind = DocumentKind(kind_value)
     except ValueError as exc:
         expected = ", ".join(kind.value for kind in DocumentKind)
         raise ValueError(f"{path}: invalid kind {kind_value!r}; expected one of: {expected}") from exc
 
-    shared_metadata = require_table(data, "shared", default={}, path=path)
     targets_raw = require_table(data, "targets", default={}, path=path)
     targets = {
         target_name: parse_target_override(path, target_name, values)
@@ -41,7 +41,6 @@ def parse_v2_document(path: Path, data: dict[str, Any], body: str, include_dir: 
         kind=kind,
         body=content,
         model_profile=model_profile,
-        shared_metadata=shared_metadata,
         targets=targets,
         source_path=path,
     )
@@ -66,23 +65,28 @@ def parse_target_override(path: Path, target_name: str, values: Any) -> TargetOv
         raise ValueError(f"{path}: targets.{target_name} must be a table")
 
     known = dict(values)
+    reject_unsupported_key(known, "partials", path, scope=f"targets.{target_name}")
     enabled = require_bool(known, "enabled", default=True, path=path, scope=f"targets.{target_name}")
     body_prepend = require_string(known, "body_prepend", default="", path=path, scope=f"targets.{target_name}")
     body_append = require_string(known, "body_append", default="", path=path, scope=f"targets.{target_name}")
-    partials = require_string_list(known, "partials", default=(), path=path, scope=f"targets.{target_name}")
 
     metadata = {
         key: value
         for key, value in known.items()
-        if key not in {"enabled", "body_prepend", "body_append", "partials"}
+        if key not in {"enabled", "body_prepend", "body_append"}
     }
     return TargetOverride(
         enabled=enabled,
         metadata=metadata,
         body_prepend=body_prepend,
         body_append=body_append,
-        partials=tuple(partials),
     )
+
+
+def reject_unsupported_key(data: dict[str, Any], key: str, path: Path, scope: str) -> None:
+    if key in data:
+        location = key if scope == "root" else f"{scope}.{key}"
+        raise ValueError(f"{path}: field {location} is not supported")
 
 
 def require_string(data: dict[str, Any], key: str, path: Path, scope: str | None = None, default: str | None = None) -> str:
@@ -112,18 +116,3 @@ def require_table(data: dict[str, Any], key: str, default: dict[str, Any], path:
     if not isinstance(value, dict):
         raise ValueError(f"{path}: field {key} must be a table")
     return value
-
-
-def require_string_list(
-    data: dict[str, Any],
-    key: str,
-    path: Path,
-    scope: str,
-    default: tuple[str, ...],
-) -> tuple[str, ...]:
-    if key not in data:
-        return default
-    value = data[key]
-    if not isinstance(value, list) or not all(isinstance(item, str) and item for item in value):
-        raise ValueError(f"{path}: field {scope}.{key} must be a list of non-empty strings")
-    return tuple(value)

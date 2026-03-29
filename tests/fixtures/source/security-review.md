@@ -3,9 +3,6 @@ description = "Security review specialist for identifying vulnerabilities and se
 kind = "subagent"
 model_profile = "deep_review"
 
-[shared]
-tags = ["review", "security"]
-
 [targets.opencode]
 role = "agent"
 mode = "subagent"

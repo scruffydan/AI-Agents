@@ -12,7 +12,6 @@ class BuildOptions:
     output_dir: Path | None = None
     selected_harnesses: tuple[str, ...] = ()
     environment: str = "default"
-    include_skills: bool = True
 
 
 @dataclass(frozen=True)

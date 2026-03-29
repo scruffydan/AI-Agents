@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import tempfile
 import unittest
 
 from ai_agents.content.schema import parse_document
@@ -43,3 +44,38 @@ class PipelineTests(unittest.TestCase):
 
         with self.assertRaisesRegex(ValueError, "does not support metadata keys"):
             validate_document(document)
+
+    def test_parse_rejects_unsupported_shared_section(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "shared.md"
+            path.write_text(
+                "+++\n"
+                'description = "Example"\n'
+                'kind = "command"\n'
+                'model_profile = "default"\n\n'
+                "[shared]\n"
+                'role = "unused"\n\n'
+                "[targets.opencode]\n"
+                "+++\n\n"
+                "Hello\n"
+            )
+
+            with self.assertRaisesRegex(ValueError, r"field shared is not supported"):
+                parse_document(path)
+
+    def test_parse_rejects_unsupported_target_partials(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "partials.md"
+            path.write_text(
+                "+++\n"
+                'description = "Example"\n'
+                'kind = "command"\n'
+                'model_profile = "default"\n\n'
+                "[targets.opencode]\n"
+                'partials = ["shared-intro"]\n'
+                "+++\n\n"
+                "Hello\n"
+            )
+
+            with self.assertRaisesRegex(ValueError, r"field targets\.opencode\.partials is not supported"):
+                parse_document(path)
