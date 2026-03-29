@@ -1,6 +1,6 @@
 ---
 name: using-code-review
-description: How and when to invoke code review agents (`code-security`, `code-readability`, `code-performance`, `code-redundancy`, `code-simplifier`, `code-full-review`). Use before major PRs, audits, refactors, or whenever targeted review feedback is needed.
+description: How and when to invoke code review agents (@code-security, @code-readability, @code-performance, @code-redundancy, @code-simplifier, @code-full-review). Use before major PRs, audits, refactors, or whenever targeted review feedback is needed.
 ---
 
 # Using Code Review Agents
@@ -9,7 +9,7 @@ This skill explains when and how to use the specialized code review agents.
 
 ## Available Review Agents
 
-### `code-security`
+### @code-security
 **Purpose**: Security vulnerability detection and OWASP compliance checks
 
 **When to use**:
@@ -26,7 +26,7 @@ This skill explains when and how to use the specialized code review agents.
 - Authentication and authorization flaws
 - Security misconfigurations
 
-### `code-readability`
+### @code-readability
 **Purpose**: Code clarity, naming conventions, and documentation review
 
 **When to use**:
@@ -43,7 +43,7 @@ This skill explains when and how to use the specialized code review agents.
 - Consistent formatting
 - Appropriate comments
 
-### `code-performance`
+### @code-performance
 **Purpose**: Performance bottleneck identification and optimization recommendations
 
 **When to use**:
@@ -60,7 +60,7 @@ This skill explains when and how to use the specialized code review agents.
 - I/O bottlenecks
 - Concurrency issues
 
-### `code-redundancy`
+### @code-redundancy
 **Purpose**: Duplicate code detection and DRY principle violations
 
 **When to use**:
@@ -77,7 +77,7 @@ This skill explains when and how to use the specialized code review agents.
 - Opportunities for abstraction
 - Similar functions that could be unified
 
-### `code-simplifier`
+### @code-simplifier
 **Purpose**: Complexity reduction and code simplification
 
 **When to use**:
@@ -94,7 +94,7 @@ This skill explains when and how to use the specialized code review agents.
 - Magic numbers and unclear expressions
 - Opportunities for early returns
 
-### `code-full-review`
+### @code-full-review
 **Purpose**: Comprehensive review orchestrating all 5 specialist agents
 
 **When to use**:
@@ -117,7 +117,7 @@ All review agents operate in **report-only mode** - they analyze and return find
 ### Single Agent Workflow
 
 ```
-1. Invoke the agent: `code-security src/auth.js`
+1. Invoke the agent: @code-security src/auth.js
 2. Wait for the security report
 3. Review findings and decide which to address
 4. Apply approved fixes
@@ -127,7 +127,7 @@ All review agents operate in **report-only mode** - they analyze and return find
 ### Full Review Workflow
 
 ```
-1. Invoke: `code-full-review src/`
+1. Invoke: @code-full-review src/
 2. Receive reports from all 5 agents
 3. Prioritize findings (security > performance > readability)
 4. Address high-priority issues first
