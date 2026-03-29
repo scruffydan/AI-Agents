@@ -7,6 +7,9 @@ from typing import Literal
 from ai_agents.domain.documents import DocumentKind
 
 
+OutputComponent = Literal["base", "documents", "skills"]
+
+
 @dataclass
 class OutputLayout:
     root: str
@@ -20,6 +23,7 @@ class InstallEntry:
     source: Path
     destination: Path
     kind: Literal["tree", "file"]
+    component: OutputComponent
     label: str
 
 
@@ -38,6 +42,29 @@ class HarnessSpec:
 
     def output_dir_for(self, kind: DocumentKind) -> str | None:
         return self.output_layout.kind_directories.get(kind)
+
+    @property
+    def supported_components(self) -> tuple[OutputComponent, ...]:
+        return ("base", "documents", "skills")
+
+    def component_for_kind(self, kind: DocumentKind) -> OutputComponent:
+        if kind == DocumentKind.BASE:
+            return "base"
+        if kind == DocumentKind.SKILL:
+            return "skills"
+        return "documents"
+
+    def base_output_path(self) -> Path:
+        return Path(self.output_layout.root) / self.base_filename
+
+    def skill_output_path(self, skill_name: str) -> Path:
+        return Path(self.output_layout.root) / self.output_layout.skills_dir / skill_name
+
+    def install_entries_for(self, components: tuple[OutputComponent, ...] | None = None) -> tuple[InstallEntry, ...]:
+        if not components:
+            return self.install_entries
+        selected = set(components)
+        return tuple(entry for entry in self.install_entries if entry.component in selected)
 
 
 HARNESS_REGISTRY: dict[str, HarnessSpec] = {
@@ -66,10 +93,32 @@ HARNESS_REGISTRY: dict[str, HarnessSpec] = {
         install_target=Path.home() / ".config" / "opencode",
         install_entries=(
             InstallEntry(
-                source=Path("."),
-                destination=Path(".config") / "opencode",
+                source=Path("AGENTS.md"),
+                destination=Path(".config") / "opencode" / "AGENTS.md",
+                kind="file",
+                component="base",
+                label="opencode base instructions",
+            ),
+            InstallEntry(
+                source=Path("agent"),
+                destination=Path(".config") / "opencode" / "agent",
                 kind="tree",
-                label="opencode",
+                component="documents",
+                label="opencode agents",
+            ),
+            InstallEntry(
+                source=Path("command"),
+                destination=Path(".config") / "opencode" / "command",
+                kind="tree",
+                component="documents",
+                label="opencode commands",
+            ),
+            InstallEntry(
+                source=Path("skill"),
+                destination=Path(".config") / "opencode" / "skill",
+                kind="tree",
+                component="skills",
+                label="opencode skills",
             ),
         ),
         base_filename="AGENTS.md",
@@ -115,10 +164,32 @@ HARNESS_REGISTRY: dict[str, HarnessSpec] = {
         install_target=Path.home() / ".claude",
         install_entries=(
             InstallEntry(
-                source=Path("."),
-                destination=Path(".claude"),
+                source=Path("CLAUDE.md"),
+                destination=Path(".claude") / "CLAUDE.md",
+                kind="file",
+                component="base",
+                label="claude base instructions",
+            ),
+            InstallEntry(
+                source=Path("agents"),
+                destination=Path(".claude") / "agents",
                 kind="tree",
-                label="claude",
+                component="documents",
+                label="claude agents",
+            ),
+            InstallEntry(
+                source=Path("commands"),
+                destination=Path(".claude") / "commands",
+                kind="tree",
+                component="documents",
+                label="claude commands",
+            ),
+            InstallEntry(
+                source=Path("skills"),
+                destination=Path(".claude") / "skills",
+                kind="tree",
+                component="skills",
+                label="claude skills",
             ),
         ),
         base_filename="CLAUDE.md",
@@ -154,18 +225,21 @@ HARNESS_REGISTRY: dict[str, HarnessSpec] = {
                 source=Path(".codex"),
                 destination=Path(".codex"),
                 kind="tree",
+                component="documents",
                 label="codex agents",
             ),
             InstallEntry(
                 source=Path(".agents") / "skills",
                 destination=Path(".agents") / "skills",
                 kind="tree",
+                component="skills",
                 label="codex skills",
             ),
             InstallEntry(
                 source=Path("AGENTS.md"),
                 destination=Path(".codex") / "AGENTS.md",
                 kind="file",
+                component="base",
                 label="codex base instructions",
             ),
         ),
