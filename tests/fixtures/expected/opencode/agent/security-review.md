@@ -3,7 +3,7 @@ description: "Security review specialist for identifying vulnerabilities and sec
 model: "openai/gpt-5.4"
 role: "agent"
 mode: "subagent"
-reasoning_effort: "high"
+reasoningEffort: "high"
 permission:
   edit: "deny"
   bash: "deny"

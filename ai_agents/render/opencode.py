@@ -37,11 +37,17 @@ def build_frontmatter(
         frontmatter["mode"] = override.metadata["mode"]
 
     for key, value in resolved.settings.items():
-        frontmatter[key] = value
+        frontmatter[normalize_frontmatter_key(key)] = value
     for key, value in override.metadata.items():
         if key in {"role", "mode"}:
             continue
         if key == "model":
             continue
-        frontmatter[key] = value
+        frontmatter[normalize_frontmatter_key(key)] = value
     return frontmatter
+
+
+def normalize_frontmatter_key(key: str) -> str:
+    if key == "reasoning_effort":
+        return "reasoningEffort"
+    return key

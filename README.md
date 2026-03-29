@@ -191,6 +191,8 @@ Model selection and reusable harness tuning are driven by logical profiles inste
 
 Profiles can define shared defaults in `profiles.<name>.shared` for cross-platform tuning like `reasoning_effort`, `temperature`, and related sampling settings. Harness-specific tables keep only the settings that truly differ by target, such as model names or sandbox controls.
 
+When rendered for OpenCode, internal shared keys are normalized to the provider-facing names OpenCode expects, for example `reasoning_effort` -> `reasoningEffort`.
+
 For OpenCode profiles, provider selection is split from the model name:
 
 ```toml
