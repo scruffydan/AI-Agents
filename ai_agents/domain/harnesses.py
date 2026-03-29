@@ -54,7 +54,7 @@ class HarnessSpec:
             raise ValueError(f"harness {self.name!r} does not define a skill output directory")
         return Path(self.output_layout.root) / skill_dir / skill_name
 
-    def install_entries_for(self, components: tuple[OutputComponent, ...] | None = None) -> tuple[InstallEntry, ...]:
+    def install_entries_for(self, components: tuple[OutputComponent, ...] = ()) -> tuple[InstallEntry, ...]:
         if not components:
             return self.install_entries
         selected = set(components)
