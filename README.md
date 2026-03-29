@@ -31,30 +31,37 @@ Or use the compatibility entrypoint:
 python3 build.py <command>
 ```
 
+Or run the repository-local executables directly:
+
+```bash
+./ai-agents <command>
+./build.py <command>
+```
+
 ### Build
 
 Build OpenCode only:
 
 ```bash
-python3 -m ai_agents build
+./ai-agents build
 ```
 
 Build all harnesses:
 
 ```bash
-python3 -m ai_agents build --all
+./ai-agents build --all
 ```
 
 Build a specific harness set:
 
 ```bash
-python3 -m ai_agents build --harness claude --harness codex
+./ai-agents build --harness claude --harness codex
 ```
 
 Build with work model profiles:
 
 ```bash
-python3 -m ai_agents build --all --work
+./ai-agents build --all --work
 ```
 
 ### Install
@@ -62,37 +69,37 @@ python3 -m ai_agents build --all --work
 Install OpenCode only:
 
 ```bash
-python3 -m ai_agents install
+./ai-agents install
 ```
 
 Install all harnesses:
 
 ```bash
-python3 -m ai_agents install --all
+./ai-agents install --all
 ```
 
 Install using existing build output:
 
 ```bash
-python3 -m ai_agents install --all --skip-build
+./ai-agents install --all --skip-build
 ```
 
 Preview install actions without writing files:
 
 ```bash
-python3 -m ai_agents install --all --dry-run
+./ai-agents install --all --dry-run
 ```
 
 Install only selected components:
 
 ```bash
-python3 -m ai_agents install --all --component base --component skills
+./ai-agents install --all --component base --component skills
 ```
 
 Force overwrite during install:
 
 ```bash
-python3 -m ai_agents install --all --force
+./ai-agents install --all --force
 ```
 
 ### Lint
@@ -100,7 +107,7 @@ python3 -m ai_agents install --all --force
 Validate prompt metadata and check for harness-coupled content patterns:
 
 ```bash
-python3 -m ai_agents lint
+./ai-agents lint
 ```
 
 ### Doctor
@@ -108,15 +115,15 @@ python3 -m ai_agents lint
 Verify source, build, and optional installed state:
 
 ```bash
-python3 -m ai_agents doctor
-python3 -m ai_agents doctor --installed
-python3 -m ai_agents doctor --json
+./ai-agents doctor
+./ai-agents doctor --installed
+./ai-agents doctor --json
 ```
 
 ### List Harnesses
 
 ```bash
-python3 -m ai_agents list harnesses
+./ai-agents list harnesses
 ```
 
 ### OpenCode Config
