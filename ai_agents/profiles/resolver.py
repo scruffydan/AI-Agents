@@ -60,7 +60,7 @@ def resolve_model_profile(
 
     settings = dict(shared_values)
     if harness == "opencode":
-        provider, model_name, model = resolve_opencode_model(profile_name, environment, harness_values)
+        model = resolve_opencode_model(profile_name, environment, harness_values)
         settings.update({key: value for key, value in harness_values.items() if key not in {"provider", "model"}})
     else:
         if "provider" in harness_values:
@@ -68,17 +68,10 @@ def resolve_model_profile(
                 f"profile={profile_name!r}, environment={environment!r}, harness={harness!r} "
                 "does not support provider"
             )
-        model_name = require_model_name(profile_name, environment, harness, harness_values)
-        provider = None
-        model = model_name
+        model = require_model_name(profile_name, environment, harness, harness_values)
         settings.update({key: value for key, value in harness_values.items() if key != "model"})
 
     return ResolvedModelConfig(
-        profile_name=profile_name,
-        environment=environment,
-        harness=harness,
-        provider=provider,
-        model_name=model_name,
         model=model,
         settings=settings,
     )
@@ -91,7 +84,7 @@ def get_profile_shared_settings(profile_name: str, profile: ProfileData) -> dict
     return dict(shared_values)
 
 
-def resolve_opencode_model(profile_name: str, environment: str, values: dict[str, Any]) -> tuple[str, str, str]:
+def resolve_opencode_model(profile_name: str, environment: str, values: dict[str, Any]) -> str:
     provider = values.get("provider")
     if not isinstance(provider, str) or not provider:
         raise ValueError(
@@ -111,7 +104,7 @@ def resolve_opencode_model(profile_name: str, environment: str, values: dict[str
             "must use split provider/model fields"
         )
 
-    return provider, model_name, compose_opencode_model(provider, model_name)
+    return compose_opencode_model(provider, model_name)
 
 
 def require_model_name(profile_name: str, environment: str, harness: str, values: dict[str, Any]) -> str:

@@ -5,8 +5,7 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any
 
-from ai_agents.content.loader import load_documents
-from ai_agents.content.validation import validate_document
+from ai_agents.content.loader import load_validated_documents
 from ai_agents.domain.harnesses import all_harnesses
 from ai_agents.profiles.resolver import load_model_profiles
 
@@ -56,9 +55,7 @@ def check_source(repo_root: Path, report: DoctorReport) -> None:
     report.checked.append("source")
 
     try:
-        documents = load_documents(prompts_dir, include_dir=prompts_dir)
-        for document in documents:
-            validate_document(document)
+        load_validated_documents(prompts_dir, include_dir=prompts_dir)
         load_model_profiles(profiles_path)
     except Exception as exc:
         report.failures.append(DoctorIssue(scope="source", message=str(exc)))

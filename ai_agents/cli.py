@@ -5,8 +5,8 @@ from pathlib import Path
 from typing import Sequence
 
 from ai_agents.build.service import build_project
-from ai_agents.content.loader import load_documents
-from ai_agents.content.validation import lint_shared_content, validate_document
+from ai_agents.content.loader import load_validated_documents
+from ai_agents.content.validation import lint_shared_content
 from ai_agents.doctor import render_doctor_report, run_doctor
 from ai_agents.domain.harnesses import OutputComponent, all_harnesses, select_harnesses
 from ai_agents.domain.options import BuildOptions, InstallOptions
@@ -165,9 +165,7 @@ def normalize_components(values: list[str]) -> tuple[OutputComponent, ...]:
 
 def handle_lint() -> int:
     prompts_dir = REPO_ROOT / "source" / "prompts"
-    documents = load_documents(prompts_dir, include_dir=prompts_dir)
-    for document in documents:
-        validate_document(document)
+    documents = load_validated_documents(prompts_dir, include_dir=prompts_dir)
 
     report = lint_shared_content(REPO_ROOT)
     if report.violations:
