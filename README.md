@@ -77,6 +77,18 @@ Install using existing build output:
 python3 -m ai_agents install --all --skip-build
 ```
 
+Preview install actions without writing files:
+
+```bash
+python3 -m ai_agents install --all --dry-run
+```
+
+Install only selected components:
+
+```bash
+python3 -m ai_agents install --all --component base --component skills
+```
+
 Force overwrite during install:
 
 ```bash
@@ -89,6 +101,16 @@ Validate prompt metadata and check for harness-coupled content patterns:
 
 ```bash
 python3 -m ai_agents lint
+```
+
+### Doctor
+
+Verify source, build, and optional installed state:
+
+```bash
+python3 -m ai_agents doctor
+python3 -m ai_agents doctor --installed
+python3 -m ai_agents doctor --json
 ```
 
 ### List Harnesses
@@ -112,6 +134,8 @@ The helper refuses to overwrite symlink targets and installs `opencode.json` wit
 Build output is written to `build/` by default.
 
 Custom build output paths may point elsewhere when creating a fresh directory, but existing output directories must stay inside `build/`.
+
+Each successful build also writes `build/manifest.json`, which records generated artifacts, source-to-output mappings, harnesses, and logical components.
 
 ### OpenCode
 
@@ -149,6 +173,8 @@ build/codex/
 - `source/model-profiles.toml` contains logical model profiles for default and work environments
 
 Prompt sources use the harness-neutral schema with `kind`, `model_profile`, and `targets.<harness>`.
+
+Harness-specific compatibility rules live in `ai_agents/domain/harnesses.py`. The harness registry is also the source of truth for logical output/install components such as `base`, `documents`, and `skills`.
 
 ## Model Profiles
 
@@ -196,4 +222,5 @@ Run a full build verification:
 ```bash
 python3 -m ai_agents lint
 python3 -m ai_agents build --all --work
+python3 -m ai_agents doctor
 ```
