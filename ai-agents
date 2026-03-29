@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Compatibility entrypoint for the multi-harness CLI."""
+"""Repository-local executable entrypoint for the multi-harness CLI."""
 
 from ai_agents.cli import main
 
