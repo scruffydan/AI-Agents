@@ -182,6 +182,16 @@ Model selection and reusable harness tuning are driven by logical profiles inste
 
 Profiles can define shared defaults in `profiles.<name>.shared` for cross-platform tuning like `reasoning_effort`, `temperature`, and related sampling settings. Harness-specific tables keep only the settings that truly differ by target, such as model names or sandbox controls.
 
+For OpenCode profiles, provider selection is split from the model name:
+
+```toml
+[profiles.default.default.opencode]
+provider = "openai"
+model = "gpt-5.4"
+```
+
+The resolver composes that into the final OpenCode model string. Claude and Codex continue to use literal `model` values and do not support `provider`.
+
 Examples:
 
 - `default`
