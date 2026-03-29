@@ -154,6 +154,8 @@ Prompt sources use the harness-neutral schema with `kind`, `model_profile`, and 
 
 Model selection and reusable harness tuning are driven by logical profiles instead of prompt-local provider rewrites.
 
+Profiles can define shared defaults in `profiles.<name>.shared` for cross-platform tuning like `reasoning_effort`, `temperature`, and related sampling settings. Harness-specific tables keep only the settings that truly differ by target, such as model names or sandbox controls.
+
 Examples:
 
 - `default`
