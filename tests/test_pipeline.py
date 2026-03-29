@@ -38,6 +38,16 @@ class PipelineTests(unittest.TestCase):
         expected = (self.fixtures / "expected" / "opencode" / "agent" / "security-review.md").read_text()
         self.assertEqual(artifact.content, expected)
 
+    def test_opencode_render_normalizes_reasoning_key(self) -> None:
+        document = parse_document(self.fixtures / "source" / "security-review.md")
+        resolved = resolve_model_profile(self.profiles, document.model_profile, "default", "opencode")
+
+        artifact = render_document(document, resolved, harness=get_harness("opencode"))
+
+        self.assertIsNotNone(artifact)
+        self.assertIn("reasoningEffort", artifact.content)
+        self.assertNotIn("reasoning_effort", artifact.content)
+
     def test_validate_rejects_unknown_metadata_key(self) -> None:
         document = parse_document(self.fixtures / "source" / "security-review.md")
         document.targets["opencode"].metadata["unsupported"] = True
