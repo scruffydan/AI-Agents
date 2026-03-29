@@ -7,7 +7,7 @@ from typing import Sequence
 from ai_agents.build.service import build_project
 from ai_agents.content.loader import load_documents
 from ai_agents.content.validation import lint_shared_content, validate_document
-from ai_agents.domain.harnesses import all_harnesses, select_harnesses
+from ai_agents.domain.harnesses import OutputComponent, all_harnesses, select_harnesses
 from ai_agents.domain.options import BuildOptions, InstallOptions
 from ai_agents.install.service import install_project
 from ai_agents.repo import find_repo_root
@@ -60,6 +60,15 @@ def build_parser() -> argparse.ArgumentParser:
     install_parser.add_argument("--work", action="store_true", help="Use work environment")
     install_parser.add_argument("--skip-build", action="store_true", help="Use existing build output")
     install_parser.add_argument("--force", action="store_true", help="Overwrite without prompts")
+    install_parser.add_argument("--dry-run", action="store_true", help="Show planned install actions without writing files")
+    install_parser.add_argument(
+        "--component",
+        action="append",
+        dest="components",
+        default=[],
+        choices=("base", "documents", "skills"),
+        help="Install only selected components. Repeatable.",
+    )
 
     subparsers.add_parser("lint", help="Validate source content and harness neutrality")
     return parser
@@ -116,19 +125,38 @@ def handle_list_harnesses() -> int:
 
 def handle_install(args: argparse.Namespace) -> int:
     selected = select_harnesses(args.harnesses, include_all=args.all)
+    components = normalize_components(args.components)
     report = install_project(
         InstallOptions(
             repo_root=REPO_ROOT,
             selected_harnesses=tuple(spec.name for spec in selected),
+            selected_components=components,
             environment="work" if args.work else "default",
             skip_build=args.skip_build,
             force=args.force,
+            dry_run=args.dry_run,
         )
     )
     print(f"Build dir: {report.build_dir}")
     print(f"Harnesses: {', '.join(spec.name for spec in report.harnesses)}")
+    if components:
+        print(f"Components: {', '.join(components)}")
+    if report.dry_run:
+        print(f"Planned actions: {len(report.plan.actions)}")
+        return 0
     print(f"Installed targets: {len(report.installed_targets)}")
     return 0
+
+
+def normalize_components(values: list[str]) -> tuple[OutputComponent, ...]:
+    seen: set[str] = set()
+    normalized: list[OutputComponent] = []
+    for value in values:
+        if value in seen:
+            continue
+        seen.add(value)
+        normalized.append(value)
+    return tuple(normalized)
 
 
 def handle_lint() -> int:
