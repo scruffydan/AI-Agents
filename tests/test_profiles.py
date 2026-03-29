@@ -24,6 +24,29 @@ class ProfileResolverTests(unittest.TestCase):
         self.assertEqual(resolved.model, "google-vertex-anthropic/claude-opus-4-5@20251101")
         self.assertEqual(resolved.settings["reasoning_effort"], "high")
 
+    def test_applies_shared_profile_settings_to_other_harnesses(self) -> None:
+        resolved = resolve_model_profile(self.profiles, "creative", "default", "claude")
+
+        self.assertEqual(resolved.model, "claude-opus-4-5")
+        self.assertEqual(resolved.settings["reasoning_effort"], "high")
+        self.assertEqual(resolved.settings["temperature"], 0.95)
+        self.assertEqual(resolved.settings["top_p"], 0.92)
+
+    def test_harness_specific_settings_override_shared_defaults(self) -> None:
+        profiles = {
+            "example": {
+                "shared": {"reasoning_effort": "medium", "temperature": 0.2},
+                "default": {
+                    "opencode": {"model": "openai/gpt-5.4", "temperature": 0.8},
+                },
+            }
+        }
+
+        resolved = resolve_model_profile(profiles, "example", "default", "opencode")
+
+        self.assertEqual(resolved.settings["reasoning_effort"], "medium")
+        self.assertEqual(resolved.settings["temperature"], 0.8)
+
     def test_raises_on_unknown_profile(self) -> None:
         with self.assertRaisesRegex(ValueError, "unknown model profile"):
             resolve_model_profile(self.profiles, "missing", "default", "opencode")
@@ -33,3 +56,9 @@ class ProfileResolverTests(unittest.TestCase):
 
         with self.assertRaisesRegex(ValueError, "missing profile entry"):
             resolve_model_profile(profiles, "default", "default", "claude")
+
+    def test_raises_on_invalid_shared_profile_settings(self) -> None:
+        profiles = {"default": {"shared": "invalid", "default": {"opencode": {"model": "openai/gpt-5.4"}}}}
+
+        with self.assertRaisesRegex(ValueError, "shared settings must be a table"):
+            resolve_model_profile(profiles, "default", "default", "opencode")
