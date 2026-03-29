@@ -3,21 +3,20 @@ from __future__ import annotations
 import json
 
 from ai_agents.domain.documents import Document, DocumentKind, TargetOverride
-from ai_agents.domain.harnesses import HarnessSpec, get_harness
+from ai_agents.domain.harnesses import HarnessSpec
 from ai_agents.domain.models import ResolvedModelConfig
 from ai_agents.render.base import Artifact, merge_body, render_markdown_artifact
 
 
-def render_document(document: Document, resolved: ResolvedModelConfig, harness: HarnessSpec | None = None) -> Artifact | None:
-    spec = harness or get_harness("codex")
-    override = document.targets.get(spec.name)
+def render_document(document: Document, resolved: ResolvedModelConfig, harness: HarnessSpec) -> Artifact | None:
+    override = document.targets.get(harness.name)
     if override is None or not override.enabled:
         return None
 
     if document.kind == DocumentKind.SUBAGENT:
-        return render_subagent(document, override, resolved, spec)
+        return render_subagent(document, override, resolved, harness)
     if document.kind in {DocumentKind.COMMAND, DocumentKind.MODE}:
-        return render_prompt_skill(document, override, spec)
+        return render_prompt_skill(document, override, harness)
     return None
 
 

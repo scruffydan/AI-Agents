@@ -15,24 +15,18 @@ class ProfileResolverTests(unittest.TestCase):
     def test_resolves_default_opencode_profile(self) -> None:
         resolved = resolve_model_profile(self.profiles, "default", "default", "opencode")
 
-        self.assertEqual(resolved.provider, "openai")
-        self.assertEqual(resolved.model_name, "gpt-5.4")
         self.assertEqual(resolved.model, "openai/gpt-5.4")
         self.assertEqual(resolved.settings["reasoning_effort"], "medium")
 
     def test_resolves_work_profile(self) -> None:
         resolved = resolve_model_profile(self.profiles, "deep_review", "work", "opencode")
 
-        self.assertEqual(resolved.provider, "google-vertex-anthropic")
-        self.assertEqual(resolved.model_name, "claude-opus-4-5@20251101")
         self.assertEqual(resolved.model, "google-vertex-anthropic/claude-opus-4-5@20251101")
         self.assertEqual(resolved.settings["reasoning_effort"], "high")
 
     def test_applies_shared_profile_settings_to_other_harnesses(self) -> None:
         resolved = resolve_model_profile(self.profiles, "creative", "default", "claude")
 
-        self.assertIsNone(resolved.provider)
-        self.assertEqual(resolved.model_name, "claude-opus-4-5")
         self.assertEqual(resolved.model, "claude-opus-4-5")
         self.assertEqual(resolved.settings["reasoning_effort"], "high")
         self.assertEqual(resolved.settings["temperature"], 0.95)

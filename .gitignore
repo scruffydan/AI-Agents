@@ -1,5 +1,5 @@
 # Build output - generated from source/prompts/
-build/
+/build/
 
 # OS files
 .DS_Store
