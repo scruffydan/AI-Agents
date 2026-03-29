@@ -2,10 +2,12 @@
 reasoning_effort = "medium"
 
 [profiles.default.default.opencode]
-model = "openai/gpt-5.4"
+provider = "openai"
+model = "gpt-5.4"
 
 [profiles.default.work.opencode]
-model = "google-vertex/gemini-3.1-pro-preview"
+provider = "google-vertex"
+model = "gemini-3.1-pro-preview"
 
 [profiles.default.default.claude]
 model = "claude-sonnet-4-6"
@@ -25,10 +27,12 @@ sandbox = "read-only"
 reasoning_effort = "high"
 
 [profiles.deep_review.default.opencode]
-model = "openai/gpt-5.4"
+provider = "openai"
+model = "gpt-5.4"
 
 [profiles.deep_review.work.opencode]
-model = "google-vertex-anthropic/claude-opus-4-5@20251101"
+provider = "google-vertex-anthropic"
+model = "claude-opus-4-5@20251101"
 
 [profiles.deep_review.default.claude]
 model = "claude-opus-4-5"
@@ -54,10 +58,12 @@ frequency_penalty = 0.3
 presence_penalty = 0.25
 
 [profiles.creative.default.opencode]
-model = "openai/gpt-5.4"
+provider = "openai"
+model = "gpt-5.4"
 
 [profiles.creative.work.opencode]
-model = "google-vertex/gemini-3.1-pro-preview"
+provider = "google-vertex"
+model = "gemini-3.1-pro-preview"
 
 [profiles.creative.default.claude]
 model = "claude-opus-4-5"
@@ -78,10 +84,12 @@ reasoning_effort = "high"
 temperature = 0.1
 
 [profiles.planner.default.opencode]
-model = "openai/gpt-5.4"
+provider = "openai"
+model = "gpt-5.4"
 
 [profiles.planner.work.opencode]
-model = "google-vertex-anthropic/claude-opus-4-5@20251101"
+provider = "google-vertex-anthropic"
+model = "claude-opus-4-5@20251101"
 
 [profiles.planner.default.claude]
 model = "claude-sonnet-4-6"
