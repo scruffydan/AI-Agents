@@ -6,6 +6,7 @@ from typing import Callable
 
 from ai_agents.build.service import build_project
 from ai_agents.domain.harnesses import HarnessSpec, select_harnesses
+from ai_agents.domain.install_plan import InstallAction, InstallPlan
 from ai_agents.domain.options import BuildOptions, InstallOptions
 from ai_agents.fs import replace_file, replace_tree, resolve_relative_to
 
@@ -17,7 +18,9 @@ Prompt = Callable[[str], str]
 class InstallReport:
     build_dir: Path
     harnesses: tuple[HarnessSpec, ...]
+    plan: InstallPlan
     installed_targets: tuple[str, ...]
+    dry_run: bool
 
 
 def install_project(options: InstallOptions, prompt: Prompt = input) -> InstallReport:
@@ -36,18 +39,69 @@ def install_project(options: InstallOptions, prompt: Prompt = input) -> InstallR
             )
         )
 
+    plan = build_install_plan(harnesses, build_dir, home_dir, options.selected_components)
     installed: list[str] = []
+    if not options.dry_run:
+        for harness in harnesses:
+            installed.extend(
+                install_harness(
+                    harness,
+                    build_dir,
+                    home_dir,
+                    options.force,
+                    prompt,
+                    options.selected_components,
+                )
+            )
+
+    return InstallReport(
+        build_dir=build_dir,
+        harnesses=harnesses,
+        plan=plan,
+        installed_targets=tuple(installed),
+        dry_run=options.dry_run,
+    )
+
+
+def build_install_plan(
+    harnesses: tuple[HarnessSpec, ...],
+    build_dir: Path,
+    home_dir: Path,
+    selected_components: tuple[str, ...],
+) -> InstallPlan:
+    actions: list[InstallAction] = []
     for harness in harnesses:
-        installed.extend(install_harness(harness, build_dir, home_dir, options.force, prompt))
+        build_root = build_dir / harness.output_layout.root
+        for entry in harness.install_entries_for(selected_components or None):
+            source = resolve_relative_to(build_root, entry.source, f"install source for {harness.name}")
+            destination = home_dir / entry.destination
+            status = "ready" if source.exists() else "missing_source"
+            actions.append(
+                InstallAction(
+                    harness=harness.name,
+                    component=entry.component,
+                    label=entry.label,
+                    source=source,
+                    destination=destination,
+                    kind=entry.kind,
+                    status=status,
+                )
+            )
+    return InstallPlan(build_dir=build_dir, actions=tuple(actions))
 
-    return InstallReport(build_dir=build_dir, harnesses=harnesses, installed_targets=tuple(installed))
 
-
-def install_harness(harness: HarnessSpec, build_dir: Path, home_dir: Path, force: bool, prompt: Prompt) -> list[str]:
+def install_harness(
+    harness: HarnessSpec,
+    build_dir: Path,
+    home_dir: Path,
+    force: bool,
+    prompt: Prompt,
+    selected_components: tuple[str, ...],
+) -> list[str]:
     installed: list[str] = []
     build_root = build_dir / harness.output_layout.root
 
-    for entry in harness.install_entries_for():
+    for entry in harness.install_entries_for(selected_components or None):
         source = resolve_relative_to(build_root, entry.source, f"install source for {harness.name}")
         destination = home_dir / entry.destination
         if entry.kind == "tree":

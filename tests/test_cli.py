@@ -44,3 +44,11 @@ class CliTests(unittest.TestCase):
 
         self.assertEqual(exit_code, 0)
         self.assertIn("Lint passed", output)
+
+    def test_install_dry_run_reports_planned_actions(self) -> None:
+        exit_code, output = self.run_cli("install", "--dry-run", "--component", "base")
+
+        self.assertEqual(exit_code, 0)
+        self.assertIn("Harnesses: opencode", output)
+        self.assertIn("Components: base", output)
+        self.assertRegex(output, r"Planned actions: [1-9]\d*")
