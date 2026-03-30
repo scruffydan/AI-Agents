@@ -25,6 +25,7 @@ def resolve_model_profile(
     profile_name: str,
     environment: str,
     harness: str,
+    opencode_provider_override: str | None = None,
 ) -> ResolvedModelConfig:
     try:
         environments = profiles[profile_name]
@@ -60,7 +61,12 @@ def resolve_model_profile(
 
     settings = dict(shared_values)
     if harness == "opencode":
-        model = resolve_opencode_model(profile_name, environment, harness_values)
+        model = resolve_opencode_model(
+            profile_name,
+            environment,
+            harness_values,
+            provider_override=opencode_provider_override,
+        )
         settings.update({key: value for key, value in harness_values.items() if key not in {"provider", "model"}})
     else:
         if "provider" in harness_values:
@@ -84,8 +90,13 @@ def get_profile_shared_settings(profile_name: str, profile: ProfileData) -> dict
     return dict(shared_values)
 
 
-def resolve_opencode_model(profile_name: str, environment: str, values: dict[str, Any]) -> str:
-    provider = values.get("provider")
+def resolve_opencode_model(
+    profile_name: str,
+    environment: str,
+    values: dict[str, Any],
+    provider_override: str | None = None,
+) -> str:
+    provider = provider_override or values.get("provider")
     if not isinstance(provider, str) or not provider:
         raise ValueError(
             f"profile={profile_name!r}, environment={environment!r}, harness='opencode' "

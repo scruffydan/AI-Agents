@@ -39,6 +39,12 @@ class CliTests(unittest.TestCase):
         self.assertIn("Harnesses: opencode, claude, codex", output)
         self.assertRegex(output, r"Artifacts: [1-9]\d*")
 
+    def test_build_reports_opencode_provider_override(self) -> None:
+        exit_code, output = self.run_cli("build", "--opencode-provider", "github-copilot")
+
+        self.assertEqual(exit_code, 0)
+        self.assertIn("OpenCode provider override: github-copilot", output)
+
     def test_lint_passes(self) -> None:
         exit_code, output = self.run_cli("lint")
 

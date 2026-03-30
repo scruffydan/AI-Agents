@@ -62,7 +62,13 @@ def build_project(options: BuildOptions) -> BuildReport:
             for harness in harnesses:
                 if harness.name not in document.targets:
                     continue
-                resolved = resolve_model_profile(profiles, document.model_profile, options.environment, harness.name)
+                resolved = resolve_model_profile(
+                    profiles,
+                    document.model_profile,
+                    options.environment,
+                    harness.name,
+                    opencode_provider_override=options.opencode_provider_override,
+                )
                 artifact = render_for_harness(document, harness, resolved)
                 if artifact is None:
                     continue
