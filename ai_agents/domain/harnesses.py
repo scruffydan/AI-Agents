@@ -43,6 +43,9 @@ class HarnessSpec:
             return "base"
         if kind == DocumentKind.SKILL:
             return "skills"
+        skill_dir = self.output_dir_for(DocumentKind.SKILL)
+        if skill_dir is not None and self.output_dir_for(kind) == skill_dir:
+            return "skills"
         return "documents"
 
     def base_output_path(self) -> Path:
@@ -142,7 +145,7 @@ HARNESS_REGISTRY: dict[str, HarnessSpec] = {
             root="claude",
             kind_directories={
                 DocumentKind.SUBAGENT: "agents",
-                DocumentKind.COMMAND: "commands",
+                DocumentKind.COMMAND: "skills",
                 DocumentKind.SKILL: "skills",
                 DocumentKind.BASE: ".",
             },
@@ -161,13 +164,6 @@ HARNESS_REGISTRY: dict[str, HarnessSpec] = {
                 kind="tree",
                 component="documents",
                 label="claude agents",
-            ),
-            InstallEntry(
-                source=Path("commands"),
-                destination=Path(".claude") / "commands",
-                kind="tree",
-                component="documents",
-                label="claude commands",
             ),
             InstallEntry(
                 source=Path("skills"),

@@ -27,8 +27,10 @@ class HarnessRegistryTests(unittest.TestCase):
 
         self.assertEqual(spec.component_for_kind(DocumentKind.BASE), "base")
         self.assertEqual(spec.component_for_kind(DocumentKind.SUBAGENT), "documents")
+        self.assertEqual(spec.component_for_kind(DocumentKind.COMMAND), "skills")
         self.assertEqual(spec.component_for_kind(DocumentKind.SKILL), "skills")
         self.assertIsNone(spec.output_dir_for(DocumentKind.MODE))
+        self.assertEqual(spec.output_dir_for(DocumentKind.COMMAND), "skills")
         self.assertEqual(spec.base_output_path().as_posix(), "claude/CLAUDE.md")
         self.assertEqual(spec.skill_output_path("example").as_posix(), "claude/skills/example")
 

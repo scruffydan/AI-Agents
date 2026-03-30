@@ -17,7 +17,14 @@ def render_document(document: Document, resolved: ResolvedModelConfig, harness: 
 
     frontmatter = build_frontmatter(document, override, resolved)
     body = merge_body(document, override)
-    return render_markdown_artifact(f"{harness.output_layout.root}/{output_dir}/{document.name}.md", frontmatter, body)
+    relative_path = render_path(document, harness, output_dir)
+    return render_markdown_artifact(relative_path, frontmatter, body)
+
+
+def render_path(document: Document, harness: HarnessSpec, output_dir: str) -> str:
+    if document.kind == DocumentKind.COMMAND:
+        return f"{harness.output_layout.root}/{output_dir}/{document.name}/SKILL.md"
+    return f"{harness.output_layout.root}/{output_dir}/{document.name}.md"
 
 
 def build_frontmatter(
@@ -27,12 +34,13 @@ def build_frontmatter(
 ) -> dict[str, object]:
     frontmatter: dict[str, object] = {}
 
-    if document.kind == DocumentKind.SUBAGENT:
+    if document.kind in {DocumentKind.SUBAGENT, DocumentKind.COMMAND}:
         frontmatter["name"] = document.name
     frontmatter["description"] = document.description
 
     if "tools" in override.metadata:
-        frontmatter["tools"] = override.metadata["tools"]
+        key = "tools" if document.kind == DocumentKind.SUBAGENT else "allowed-tools"
+        frontmatter[key] = override.metadata["tools"]
 
     model = override.metadata.get("model")
     if model is None and document.kind == DocumentKind.SUBAGENT:
