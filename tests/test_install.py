@@ -33,6 +33,7 @@ class InstallServiceTests(unittest.TestCase):
             self.assertEqual([spec.name for spec in report.harnesses], ["opencode", "claude", "codex"])
             self.assertTrue((home_dir / ".config" / "opencode" / "agent" / "code-security.md").exists())
             self.assertTrue((home_dir / ".claude" / "agents" / "code-security.md").exists())
+            self.assertTrue((home_dir / ".claude" / "skills" / "code-full-review" / "SKILL.md").exists())
             self.assertTrue((home_dir / ".codex" / "agents" / "code-security.toml").exists())
             self.assertTrue((home_dir / ".agents" / "skills" / "command-code-full-review" / "SKILL.md").exists())
             self.assertTrue((home_dir / ".codex" / "AGENTS.md").exists())
