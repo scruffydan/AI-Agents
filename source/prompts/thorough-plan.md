@@ -4,6 +4,7 @@ kind = "mode"
 model_profile = "planner"
 
 [targets.opencode]
+temperature = 0.1
 
 [targets.opencode.permission]
 edit = "deny"

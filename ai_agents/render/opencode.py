@@ -26,23 +26,39 @@ def build_frontmatter(
     resolved: ResolvedModelConfig,
 ) -> dict[str, object]:
     frontmatter: dict[str, object] = {"description": document.description}
+    is_mode = document.kind == DocumentKind.MODE
+    metadata = override.metadata
 
-    role = override.metadata.get("role")
+    role = metadata.get("role")
     if role is not None:
         frontmatter["role"] = role
 
-    if document.kind == DocumentKind.MODE:
+    if is_mode:
         frontmatter["mode"] = "primary"
-    elif "mode" in override.metadata:
-        frontmatter["mode"] = override.metadata["mode"]
+        temperature = metadata.get("temperature")
+        if temperature is not None:
+            frontmatter["temperature"] = temperature
+    elif "mode" in metadata:
+        frontmatter["mode"] = metadata["mode"]
 
-    frontmatter["model"] = str(override.metadata.get("model") or resolved.model)
+    model = metadata.get("model")
+    if model is None and not is_mode:
+        model = resolved.model
+    if model is not None:
+        frontmatter["model"] = str(model)
 
-    if document.kind != DocumentKind.COMMAND:
+    if is_mode:
+        reasoning_effort = metadata.get("reasoning_effort")
+        if reasoning_effort is not None:
+            frontmatter["reasoningEffort"] = reasoning_effort
+
+    if document.kind not in {DocumentKind.COMMAND, DocumentKind.MODE}:
         merge_settings(frontmatter, resolved.settings)
 
-    for key, value in override.metadata.items():
+    for key, value in metadata.items():
         if key in {"role", "mode", "model"}:
+            continue
+        if is_mode and key in {"temperature", "reasoning_effort", "top_p", "frequency_penalty", "presence_penalty"}:
             continue
         if document.kind == DocumentKind.COMMAND and key != "subtask":
             continue

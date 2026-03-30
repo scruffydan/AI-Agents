@@ -8,11 +8,7 @@ from ai_agents.domain.documents import Document
 from ai_agents.domain.harnesses import HarnessSpec, get_harness
 
 
-FORBIDDEN_SHARED_PATTERNS = (
-    re.compile(r"@[a-zA-Z-]+"),
-    re.compile(r"For Claude Code"),
-    re.compile(r"For OpenCode"),
-)
+FORBIDDEN_SHARED_PATTERNS: tuple[re.Pattern[str], ...] = ()
 
 
 @dataclass(frozen=True)

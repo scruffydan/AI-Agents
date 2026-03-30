@@ -1,7 +1,7 @@
 +++
 description = "Answer general questions unrelated to the current coding session. Use this agent to handle tangential questions without consuming main conversation context."
 kind = "subagent"
-model_profile = "deep_review"
+model_profile = "sidebar"
 
 [targets.opencode]
 mode = "subagent"
@@ -43,7 +43,7 @@ You handle **general conceptual questions**, including:
 - "How does X work?" type questions (general mechanisms, not specific to user's code)
 - Historical/factual questions
 - Quick lookups and definitions
-- General codebase concepts (when explicitly called with `@sidebar` for codebase questions)
+- General codebase concepts (when explicitly called with @sidebar for codebase questions)
 
 ## What You Don't Handle (Unless Explicitly Called)
 
