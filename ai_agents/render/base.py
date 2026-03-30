@@ -36,7 +36,7 @@ def to_yaml(data: Mapping[str, object], indent: int = 0) -> str:
     return "\n".join(lines)
 
 
-PLAIN_SCALAR_PATTERN = re.compile(r"^[A-Za-z0-9_./,@`()+-][A-Za-z0-9_./,@`()+\- ]*$")
+PLAIN_SCALAR_PATTERN = re.compile(r'^[A-Za-z0-9_./,@`()+"-][A-Za-z0-9_./,@`()+"\- ]*$')
 RESERVED_SCALARS = {"", "null", "true", "false", "yes", "no", "on", "off", "~"}
 NUMERIC_PATTERN = re.compile(r"^[-+]?(?:0|[1-9][0-9]*)(?:\.[0-9]+)?(?:[eE][-+]?[0-9]+)?$")
 
@@ -55,7 +55,7 @@ def can_use_plain_scalar(value: str) -> bool:
         return False
     if NUMERIC_PATTERN.match(value):
         return False
-    if any(token in value for token in (": ", "\n", '"', "#", "[", "]", "{", "}")):
+    if any(token in value for token in (": ", "\n", "#", "[", "]", "{", "}")):
         return False
     return bool(PLAIN_SCALAR_PATTERN.match(value))
 

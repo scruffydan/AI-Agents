@@ -4,6 +4,12 @@ kind = "mode"
 model_profile = "creative"
 
 [targets.opencode]
+model = "openai/gpt-5.4"
+reasoning_effort = "high"
+temperature = 0.95
+top_p = 0.92
+frequency_penalty = 0.3
+presence_penalty = 0.25
 
 [targets.opencode.permission]
 edit = "deny"

@@ -104,3 +104,43 @@ sandbox = "workspace-write"
 [profiles.planner.work.codex]
 model = "openai/gpt-5.4"
 sandbox = "workspace-write"
+
+[profiles.git_commit.default.opencode]
+provider = "openai"
+model = "gpt-5.4"
+
+[profiles.git_commit.work.opencode]
+provider = "google-vertex"
+model = "gemini-3.1-pro-preview"
+
+[profiles.git_commit.default.claude]
+model = "claude-sonnet-4-6"
+
+[profiles.git_commit.work.claude]
+model = "claude-sonnet-4-6"
+
+[profiles.git_commit.default.codex]
+model = "openai/gpt-5.4"
+
+[profiles.git_commit.work.codex]
+model = "openai/gpt-5.4"
+
+[profiles.sidebar.default.opencode]
+provider = "openai"
+model = "gpt-5.4"
+
+[profiles.sidebar.work.opencode]
+provider = "google-vertex-anthropic"
+model = "claude-opus-4-5@20251101"
+
+[profiles.sidebar.default.claude]
+model = "claude-opus-4-5"
+
+[profiles.sidebar.work.claude]
+model = "claude-opus-4-5"
+
+[profiles.sidebar.default.codex]
+model = "openai/gpt-5.4"
+
+[profiles.sidebar.work.codex]
+model = "openai/gpt-5.4"
