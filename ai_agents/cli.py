@@ -15,6 +15,7 @@ from ai_agents.repo import find_repo_root
 
 
 REPO_ROOT = find_repo_root(Path(__file__))
+OPENCODE_PROVIDERS = ("openai", "github-copilot", "opencode")
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -44,6 +45,11 @@ def build_parser() -> argparse.ArgumentParser:
         type=Path,
         help="Output directory. Defaults to <repo>/build.",
     )
+    build_parser.add_argument(
+        "--opencode-provider",
+        choices=OPENCODE_PROVIDERS,
+        help="Override the OpenCode provider for this build.",
+    )
 
     list_parser = subparsers.add_parser("list", help="List project metadata")
     list_subparsers = list_parser.add_subparsers(dest="list_command", required=True)
@@ -62,6 +68,11 @@ def build_parser() -> argparse.ArgumentParser:
     install_parser.add_argument("--skip-build", action="store_true", help="Use existing build output")
     install_parser.add_argument("--force", action="store_true", help="Overwrite without prompts")
     install_parser.add_argument("--dry-run", action="store_true", help="Show planned install actions without writing files")
+    install_parser.add_argument(
+        "--opencode-provider",
+        choices=OPENCODE_PROVIDERS,
+        help="Override the OpenCode provider for the build performed by install.",
+    )
     install_parser.add_argument(
         "--component",
         action="append",
@@ -105,12 +116,15 @@ def handle_build(args: argparse.Namespace) -> int:
         output_dir=args.output,
         selected_harnesses=tuple(spec.name for spec in selected),
         environment="work" if args.work else "default",
+        opencode_provider_override=args.opencode_provider,
     )
     report = build_project(options)
 
     print(f"Repo root: {report.repo_root}")
     print(f"Output dir: {report.output_dir}")
     print(f"Environment: {report.environment}")
+    if args.opencode_provider:
+        print(f"OpenCode provider override: {args.opencode_provider}")
     print(f"Harnesses: {', '.join(spec.name for spec in report.harnesses)}")
     print(f"Documents: {report.document_count}")
     print(f"Artifacts: {report.artifact_count}")
@@ -136,12 +150,15 @@ def handle_install(args: argparse.Namespace) -> int:
             selected_harnesses=tuple(spec.name for spec in selected),
             selected_components=components,
             environment="work" if args.work else "default",
+            opencode_provider_override=args.opencode_provider,
             skip_build=args.skip_build,
             force=args.force,
             dry_run=args.dry_run,
         )
     )
     print(f"Build dir: {report.build_dir}")
+    if args.opencode_provider:
+        print(f"OpenCode provider override: {args.opencode_provider}")
     print(f"Harnesses: {', '.join(spec.name for spec in report.harnesses)}")
     if components:
         print(f"Components: {', '.join(components)}")

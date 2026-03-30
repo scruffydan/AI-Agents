@@ -204,6 +204,16 @@ model = "gpt-5.4"
 
 The resolver composes that into the final OpenCode model string. Claude and Codex continue to use literal `model` values and do not support `provider`.
 
+For quick provider failover, you can override just the OpenCode provider at build or install time:
+
+```bash
+./ai-agents build --opencode-provider github-copilot
+./ai-agents build --opencode-provider opencode
+./ai-agents install --opencode-provider github-copilot
+```
+
+Supported provider override values are `openai`, `github-copilot`, and `opencode` (OpenCode Zen). The override only replaces the provider portion of the final OpenCode model string, so the selected model name still comes from the active profile.
+
 Examples:
 
 - `default`

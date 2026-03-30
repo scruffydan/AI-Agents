@@ -47,6 +47,17 @@ class ProfileResolverTests(unittest.TestCase):
         self.assertEqual(resolved.settings["reasoning_effort"], "medium")
         self.assertEqual(resolved.settings["temperature"], 0.8)
 
+    def test_opencode_provider_override_replaces_profile_provider(self) -> None:
+        resolved = resolve_model_profile(
+            self.profiles,
+            "default",
+            "default",
+            "opencode",
+            opencode_provider_override="github-copilot",
+        )
+
+        self.assertEqual(resolved.model, "github-copilot/gpt-5.4")
+
     def test_raises_on_unknown_profile(self) -> None:
         with self.assertRaisesRegex(ValueError, "unknown model profile"):
             resolve_model_profile(self.profiles, "missing", "default", "opencode")

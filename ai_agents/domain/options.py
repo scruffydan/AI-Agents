@@ -12,6 +12,7 @@ class BuildOptions:
     output_dir: Path | None = None
     selected_harnesses: tuple[str, ...] = ()
     environment: str = "default"
+    opencode_provider_override: str | None = None
 
 
 @dataclass(frozen=True)
@@ -24,4 +25,5 @@ class InstallOptions:
     skip_build: bool = False
     dry_run: bool = False
     environment: str = "default"
+    opencode_provider_override: str | None = None
     home_dir: Path | None = None

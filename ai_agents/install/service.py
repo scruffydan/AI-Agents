@@ -36,6 +36,7 @@ def install_project(options: InstallOptions, prompt: Prompt = input) -> InstallR
                 output_dir=build_dir,
                 selected_harnesses=tuple(spec.name for spec in harnesses),
                 environment=options.environment,
+                opencode_provider_override=options.opencode_provider_override,
             )
         )
 
