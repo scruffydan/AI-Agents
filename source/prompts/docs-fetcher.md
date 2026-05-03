@@ -5,7 +5,7 @@ model_profile = "default"
 
 [targets.opencode]
 mode = "subagent"
-reasoning_effort = "high"
+reasoning_effort = "medium"
 
 [targets.opencode.permission]
 edit = "deny"
