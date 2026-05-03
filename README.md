@@ -228,6 +228,7 @@ Supported provider override values are `openai`, `github-copilot`, and `opencode
 Examples:
 
 - `default`
+- `mini_reasoning`
 - `deep_review`
 - `creative`
 - `planner`

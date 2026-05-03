@@ -1,11 +1,11 @@
 +++
 description = "Fetch and extract relevant documentation from URLs. Use this agent when you need specific information from external documentation without flooding the main context with entire pages."
 kind = "subagent"
-model_profile = "default"
+model_profile = "mini_reasoning"
 
 [targets.opencode]
 mode = "subagent"
-reasoning_effort = "medium"
+reasoning_effort = "high"
 
 [targets.opencode.permission]
 edit = "deny"

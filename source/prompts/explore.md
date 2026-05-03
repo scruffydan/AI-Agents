@@ -1,11 +1,11 @@
 +++
 description = "Explore and answer questions about the codebase. Use this agent to find files, search code, understand implementations, and trace dependencies without consuming main conversation context."
 kind = "subagent"
-model_profile = "default"
+model_profile = "mini_reasoning"
 
 [targets.opencode]
 mode = "subagent"
-reasoning_effort = "medium"
+reasoning_effort = "high"
 
 [targets.opencode.permission]
 edit = "deny"
