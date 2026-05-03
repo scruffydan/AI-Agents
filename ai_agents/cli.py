@@ -10,7 +10,7 @@ from ai_agents.content.validation import lint_shared_content
 from ai_agents.doctor import render_doctor_report, run_doctor
 from ai_agents.domain.harnesses import OutputComponent, all_harnesses, select_harnesses
 from ai_agents.domain.options import BuildOptions, InstallOptions
-from ai_agents.install.service import install_project
+from ai_agents.install.service import InvalidInstallPlan, install_project
 from ai_agents.repo import find_repo_root
 
 
@@ -85,6 +85,11 @@ def build_parser() -> argparse.ArgumentParser:
     doctor_parser = subparsers.add_parser("doctor", help="Verify source, build, and installed state")
     doctor_parser.add_argument("--installed", action="store_true", help="Verify installed targets under the home directory")
     doctor_parser.add_argument("--json", action="store_true", help="Emit machine-readable JSON")
+    doctor_parser.add_argument(
+        "--build-dir",
+        type=Path,
+        help="Build output directory to verify. Defaults to <repo>/build.",
+    )
 
     subparsers.add_parser("lint", help="Validate source content and harness neutrality")
     return parser
@@ -144,18 +149,24 @@ def handle_list_harnesses() -> int:
 def handle_install(args: argparse.Namespace) -> int:
     selected = select_harnesses(args.harnesses, include_all=args.all)
     components = normalize_components(args.components)
-    report = install_project(
-        InstallOptions(
-            repo_root=REPO_ROOT,
-            selected_harnesses=tuple(spec.name for spec in selected),
-            selected_components=components,
-            environment="work" if args.work else "default",
-            opencode_provider_override=args.opencode_provider,
-            skip_build=args.skip_build,
-            force=args.force,
-            dry_run=args.dry_run,
+    try:
+        report = install_project(
+            InstallOptions(
+                repo_root=REPO_ROOT,
+                selected_harnesses=tuple(spec.name for spec in selected),
+                selected_components=components,
+                environment="work" if args.work else "default",
+                opencode_provider_override=args.opencode_provider,
+                skip_build=args.skip_build,
+                force=args.force,
+                dry_run=args.dry_run,
+            )
         )
-    )
+    except InvalidInstallPlan as exc:
+        print("Install plan is invalid: missing build artifacts")
+        for action in exc.missing_actions:
+            print(f"- {action.label}: {action.source}")
+        return 1
     print(f"Build dir: {report.build_dir}")
     if args.opencode_provider:
         print(f"OpenCode provider override: {args.opencode_provider}")
@@ -197,7 +208,7 @@ def handle_lint() -> int:
 
 
 def handle_doctor(args: argparse.Namespace) -> int:
-    report = run_doctor(REPO_ROOT, verify_installed=args.installed)
+    report = run_doctor(REPO_ROOT, verify_installed=args.installed, build_dir=args.build_dir)
     if args.json:
         import json
 

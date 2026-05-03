@@ -7,7 +7,8 @@ import unittest
 
 from ai_agents.build.service import build_project
 from ai_agents.doctor import render_doctor_report, run_doctor
-from ai_agents.domain.options import BuildOptions
+from ai_agents.domain.options import BuildOptions, InstallOptions
+from ai_agents.install.service import install_project
 from tests.helpers import repo_root
 
 
@@ -56,12 +57,16 @@ class DoctorTests(unittest.TestCase):
         self.assertEqual(report.failures, [])
 
     def test_doctor_reports_installed_failures(self) -> None:
+        build_project(BuildOptions(repo_root=self.repo_root, selected_harnesses=("opencode",)))
+
         report = run_doctor(self.repo_root, verify_installed=True, home_dir=Path("/tmp/nonexistent-ai-agents-home"))
 
         self.assertFalse(report.ok)
         self.assertTrue(any(issue.scope == "installed" for issue in report.failures))
 
     def test_rendered_report_mentions_failures(self) -> None:
+        build_project(BuildOptions(repo_root=self.repo_root, selected_harnesses=("opencode",)))
+
         report = run_doctor(self.repo_root, verify_installed=True, home_dir=Path("/tmp/nonexistent-ai-agents-home"))
 
         rendered = render_doctor_report(report)
@@ -69,12 +74,48 @@ class DoctorTests(unittest.TestCase):
         self.assertIn("Failures:", rendered)
         self.assertIn("missing installed targets", rendered)
 
+    def test_doctor_installed_uses_manifest_harnesses(self) -> None:
+        build_parent = self.repo_root / "build"
+        build_parent.mkdir(exist_ok=True)
+        with tempfile.TemporaryDirectory() as tmp:
+            temp_root = Path(tmp)
+            build_dir = build_parent / "test-doctor-installed"
+            home_dir = temp_root / "home"
+            install_project(
+                InstallOptions(
+                    repo_root=self.repo_root,
+                    build_dir=build_dir,
+                    selected_harnesses=("opencode",),
+                    force=True,
+                    home_dir=home_dir,
+                ),
+                prompt=lambda _: "y",
+            )
+
+            report = run_doctor(self.repo_root, verify_installed=True, home_dir=home_dir, build_dir=build_dir)
+
+            self.assertTrue(report.ok)
+            self.assertEqual(report.failures, [])
+
+    def test_doctor_supports_custom_build_dir(self) -> None:
+        build_parent = self.repo_root / "build"
+        build_parent.mkdir(exist_ok=True)
+        with tempfile.TemporaryDirectory(dir=build_parent) as tmp:
+            build_dir = Path(tmp) / "custom"
+            build_project(BuildOptions(repo_root=self.repo_root, output_dir=build_dir, selected_harnesses=("opencode",)))
+
+            report = run_doctor(self.repo_root, verify_installed=False, build_dir=build_dir)
+
+            self.assertTrue(report.ok)
+            self.assertEqual(report.failures, [])
+
     def test_json_output_shape(self) -> None:
         report = run_doctor(self.repo_root, verify_installed=False)
 
         payload = json.loads(json.dumps(report.to_dict()))
 
         self.assertIn("repo_root", payload)
+        self.assertIn("build_dir", payload)
         self.assertIn("checked", payload)
         self.assertIn("warnings", payload)
         self.assertIn("failures", payload)

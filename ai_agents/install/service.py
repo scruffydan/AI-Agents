@@ -23,6 +23,15 @@ class InstallReport:
     dry_run: bool
 
 
+class InvalidInstallPlan(ValueError):
+    def __init__(self, missing_actions: tuple[InstallAction, ...]) -> None:
+        self.missing_actions = missing_actions
+        labels = ", ".join(action.label for action in missing_actions[:3])
+        extra = len(missing_actions) - min(len(missing_actions), 3)
+        suffix = f" (+{extra} more)" if extra else ""
+        super().__init__(f"install plan has missing sources: {labels}{suffix}")
+
+
 def install_project(options: InstallOptions, prompt: Prompt = input) -> InstallReport:
     repo_root = options.repo_root.resolve()
     build_dir = options.build_dir.resolve() if options.build_dir else repo_root / "build"
@@ -41,6 +50,7 @@ def install_project(options: InstallOptions, prompt: Prompt = input) -> InstallR
         )
 
     plan = build_install_plan(harnesses, build_dir, home_dir, options.selected_components)
+    validate_install_plan(plan)
     installed = execute_install_plan(plan, force=options.force, prompt=prompt) if not options.dry_run else ()
 
     return InstallReport(
@@ -79,11 +89,18 @@ def build_install_plan(
     return InstallPlan(build_dir=build_dir, actions=tuple(actions))
 
 
+def validate_install_plan(plan: InstallPlan) -> None:
+    missing = tuple(action for action in plan.actions if action.status == "missing_source")
+    if missing:
+        raise InvalidInstallPlan(missing)
+
+
 def execute_install_plan(plan: InstallPlan, force: bool, prompt: Prompt) -> tuple[str, ...]:
+    validate_install_plan(plan)
     installed: list[str] = []
     for action in plan.actions:
         if action.status != "ready":
-            continue
+            raise ValueError(f"install action is not ready: {action.label} ({action.status})")
         if not should_write(action.destination, force, prompt, label=action.label):
             continue
         if action.kind == "tree":
