@@ -7,7 +7,7 @@ claude:
 opencode:
   mode: subagent
   model: opencode/gpt-5.5
-  reasoningEffort: medium
+  reasoningEffort: high
   permission:
     edit: deny
     bash: deny
