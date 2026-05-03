@@ -3,7 +3,7 @@ reasoning_effort = "medium"
 
 [profiles.default.default.opencode]
 provider = "openai"
-model = "gpt-5.4"
+model = "gpt-5.5"
 
 [profiles.default.work.opencode]
 provider = "google-vertex"
@@ -16,42 +16,42 @@ model = "claude-sonnet-4-6"
 model = "claude-sonnet-4-6"
 
 [profiles.default.default.codex]
-model = "openai/gpt-5.4"
+model = "openai/gpt-5.5"
 sandbox = "read-only"
 
 [profiles.default.work.codex]
-model = "openai/gpt-5.4"
+model = "openai/gpt-5.5"
 sandbox = "read-only"
 
 [profiles.deep_review.shared]
-reasoning_effort = "high"
+reasoning_effort = "medium"
 
 [profiles.deep_review.default.opencode]
 provider = "openai"
-model = "gpt-5.4"
+model = "gpt-5.5"
 
 [profiles.deep_review.work.opencode]
 provider = "google-vertex-anthropic"
-model = "claude-opus-4-5@20251101"
+model = "claude-opus-4-6"
 
 [profiles.deep_review.default.claude]
-model = "claude-opus-4-5"
+model = "claude-opus-4-6"
 
 [profiles.deep_review.work.claude]
-model = "claude-opus-4-5"
+model = "claude-opus-4-6"
 
 [profiles.deep_review.default.codex]
-model = "openai/gpt-5.4"
+model = "openai/gpt-5.5"
 sandbox = "read-only"
 approval_policy = "on-request"
 
 [profiles.deep_review.work.codex]
-model = "openai/gpt-5.4"
+model = "openai/gpt-5.5"
 sandbox = "read-only"
 approval_policy = "on-request"
 
 [profiles.creative.shared]
-reasoning_effort = "high"
+reasoning_effort = "medium"
 temperature = 0.95
 top_p = 0.92
 frequency_penalty = 0.3
@@ -59,37 +59,37 @@ presence_penalty = 0.25
 
 [profiles.creative.default.opencode]
 provider = "openai"
-model = "gpt-5.4"
+model = "gpt-5.5"
 
 [profiles.creative.work.opencode]
 provider = "google-vertex"
 model = "gemini-3.1-pro-preview"
 
 [profiles.creative.default.claude]
-model = "claude-opus-4-5"
+model = "claude-opus-4-6"
 
 [profiles.creative.work.claude]
-model = "claude-opus-4-5"
+model = "claude-opus-4-6"
 
 [profiles.creative.default.codex]
-model = "openai/gpt-5.4"
+model = "openai/gpt-5.5"
 sandbox = "read-only"
 
 [profiles.creative.work.codex]
-model = "openai/gpt-5.4"
+model = "openai/gpt-5.5"
 sandbox = "read-only"
 
 [profiles.planner.shared]
-reasoning_effort = "high"
+reasoning_effort = "medium"
 temperature = 0.1
 
 [profiles.planner.default.opencode]
 provider = "openai"
-model = "gpt-5.4"
+model = "gpt-5.5"
 
 [profiles.planner.work.opencode]
 provider = "google-vertex-anthropic"
-model = "claude-opus-4-5@20251101"
+model = "claude-opus-4-6"
 
 [profiles.planner.default.claude]
 model = "claude-sonnet-4-6"
@@ -98,16 +98,19 @@ model = "claude-sonnet-4-6"
 model = "claude-sonnet-4-6"
 
 [profiles.planner.default.codex]
-model = "openai/gpt-5.4"
+model = "openai/gpt-5.5"
 sandbox = "workspace-write"
 
 [profiles.planner.work.codex]
-model = "openai/gpt-5.4"
+model = "openai/gpt-5.5"
 sandbox = "workspace-write"
+
+[profiles.git_commit.shared]
+reasoning_effort = "medium"
 
 [profiles.git_commit.default.opencode]
 provider = "openai"
-model = "gpt-5.4"
+model = "gpt-5.5"
 
 [profiles.git_commit.work.opencode]
 provider = "google-vertex"
@@ -120,27 +123,30 @@ model = "claude-sonnet-4-6"
 model = "claude-sonnet-4-6"
 
 [profiles.git_commit.default.codex]
-model = "openai/gpt-5.4"
+model = "openai/gpt-5.5"
 
 [profiles.git_commit.work.codex]
-model = "openai/gpt-5.4"
+model = "openai/gpt-5.5"
+
+[profiles.sidebar.shared]
+reasoning_effort = "medium"
 
 [profiles.sidebar.default.opencode]
 provider = "openai"
-model = "gpt-5.4"
+model = "gpt-5.5"
 
 [profiles.sidebar.work.opencode]
 provider = "google-vertex-anthropic"
-model = "claude-opus-4-5@20251101"
+model = "claude-opus-4-6"
 
 [profiles.sidebar.default.claude]
-model = "claude-opus-4-5"
+model = "claude-opus-4-6"
 
 [profiles.sidebar.work.claude]
-model = "claude-opus-4-5"
+model = "claude-opus-4-6"
 
 [profiles.sidebar.default.codex]
-model = "openai/gpt-5.4"
+model = "openai/gpt-5.5"
 
 [profiles.sidebar.work.codex]
-model = "openai/gpt-5.4"
+model = "openai/gpt-5.5"

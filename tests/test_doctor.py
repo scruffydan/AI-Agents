@@ -32,7 +32,7 @@ class DoctorTests(unittest.TestCase):
             )
             (temp_root / "source" / "skills").mkdir()
             (temp_root / "source" / "model-profiles.toml").write_text(
-                "[profiles.default.default.opencode]\nmodel = \"openai/gpt-5.4\"\n"
+                "[profiles.default.default.opencode]\nmodel = \"openai/gpt-5.5\"\n"
             )
 
             report = run_doctor(temp_root, verify_installed=False)

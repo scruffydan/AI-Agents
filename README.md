@@ -199,7 +199,7 @@ For OpenCode profiles, provider selection is split from the model name:
 ```toml
 [profiles.default.default.opencode]
 provider = "openai"
-model = "gpt-5.4"
+model = "gpt-5.5"
 ```
 
 The resolver composes that into the final OpenCode model string. Claude and Codex continue to use literal `model` values and do not support `provider`.
