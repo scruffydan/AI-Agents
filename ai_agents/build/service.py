@@ -112,9 +112,7 @@ def normalize_output_dir(repo_root: Path, output_dir: Path | None) -> Path:
     candidate = output_dir.resolve() if output_dir else build_root
     if candidate.is_relative_to(build_root):
         return candidate
-    if candidate.exists():
-        raise ValueError(f"output directory must stay within {build_root}")
-    return candidate
+    raise ValueError(f"output directory must stay within {build_root}")
 
 
 def stage_output_dir(output_dir: Path) -> Path:

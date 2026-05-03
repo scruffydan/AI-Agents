@@ -20,6 +20,10 @@ class SecurityGuardTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "output directory must stay within"):
             build_project(BuildOptions(repo_root=self.repo_root, output_dir=self.repo_root / "source"))
 
+        with tempfile.TemporaryDirectory() as tmp:
+            with self.assertRaisesRegex(ValueError, "output directory must stay within"):
+                build_project(BuildOptions(repo_root=self.repo_root, output_dir=Path(tmp) / "new-build"))
+
     def test_expand_includes_rejects_parent_traversal(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             temp_root = Path(tmp)

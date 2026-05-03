@@ -15,8 +15,10 @@ class BuildServiceTests(unittest.TestCase):
         self.repo_root = repo_root()
 
     def test_build_project_writes_all_harness_outputs(self) -> None:
-        with tempfile.TemporaryDirectory() as tmp:
-            output_dir = Path(tmp) / "build"
+        build_parent = self.repo_root / "build"
+        build_parent.mkdir(exist_ok=True)
+        with tempfile.TemporaryDirectory(dir=build_parent) as tmp:
+            output_dir = Path(tmp) / "out"
             report = build_project(
                 BuildOptions(
                     repo_root=self.repo_root,

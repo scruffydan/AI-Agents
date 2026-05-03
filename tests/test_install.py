@@ -5,7 +5,7 @@ import tempfile
 import unittest
 
 from ai_agents.domain.options import InstallOptions
-from ai_agents.install.service import install_project
+from ai_agents.install.service import InvalidInstallPlan, install_project
 from tests.helpers import repo_root
 
 
@@ -14,9 +14,11 @@ class InstallServiceTests(unittest.TestCase):
         self.repo_root = repo_root()
 
     def test_install_project_installs_all_harnesses(self) -> None:
+        build_parent = self.repo_root / "build"
+        build_parent.mkdir(exist_ok=True)
         with tempfile.TemporaryDirectory() as tmp:
             temp_root = Path(tmp)
-            build_dir = temp_root / "build"
+            build_dir = build_parent / "test-install-all"
             home_dir = temp_root / "home"
             report = install_project(
                 InstallOptions(
@@ -39,9 +41,11 @@ class InstallServiceTests(unittest.TestCase):
             self.assertTrue((home_dir / ".codex" / "AGENTS.md").exists())
 
     def test_install_project_supports_dry_run(self) -> None:
+        build_parent = self.repo_root / "build"
+        build_parent.mkdir(exist_ok=True)
         with tempfile.TemporaryDirectory() as tmp:
             temp_root = Path(tmp)
-            build_dir = temp_root / "build"
+            build_dir = build_parent / "test-install-dry-run"
             home_dir = temp_root / "home"
 
             report = install_project(
@@ -64,9 +68,11 @@ class InstallServiceTests(unittest.TestCase):
             self.assertFalse((home_dir / ".config" / "opencode").exists())
 
     def test_install_project_can_filter_components(self) -> None:
+        build_parent = self.repo_root / "build"
+        build_parent.mkdir(exist_ok=True)
         with tempfile.TemporaryDirectory() as tmp:
             temp_root = Path(tmp)
-            build_dir = temp_root / "build"
+            build_dir = build_parent / "test-install-components"
             home_dir = temp_root / "home"
 
             report = install_project(
@@ -88,9 +94,11 @@ class InstallServiceTests(unittest.TestCase):
             self.assertTrue((home_dir / ".claude" / "skills" / "git-commit" / "SKILL.md").exists())
 
     def test_install_project_executes_planned_actions(self) -> None:
+        build_parent = self.repo_root / "build"
+        build_parent.mkdir(exist_ok=True)
         with tempfile.TemporaryDirectory() as tmp:
             temp_root = Path(tmp)
-            build_dir = temp_root / "build"
+            build_dir = build_parent / "test-install-actions"
             home_dir = temp_root / "home"
 
             report = install_project(
@@ -108,3 +116,20 @@ class InstallServiceTests(unittest.TestCase):
 
             planned_destinations = [str(action.destination) for action in report.plan.actions if action.status == "ready"]
             self.assertEqual(list(report.installed_targets), planned_destinations)
+
+    def test_install_project_rejects_missing_skip_build_sources(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            temp_root = Path(tmp)
+
+            with self.assertRaisesRegex(InvalidInstallPlan, "missing sources"):
+                install_project(
+                    InstallOptions(
+                        repo_root=self.repo_root,
+                        build_dir=temp_root / "missing-build",
+                        selected_harnesses=("opencode",),
+                        skip_build=True,
+                        force=True,
+                        home_dir=temp_root / "home",
+                    ),
+                    prompt=lambda _: "y",
+                )

@@ -64,6 +64,12 @@ Build with work model profiles:
 ./ai-agents build --all --work
 ```
 
+Build into a named directory under `build/`:
+
+```bash
+./ai-agents build --all --output build/work
+```
+
 ### Install
 
 Install OpenCode only:
@@ -83,6 +89,8 @@ Install using existing build output:
 ```bash
 ./ai-agents install --all --skip-build
 ```
+
+`--skip-build` validates that every planned source exists before writing anything. Missing build artifacts make the install fail with a list of missing paths.
 
 Preview install actions without writing files:
 
@@ -118,7 +126,10 @@ Verify source, build, and optional installed state:
 ./ai-agents doctor
 ./ai-agents doctor --installed
 ./ai-agents doctor --json
+./ai-agents doctor --build-dir build/work
 ```
+
+Installed-state checks are based on the selected build manifest, so `doctor --installed` verifies only the harnesses and components represented by that build output.
 
 ### List Harnesses
 
@@ -140,9 +151,9 @@ The helper refuses to overwrite symlink targets and installs `opencode.json` wit
 
 Build output is written to `build/` by default.
 
-Custom build output paths may point elsewhere when creating a fresh directory, but existing output directories must stay inside `build/`.
+Custom build output paths must stay under the repository `build/` directory, even when creating a fresh directory.
 
-Each successful build also writes `build/manifest.json`, which records generated artifacts, source-to-output mappings, harnesses, and logical components.
+Each successful build also writes `<output>/manifest.json`, which records generated artifacts, source-to-output mappings, harnesses, and logical components.
 
 ### OpenCode
 
