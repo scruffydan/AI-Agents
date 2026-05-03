@@ -96,8 +96,8 @@ If you use `--work`, provider selection is skipped and model mapping still happe
 Model mappings are configured in `source/model-mappings.json`. This allows you to map models like:
 - `opencode/claude-sonnet-4-6` → `google-vertex/gemini-3.1-pro-preview`
 - `opencode/gemini-3.1-pro` → `google-vertex/gemini-3.1-pro-preview`
-- `opencode/gpt-5.4` → `google-vertex-anthropic/claude-opus-4-5@20251101`
-- `openai/gpt-5.4` → `google-vertex/gemini-3.1-pro-preview`
+- `opencode/gpt-5.5` → `anthropic/claude-opus-4-6`
+- `openai/gpt-5.5` → `google-vertex/gemini-3.1-pro-preview`
 
 Non-GPT models keep the provider defined in the prompt frontmatter. Unmapped models will show a warning during build and keep their original configured provider/model.
 

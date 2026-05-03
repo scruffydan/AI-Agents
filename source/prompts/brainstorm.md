@@ -6,8 +6,8 @@ opencode:
   top_p: 0.92
   frequency_penalty: 0.3
   presence_penalty: 0.25
-  model: openai/gpt-5.4
-  reasoningEffort: high
+  model: openai/gpt-5.5
+  reasoningEffort: medium
   permission:
     edit: deny
     bash: deny

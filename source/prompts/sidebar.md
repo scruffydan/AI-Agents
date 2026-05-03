@@ -3,10 +3,11 @@ description: Answer general questions unrelated to the current coding session. U
 type: subagent
 claude:
   tools: WebFetch
-  model: claude-opus-4-5
+  model: claude-opus-4-6
 opencode:
   mode: subagent
-  model: openai/gpt-5.4
+  model: openai/gpt-5.5
+  reasoningEffort: medium
   permission:
     edit: deny
     bash: deny

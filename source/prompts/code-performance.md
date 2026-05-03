@@ -3,11 +3,11 @@ description: Performance optimization specialist. Invoke for identifying bottlen
 type: subagent
 claude:
   tools: Read, Glob, Grep
-  model: claude-opus-4-5
+  model: claude-opus-4-6
 opencode:
   mode: subagent
-  model: opencode/gpt-5.4
-  reasoningEffort: high
+  model: opencode/gpt-5.5
+  reasoningEffort: medium
   permission:
     edit: deny
     bash: deny
