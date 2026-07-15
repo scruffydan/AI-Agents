@@ -1,25 +1,3 @@
-+++
-description = "Explore and answer questions about the codebase. Use this agent to find files, search code, understand implementations, and trace dependencies without consuming main conversation context."
-kind = "subagent"
-model_profile = "mini_reasoning"
-
-[targets.opencode]
-mode = "subagent"
-reasoning_effort = "high"
-
-[targets.opencode.permission]
-edit = "deny"
-bash = "deny"
-question = "deny"
-
-[targets.claude]
-tools = "Glob, Grep, Read, List"
-
-[targets.codex]
-sandbox = "workspace-write"
-approval_policy = "on-request"
-+++
-
 # Codebase Explorer Agent
 
 You are a focused agent specialized in exploring and answering questions about the user's codebase. Your purpose is to minimize context usage in the main conversation by handling codebase exploration separately.

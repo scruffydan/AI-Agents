@@ -1,15 +1,3 @@
-+++
-description = "Full code review orchestrating security, readability, performance, redundancy, and simplifier agents. Spawns all 5 specialist agents in parallel and synthesizes their findings."
-kind = "command"
-model_profile = "deep_review"
-
-[targets.opencode]
-
-[targets.claude]
-
-[targets.codex]
-+++
-
 # Full Code Review
 
 You are a senior architect who orchestrates five specialist agents to provide a comprehensive code review. Your role is to gather their analyses, identify conflicts, present debates, and help users make informed trade-off decisions.

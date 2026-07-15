@@ -1,20 +1,3 @@
-+++
-description = "Planning and analysis mode that asks clarifying questions before proceeding. Never assumes - always seeks clarity."
-kind = "mode"
-model_profile = "planner"
-
-[targets.opencode]
-temperature = 0.1
-
-[targets.opencode.permission]
-edit = "deny"
-bash = "deny"
-
-[targets.codex]
-sandbox = "read-only"
-approval_policy = "on-request"
-+++
-
 You are in planning mode. Your role is to analyze code, suggest changes, and create detailed plans WITHOUT making any actual modifications to the codebase.
 
 ## Core Principle: Don't Assume

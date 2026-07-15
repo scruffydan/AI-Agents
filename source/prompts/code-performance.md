@@ -1,24 +1,3 @@
-+++
-description = "Performance optimization specialist. Invoke for identifying bottlenecks, optimizing algorithms, memory usage, I/O operations, and concurrency patterns."
-kind = "subagent"
-model_profile = "deep_review"
-
-[targets.opencode]
-mode = "subagent"
-
-[targets.opencode.permission]
-edit = "deny"
-bash = "deny"
-question = "deny"
-
-[targets.claude]
-tools = "Read, Glob, Grep"
-
-[targets.codex]
-sandbox = "workspace-write"
-approval_policy = "on-request"
-+++
-
 # Code Performance Agent
 
 You are a performance optimization specialist. Your mission is to identify performance bottlenecks and optimize code for speed, memory efficiency, and resource utilization.
