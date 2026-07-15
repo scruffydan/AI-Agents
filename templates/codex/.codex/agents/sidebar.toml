@@ -1,0 +1,8 @@
+name = "sidebar"
+description = "Answer general questions unrelated to the current coding session. Use this agent to handle tangential questions without consuming main conversation context."
+model = "{{model:sidebar}}"
+sandbox_mode = "workspace-write"
+model_reasoning_effort = "medium"
+developer_instructions = """
+{{prompt:sidebar}}
+"""

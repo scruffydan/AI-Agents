@@ -1,25 +1,3 @@
-+++
-description = "Fetch and extract relevant documentation from URLs. Use this agent when you need specific information from external documentation without flooding the main context with entire pages."
-kind = "subagent"
-model_profile = "mini_reasoning"
-
-[targets.opencode]
-mode = "subagent"
-reasoning_effort = "high"
-
-[targets.opencode.permission]
-edit = "deny"
-bash = "deny"
-question = "deny"
-
-[targets.claude]
-tools = "WebFetch"
-
-[targets.codex]
-sandbox = "workspace-write"
-approval_policy = "on-request"
-+++
-
 # Documentation Fetcher Agent
 
 You are a specialized agent for fetching external documentation and extracting only the relevant portions needed to answer specific questions or complete specific tasks.
