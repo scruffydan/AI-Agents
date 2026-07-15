@@ -109,3 +109,14 @@ value when omitted.
 
 There is no harness registry, schema version, manifest, plugin API, or generated
 domain model. The checked-in templates are the configuration contract.
+
+## Adoption checklist
+
+See [TODO.md](TODO.md) for the remaining rollout checks. Before merging this
+branch, install each harness independently and confirm that it discovers the
+rendered agents, commands, and skills. Also verify the work profile and the
+OpenCode provider override against the providers used in the real environment.
+
+These are manual compatibility checks, not a plan to rebuild the removed
+framework. Future code should be added only when a concrete harness-format change
+cannot be represented directly in a provider-native template.
