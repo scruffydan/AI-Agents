@@ -1,8 +1,0 @@
-name = "docs-fetcher"
-description = "Fetch and extract relevant documentation from URLs. Use this agent when you need specific information from external documentation without flooding the main context with entire pages."
-model = "{{model:mini_reasoning}}"
-sandbox_mode = "workspace-write"
-model_reasoning_effort = "high"
-developer_instructions = """
-{{prompt:docs-fetcher}}
-"""
