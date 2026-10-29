@@ -61,8 +61,13 @@ Install selected harnesses:
 ./install.sh claude codex
 ```
 
-Existing managed paths require confirmation. Use `--force` to replace them
-without prompting:
+Agents, commands, and skills are installed one entry at a time, so anything
+else in those directories is left alone. Unchanged files are skipped. Changed
+files require confirmation, and the replaced version is moved to
+`~/.ai-agents-backups/<timestamp>/` instead of being deleted. Removing a prompt
+from this repository does not remove its installed copy; delete that by hand.
+
+Use `--force` to replace changed files without prompting:
 
 ```bash
 ./install.sh opencode --work --force
