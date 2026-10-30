@@ -37,6 +37,22 @@ class BuildTests(unittest.TestCase):
         instructions = tomllib.loads(rendered.read_text())["developer_instructions"]
         self.assertEqual(instructions.strip(), body)
 
+    def test_default_build_renders_all_harnesses_with_bare_codex_models(self):
+        self.build()
+
+        for harness in ("opencode", "claude", "codex"):
+            self.assertTrue((self.root / "build" / harness).is_dir())
+        for agent in (self.root / "build/codex/.codex/agents").glob("*.toml"):
+            with self.subTest(agent=agent.name):
+                self.assertNotIn("/", tomllib.loads(agent.read_text())["model"])
+
+    def test_unknown_harness_is_rejected(self):
+        result = subprocess.run(
+            [sys.executable, "build.py", "cursor"], cwd=self.root, capture_output=True, text=True
+        )
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("invalid harness: cursor", result.stderr)
+
     def test_brainstorm_follows_work_and_provider_options(self):
         brainstorm = self.root / "build/opencode/agent/brainstorm.md"
         for args, model in (

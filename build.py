@@ -158,7 +158,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "harnesses",
         nargs="*",
-        choices=HARNESSES,
+        metavar="{" + ",".join(HARNESSES) + "}",
         help="Harnesses to build. Defaults to all.",
     )
     parser.add_argument("--work", action="store_true", help="Use work model mappings.")
@@ -168,6 +168,10 @@ def main(argv: list[str] | None = None) -> int:
         help="Override the provider prefix for rendered OpenCode models.",
     )
     args = parser.parse_args(argv)
+    # Python < 3.12 rejects an empty nargs="*" list when choices is set.
+    unknown = [name for name in args.harnesses if name not in HARNESSES]
+    if unknown:
+        parser.error(f"invalid harness: {', '.join(unknown)} (choose from {', '.join(HARNESSES)})")
     build(
         args.harnesses or list(HARNESSES),
         work=args.work,
