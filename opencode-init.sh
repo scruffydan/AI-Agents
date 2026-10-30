@@ -6,13 +6,27 @@ set -eu
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SRC="$REPO_ROOT/source/opencode.json"
 DEST="$HOME/.config/opencode/opencode.json"
+YES=false
+
+usage() {
+    echo "Usage: $(basename "$0") [-y|--yes]"
+    echo "  -y, --yes   Overwrite an existing $DEST without prompting"
+}
+
+for arg in "$@"; do
+    case "$arg" in
+        -y|--yes) YES=true ;;
+        -h|--help) usage; exit 0 ;;
+        *) echo "Error: unknown option: $arg" >&2; usage >&2; exit 1 ;;
+    esac
+done
 
 if [[ ! -f "$SRC" ]]; then
     echo "Error: $SRC not found"
     exit 1
 fi
 
-if [[ -f "$DEST" ]] && [[ "${1:-}" != "-y" ]]; then
+if [[ -f "$DEST" ]] && [[ "$YES" != true ]]; then
     read -rp "Overwrite $DEST? [y/N]: " answer
     if [[ "$answer" != [yY]* ]]; then
         echo "Aborted."

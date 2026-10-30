@@ -61,6 +61,33 @@ class InstallTests(unittest.TestCase):
         self.assertEqual(result.stdout.count("Backed up:"), 1)
         self.assertEqual(result.stdout.count("Installed:"), 1)
 
+    def init_opencode(self, *args):
+        shutil.copy2(REPO / "opencode-init.sh", self.root / "opencode-init.sh")
+        return subprocess.run(
+            ["bash", "opencode-init.sh", *args],
+            cwd=self.root, env={**os.environ, "HOME": str(self.home)},
+            capture_output=True, text=True, stdin=subprocess.DEVNULL,
+        )
+
+    def test_opencode_init_help_and_unknown_options_write_nothing(self):
+        config = self.home / ".config/opencode/opencode.json"
+        for args, code in ((("--help",), 0), (("-h",), 0), (("--bogus",), 1)):
+            with self.subTest(args=args):
+                result = self.init_opencode(*args)
+                self.assertEqual(result.returncode, code, result.stdout + result.stderr)
+                self.assertIn("Usage:", result.stdout + result.stderr)
+                self.assertFalse(config.exists())
+
+    def test_opencode_init_yes_overwrites_existing_config(self):
+        config = self.home / ".config/opencode/opencode.json"
+        config.parent.mkdir(parents=True)
+        config.write_text("old")
+
+        result = self.init_opencode("--yes")
+
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(config.read_text(), (REPO / "source/opencode.json").read_text())
+
 
 if __name__ == "__main__":
     unittest.main()
