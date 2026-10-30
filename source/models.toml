@@ -1,6 +1,10 @@
 # Models are the only dynamic part of the provider-native templates.
 # A missing *_work value falls back to the normal harness value.
 
+[brainstorm]
+opencode = "openai/gpt-5.5"
+opencode_work = "google-vertex/gemini-3.1-pro-preview"
+
 [deep_review]
 opencode = "openai/gpt-5.5"
 opencode_work = "google-vertex-anthropic/claude-opus-4-6"
