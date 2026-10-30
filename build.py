@@ -91,6 +91,12 @@ def expand_includes(text: str, stack: tuple[str, ...]) -> str:
     return INCLUDE_RE.sub(replace, text)
 
 
+def toml_multiline(text: str) -> str:
+    """Escape text for a TOML multiline basic string so it parses back unchanged."""
+    text = text.replace("\\", "\\\\").replace('"""', '\\"\\"\\"')
+    return re.sub(r"[\x00-\x08\x0b-\x1f\x7f]", lambda m: f"\\u{ord(m[0]):04x}", text)
+
+
 def render_template(
     path: Path,
     harness: str,
@@ -100,7 +106,9 @@ def render_template(
     def replace(match: re.Match[str]) -> str:
         kind, name = match.groups()
         if kind == "prompt":
-            return prompt_body(name)
+            body = prompt_body(name)
+            # TOML templates embed prompts inside """ strings.
+            return toml_multiline(body) if path.suffix == ".toml" else body
         return resolve_model(name, harness, work, opencode_provider)
 
     rendered = TOKEN_RE.sub(replace, path.read_text())
