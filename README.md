@@ -58,9 +58,18 @@ will refuse to overwrite the file. `--profile` defaults to `deep_review`.
 ```
 
 Edit `source/skills/database-debugging/SKILL.md`, then run `./build.py`.
-The whole folder is copied to each selected harness, so supporting scripts,
-examples, and reference files can live beside `SKILL.md`. Skills do not need
-per-harness templates.
+You can also create `source/skills/<name>/SKILL.md` by hand, with YAML frontmatter
+containing `name` and `description`, followed by the instructions.
+
+The whole folder is copied to each selected harness without changing its contents.
+Supporting scripts, examples, and reference files can live beside `SKILL.md`; use
+relative paths to reference them. Keep instructions portable and put model
+selection and agent settings in the native templates.
+
+Shared skills do not need per-harness templates. Tokens such as `{{prompt:...}}`,
+`{{model:...}}`, and `{{include:...}}` are not expanded in shared skills. Avoid names
+that overlap skills under `templates/`; duplicate output paths fail the build.
+The build does not validate skill metadata or behavior.
 
 Both creation commands use lowercase names with hyphens and refuse to overwrite
 existing content. They create editable starting files with TODO instructions;
@@ -228,17 +237,16 @@ recognizes the exact name `AGENTS.md`, not `Agent.md` or a `CLAUDE.md` fallback.
 
 ## Change models
 
-`source/models.toml` contains the small set of model profiles referenced by the
-templates. Each profile can provide `opencode`, `claude`, and `codex` values,
-plus optional `*_work` overrides. Work values fall back to the normal harness
-value when omitted.
+Edit `source/models.toml` to change the models behind each profile. An agent selects
+its profile with `model_profile` in `source/agents/<name>.md`; explicit templates
+use `{{model:profile}}`.
 
-OpenCode profile values include the reasoning variant, so work mappings can use
-a different effort from normal mappings. Sol and Opus roles use high effort;
-Astra brainstorming stays at medium. The OpenCode work docs-fetcher and git-commit
-agents use Claude Sonnet 5.5 at high effort; explore uses Gemini 4 Argon at high
-effort. Claude templates set `effort: high` for Opus
-roles, and Codex templates set high reasoning effort for Sol roles.
+Each profile provides model IDs for its target harnesses using `opencode`, `claude`,
+and `codex` keys. Optional `opencode_work`, `claude_work`, and `codex_work` values
+apply with `--work`, falling back to the normal value when omitted.
+
+OpenCode model IDs include their reasoning variant. Claude and Codex reasoning
+settings live in native defaults, overrides, or explicit templates.
 
 OpenCode V2 uses the `google-vertex` provider for both Gemini and Claude work
 models. Configure Google Cloud project, location, credentials, and model access
@@ -255,66 +263,11 @@ These templates can use `{{prompt:name}}` for a shared prompt body and
 `{{model:profile}}` for a model. Command/skill and mode mappings differ by harness,
 so these remain explicit. `new.py agent` creates subagents only.
 
-## Add a shared skill
-
-Create `source/skills/<name>/SKILL.md`, using a lowercase, hyphen-separated name
-such as `review-migrations`. Start with YAML frontmatter describing the skill's
-name and when to use it, followed by the instructions:
-
-```markdown
----
-name: review-migrations
-description: Use when reviewing database migrations for correctness and deployment risks.
----
-
-# Review database migrations
-
-1. Read the migration and related schema.
-2. Check for data loss, locking, and compatibility issues.
-3. Check the rollback approach.
-4. Report concrete findings with file references and suggested fixes.
-```
-
-The build copies the entire skill folder into all three harnesses; no separate
-template is needed. Keep instructions portable: describe actions such as
-"search the repository" instead of naming a harness-specific tool. Keep model
-selection and agent configuration in the harness-specific templates. Supporting
-scripts, references, and assets can live inside the skill folder; reference them
-from `SKILL.md` using relative paths.
-
-Shared skills are copied verbatim. Tokens such as `{{prompt:...}}`,
-`{{model:...}}`, and `{{include:...}}` are not expanded there. Choose a skill name
-that does not overlap a skill under `templates/`; duplicate output file paths
-fail the build rather than overwriting shared files.
-
-Run `./build.py` to generate all three configurations, or `./install.sh` to build
-and install them. Then try a representative request in each harness to confirm
-that it discovers the skill and follows the intended steps. The build does not
-validate skill metadata or behavior.
-
-## Agent definition layout
-
-The nine shared subagent definitions live in `source/agents/`, with common metadata
-in TOML frontmatter and instructions below it. Three native defaults and five
-overrides provide their harness-specific settings. Edit an agent's source file for
-shared changes and its relevant override for exceptions. Commands and modes keep
-explicit templates under `templates/<harness>/`.
-
 ## Checks
 
 ```bash
 python3 -m unittest discover -s tests
 ```
 
-The test suite creates temporary copies to check agent creation, Unicode and native
-escaping, target selection, override isolation, skill copying, overwrite refusal,
-Finder metadata handling, and preservation of the previous build after rendering
-or collision errors. Installer checks use isolated home directories, leaving real
+Tests use temporary repositories and isolated home directories, leaving real
 harness configs untouched.
-
-Before the shared-agent authoring change was merged, generated configs were also
-compared byte-for-byte against the previous main (`50b8e9d`) across all 56
-combinations of harness subsets, work mode, and provider options. This was a
-migration check; the test suite does not automatically compare against Git history.
-
-Keep future changes focused on concrete authoring or harness compatibility needs.
