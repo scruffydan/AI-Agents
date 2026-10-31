@@ -190,8 +190,9 @@ value when omitted.
 
 OpenCode profile values include the reasoning variant, so work mappings can use
 a different effort from normal mappings. Sol and Opus roles use high effort;
-Astra brainstorming stays at medium. The OpenCode work git-commit agent uses
-Claude Sonnet 5.5 at high effort. Claude templates set `effort: high` for Opus
+Astra brainstorming stays at medium. The OpenCode work docs-fetcher and git-commit
+agents use Claude Sonnet 5.5 at high effort; explore uses Gemini 4 Argon at high
+effort. Claude templates set `effort: high` for Opus
 roles, and Codex templates set high reasoning effort for Sol roles.
 
 OpenCode V2 uses the `google-vertex` provider for both Gemini and Claude work

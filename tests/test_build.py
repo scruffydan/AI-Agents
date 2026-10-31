@@ -151,6 +151,10 @@ class BuildTests(unittest.TestCase):
         self.assertIn("action: shell\n    resource: \"*\"\n    effect: deny", reviewer)
         commit = (output / "agents/git-commit.md").read_text()
         self.assertIn("model: google-vertex/claude-sonnet-5-5#high\n", commit)
+        docs = (output / "agents/docs-fetcher.md").read_text()
+        self.assertIn("model: google-vertex/claude-sonnet-5-5#high\n", docs)
+        explore = (output / "agents/explore.md").read_text()
+        self.assertIn("model: google-vertex/gemini-4-argon#high\n", explore)
 
 
 if __name__ == "__main__":
