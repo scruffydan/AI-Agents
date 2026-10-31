@@ -24,12 +24,15 @@ class InstallTests(unittest.TestCase):
         for name in ("build.py", "install.sh"):
             shutil.copy2(REPO / name, self.root / name)
 
-    def install(self, *args):
+    def run_install(self, *args, input_text=""):
         env = {**os.environ, "HOME": str(self.home), "PYTHON": sys.executable}
-        result = subprocess.run(
+        return subprocess.run(
             ["bash", "install.sh", *args, "--force"],
-            cwd=self.root, env=env, capture_output=True, text=True,
+            cwd=self.root, env=env, capture_output=True, text=True, input=input_text,
         )
+
+    def install(self, *args, input_text=""):
+        result = self.run_install(*args, input_text=input_text)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         return result
 
@@ -62,7 +65,7 @@ class InstallTests(unittest.TestCase):
         self.assertEqual(result.stdout.count("Installed:"), 1)
 
     def test_all_harnesses_install_shared_skills_and_prompt_modes(self):
-        for args in (("codex", "claude", "opencode"), ("codex", "claude", "opencode", "--work")):
+        for args in (("--all",), ("--all", "--work")):
             with self.subTest(args=args):
                 self.install(*args)
                 for directory in (".config/opencode/skills", ".claude/skills", ".agents/skills"):
@@ -100,16 +103,47 @@ class InstallTests(unittest.TestCase):
                 self.assertEqual((self.home / target).read_bytes(), body)
         self.assertEqual(config.read_text(), '{"providers": {"local": {}}}')
 
-    def test_default_install_targets_only_codex(self):
+    def test_picker_defaults_to_codex_on_enter(self):
         for args in ((), ("--work",)):
             with self.subTest(args=args):
-                self.install(*args)
+                result = self.install(*args, input_text="\n")
+                self.assertIn("1) Codex (default)", result.stdout)
+                self.assertLess(result.stdout.index("2) Claude Code"), result.stdout.index("3) OpenCode"))
                 self.assertTrue((self.home / ".codex/AGENTS.md").is_file())
                 self.assertTrue((self.home / ".codex/agents/explore.toml").is_file())
                 self.assertTrue((self.home / ".agents/skills/git-commit/SKILL.md").is_file())
                 self.assertFalse((self.home / ".claude").exists())
                 self.assertFalse((self.home / ".config/opencode").exists())
                 self.assertEqual([p.name for p in (self.root / "build").iterdir()], ["codex"])
+
+    def test_picker_accepts_multiple_numbers_and_names_without_duplicates(self):
+        self.install(input_text="claude 3 2 opencode\n")
+        self.assertTrue((self.home / ".claude/CLAUDE.md").is_file())
+        self.assertTrue((self.home / ".config/opencode/AGENTS.md").is_file())
+        self.assertFalse((self.home / ".codex").exists())
+
+    def test_picker_retries_invalid_selection(self):
+        result = self.install(input_text="1 invalid\n2\n")
+        self.assertIn("Invalid selection: invalid", result.stderr)
+        self.assertTrue((self.home / ".claude/CLAUDE.md").is_file())
+        self.assertFalse((self.home / ".codex").exists())
+
+    def test_picker_eof_and_conflicting_all_flag_write_nothing(self):
+        for args in ((), ("codex", "--all"), ("--all", "opencode")):
+            with self.subTest(args=args):
+                result = self.run_install(*args)
+                self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
+                self.assertFalse((self.root / "build").exists())
+                self.assertEqual(list(self.home.iterdir()), [])
+
+    def test_explicit_harnesses_and_all_skip_picker(self):
+        for args in (("codex", "claude", "opencode"), ("--all",)):
+            with self.subTest(args=args):
+                result = self.install(*args)
+                self.assertNotIn("Which harnesses", result.stdout)
+                targets = (".codex/AGENTS.md", ".claude/CLAUDE.md", ".config/opencode/AGENTS.md")
+                self.assertTrue(all((self.home / target).is_file() for target in targets))
+                self.assertIn("for codex, claude, opencode", result.stdout)
 
     def init_opencode(self, *args):
         shutil.copy2(REPO / "opencode-init.sh", self.root / "opencode-init.sh")

@@ -59,21 +59,26 @@ selected with a model variant such as `openai/gpt-6.1-sol#high`.
 
 ## Install
 
-Build and install Codex configs (the default):
+Choose which harnesses to build and install interactively:
 
 ```bash
 ./install.sh
 ```
 
-Install selected harnesses, or all three in the preferred order:
+The picker lists Codex first (the default), Claude Code second, and OpenCode last.
+Enter one or more numbers or names separated by spaces, or press Enter for Codex.
+
+Skip the picker by naming harnesses, or use `--all` to install all three:
 
 ```bash
+./install.sh codex
 ./install.sh codex claude
-./install.sh codex claude opencode
+./install.sh --all
 ```
 
-The option order is Codex, Claude Code, then OpenCode. Only explicitly selected
-harnesses are installed; with no harness arguments, only Codex is installed.
+`--all` installs in Codex, Claude Code, OpenCode order and cannot be combined with
+explicit harness names. For unattended use, pass harness names or `--all`; the
+picker exits without installing if input ends before a selection is received.
 
 Agents, commands, and skills are installed one entry at a time, so anything
 else in those directories is left alone. Unchanged files are skipped. Changed
@@ -89,7 +94,7 @@ loading stale definitions alongside the new files.
 Use `--force` to replace changed files without prompting:
 
 ```bash
-./install.sh --work --force
+./install.sh codex --work --force
 ```
 
 Set `PYTHON` if `python3` is not Python 3.11 or newer:
