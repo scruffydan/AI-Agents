@@ -5,6 +5,7 @@ set -eu
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PYTHON="${PYTHON:-python3}"
 FORCE=false
+ALL=false
 WORK=false
 PROVIDER=""
 HARNESSES=()
@@ -12,9 +13,10 @@ HARNESSES=()
 usage() {
     echo "Usage: ./install.sh [codex|claude|opencode ...] [OPTIONS]"
     echo
-    echo "Defaults to codex. List multiple harnesses to install more than one."
+    echo "With no harness arguments, prompts for a selection (default: codex)."
     echo
     echo "Options:"
+    echo "  --all                        Install Codex, Claude Code, and OpenCode"
     echo "  --work                       Use work model mappings"
     echo "  --opencode-provider NAME     openai, github-copilot, or opencode"
     echo "  -y, --force                  Replace changed files without prompting"
@@ -24,6 +26,10 @@ while [ "$#" -gt 0 ]; do
     case "$1" in
         codex|claude|opencode)
             HARNESSES+=("$1")
+            shift
+            ;;
+        --all)
+            ALL=true
             shift
             ;;
         --work)
@@ -51,7 +57,45 @@ while [ "$#" -gt 0 ]; do
     esac
 done
 
-[ "${#HARNESSES[@]}" -gt 0 ] || HARNESSES=(codex)
+if [ "$ALL" = true ]; then
+    if [ "${#HARNESSES[@]}" -gt 0 ]; then
+        echo "Use --all or explicit harness names, not both." >&2
+        exit 2
+    fi
+    HARNESSES=(codex claude opencode)
+elif [ "${#HARNESSES[@]}" -eq 0 ]; then
+    echo "Which harnesses would you like to install?"
+    echo "  1) Codex (default)"
+    echo "  2) Claude Code"
+    echo "  3) OpenCode"
+    while true; do
+        printf "Enter numbers or names separated by spaces [1]: "
+        if ! read -r -a selections; then
+            echo "No selection received. Pass harness names or --all for unattended installs." >&2
+            exit 2
+        fi
+        [ "${#selections[@]}" -gt 0 ] || selections=(codex)
+        HARNESSES=()
+        valid=true
+        for selection in "${selections[@]}"; do
+            case "$selection" in
+                1|codex) selected=codex ;;
+                2|claude) selected=claude ;;
+                3|opencode) selected=opencode ;;
+                *)
+                    echo "Invalid selection: $selection. Choose 1, 2, 3, codex, claude, or opencode." >&2
+                    valid=false
+                    break
+                    ;;
+            esac
+            case " ${HARNESSES[*]:-} " in
+                *" $selected "*) ;;
+                *) HARNESSES+=("$selected") ;;
+            esac
+        done
+        [ "$valid" = false ] || break
+    done
+fi
 : "${HOME:?HOME must be set}"
 
 BUILD_ARGS=("${HARNESSES[@]}")
