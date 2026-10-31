@@ -62,7 +62,7 @@ class InstallTests(unittest.TestCase):
         self.assertEqual(result.stdout.count("Installed:"), 1)
 
     def test_all_harnesses_install_shared_skills_and_prompt_modes(self):
-        for args in ((), ("--work",)):
+        for args in (("codex", "claude", "opencode"), ("codex", "claude", "opencode", "--work")):
             with self.subTest(args=args):
                 self.install(*args)
                 for directory in (".config/opencode/skills", ".claude/skills", ".agents/skills"):
@@ -92,13 +92,24 @@ class InstallTests(unittest.TestCase):
         config.parent.mkdir(parents=True)
         config.write_text('{"providers": {"local": {}}}')
 
-        self.install()
+        self.install("codex", "claude", "opencode")
 
         body = (self.root / "source/prompts/AGENTS.md").read_bytes()
         for target in (".config/opencode/AGENTS.md", ".claude/CLAUDE.md", ".codex/AGENTS.md"):
             with self.subTest(target=target):
                 self.assertEqual((self.home / target).read_bytes(), body)
         self.assertEqual(config.read_text(), '{"providers": {"local": {}}}')
+
+    def test_default_install_targets_only_codex(self):
+        for args in ((), ("--work",)):
+            with self.subTest(args=args):
+                self.install(*args)
+                self.assertTrue((self.home / ".codex/AGENTS.md").is_file())
+                self.assertTrue((self.home / ".codex/agents/explore.toml").is_file())
+                self.assertTrue((self.home / ".agents/skills/git-commit/SKILL.md").is_file())
+                self.assertFalse((self.home / ".claude").exists())
+                self.assertFalse((self.home / ".config/opencode").exists())
+                self.assertEqual([p.name for p in (self.root / "build").iterdir()], ["codex"])
 
     def init_opencode(self, *args):
         shutil.copy2(REPO / "opencode-init.sh", self.root / "opencode-init.sh")
