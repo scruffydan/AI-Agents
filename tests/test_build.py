@@ -46,6 +46,13 @@ class BuildTests(unittest.TestCase):
             with self.subTest(agent=agent.name):
                 self.assertNotIn("/", tomllib.loads(agent.read_text())["model"])
 
+    def test_shared_base_instructions_propagate_to_all_harnesses(self):
+        body = (self.root / "source/prompts/AGENTS.md").read_bytes()
+        self.build()
+        for target in ("opencode/AGENTS.md", "claude/CLAUDE.md", "codex/AGENTS.md"):
+            with self.subTest(target=target):
+                self.assertEqual((self.root / "build" / target).read_bytes(), body)
+
     def test_unknown_harness_is_rejected(self):
         result = subprocess.run(
             [sys.executable, "build.py", "cursor"], cwd=self.root, capture_output=True, text=True
