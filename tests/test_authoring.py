@@ -101,6 +101,8 @@ class AuthoringTests(unittest.TestCase):
             ("templates/codex/.codex/agents/explore.toml",
              (output / "codex/.codex/agents/explore.toml").read_text(), "Duplicate output"),
             ("templates/claude/skills/git-commit/SKILL.md", "conflict", "Duplicate output"),
+            ("templates/claude/skills/git-commit", "directory conflict", "Duplicate output"),
+            ("templates/codex/.codex/agents/explore.toml/extra.md", "ancestor conflict", "Duplicate output"),
         )
         for relative, content, error in cases:
             with self.subTest(path=relative):
@@ -111,6 +113,46 @@ class AuthoringTests(unittest.TestCase):
                 self.assertIn(error, result.stderr)
                 self.assertEqual(snapshot(), original)
                 path.unlink()
+                # Remove temporary directories so later cases can test file conflicts.
+                parent = path.parent
+                while parent != self.root and not any(parent.iterdir()):
+                    parent.rmdir()
+                    parent = parent.parent
+
+    def test_unicode_descriptions_are_portable_yaml(self):
+        description = "Review queries 🔍\u0085\u2028\u2029"
+        expected = 'description: "Review queries 🔍\\u0085\\u2028\\u2029"\n'
+        self.cli("new.py", "agent", "unicode-agent", "--description", description)
+        self.cli("new.py", "skill", "unicode-skill", "--description", description)
+        self.cli("build.py")
+
+        targets = (
+            "claude/agents/unicode-agent.md",
+            "opencode/agents/unicode-agent.md",
+            "claude/skills/unicode-skill/SKILL.md",
+            "opencode/skills/unicode-skill/SKILL.md",
+            "codex/.agents/skills/unicode-skill/SKILL.md",
+        )
+        for target in targets:
+            with self.subTest(target=target):
+                self.assertIn(expected, (self.root / "build" / target).read_text())
+        codex = self.root / "build/codex/.codex/agents/unicode-agent.toml"
+        self.assertEqual(tomllib.loads(codex.read_text())["description"], description)
+
+    def test_finder_metadata_is_ignored_without_disabling_override_validation(self):
+        for relative in ("templates/overrides/.DS_Store",
+                         "templates/overrides/claude/.DS_Store",
+                         "templates/claude/agents/.DS_Store"):
+            path = self.root / relative
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(b"\x00\xffFinder metadata")
+        self.cli("build.py", "codex")
+        self.cli("build.py")
+        self.assertFalse((self.root / "build/claude/agents/.DS_Store").exists())
+
+        (self.root / "templates/overrides/claude/nonexistent.md").write_text("bad override")
+        result = self.cli("build.py", success=False)
+        self.assertIn("Override has no matching agent", result.stderr)
 
 
 if __name__ == "__main__":
