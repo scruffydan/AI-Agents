@@ -114,6 +114,55 @@ PYTHON=/path/to/python3.11 ./install.sh
 ./opencode-init.sh
 ```
 
+This replaces the entire OpenCode config, including local provider settings.
+For an existing setup, merge the rules from `source/opencode.json` manually or
+review the replacement first. The initializer confirms replacements, backs up
+the old file under `~/.ai-agents-backups/` with private permissions, and installs
+the new file with mode `600`. `--yes` skips confirmation but still backs up;
+unchanged files are skipped. It refuses a symlink at the destination file.
+`install.sh` does not install or update `opencode.json`.
+
+## OpenCode security defaults
+
+The config targets [OpenCode V2 permissions](https://opencode.ai/v2/docs/permissions),
+reviewed on 2026-10-30. Keep the ordered `permissions` array with
+`action`/`resource`/`effect` and the `shell` action; V1's `permission`/`bash`
+format is different. The last matching rule wins, including agent rules appended
+after global rules. Saved approvals are durable and project-scoped: review their
+proposed patterns before choosing **Allow always**.
+
+- Normal edits, searches, shell commands, and delegation use OpenCode's native
+  agent defaults. Build allows routine coding without a prompt for every tool
+  call. There is no blanket permission override or shell allowlist.
+- Reads are allowed, including environment files: secret handling relies on the
+  shared `AGENTS.md` instructions. Those instructions guide the agent but do not
+  enforce access control. This deliberately removes filename-based secret blocks
+  and OpenCode's default environment-file read prompts.
+- Access outside the project asks. Common `git push` commands, including forms
+  with Git options before `push`, also ask. Staging and local commits follow
+  native permissions; the shared instructions still require a user request to push.
+- Built-in agent restrictions remain native: Plan denies normal file edits but
+  permits plan files, and General cannot ask questions or launch more agents.
+  Custom agents use their own permissions, independent of their parent's.
+  Check their configuration before authorizing them. Sharing remains disabled.
+
+This is a permissive setup for trusted projects, **not a sandbox or secret
+filter**. Shell commands run with the host user's filesystem, process, and
+network authority. Directory inference is best effort, and push prompts match
+command text rather than every possible way to publish data. Scripts, aliases,
+or other executables can perform the same actions without matching those patterns.
+Disabled sharing does not prevent model-provider traffic. Plugins and MCP servers
+need independent trust and access review.
+
+Agent-specific rules can override global permission denies. For restrictions
+that must survive agent overrides, use managed/global
+[V2 policies](https://opencode.ai/v2/docs/policies); for example, a `tool.use`
+deny on `shell:*` blocks shell checks after agent rules and saved approvals.
+Policies still do not sandbox plugin code. Use OS/container isolation, limited
+credentials, and network controls for untrusted repositories or stronger
+boundaries. The shipped config is a personal convenience baseline, not an enforced
+organization policy.
+
 ## Edit prompts
 
 Reusable prompt bodies live in `source/prompts/`. They are ordinary Markdown
@@ -122,6 +171,11 @@ without configuration frontmatter. Shared fragments use:
 ```text
 {{include:_report-only-intro.md}}
 ```
+
+`source/prompts/AGENTS.md` is the shared base for all three harnesses: the build
+copies it to OpenCode/Codex `AGENTS.md` and Claude `CLAUDE.md`. Edit the source
+and rebuild/reinstall rather than editing generated copies. OpenCode V2
+recognizes the exact name `AGENTS.md`, not `Agent.md` or a `CLAUDE.md` fallback.
 
 Provider-specific frontmatter and file formats live under `templates/` in their
 final output layout. Editing a template is intentionally direct: what you see is
