@@ -131,34 +131,28 @@ format is different. The last matching rule wins, including agent rules appended
 after global rules. Saved approvals are durable and project-scoped: review their
 proposed patterns before choosing **Allow always**.
 
-- Unlisted actions ask, including edits, shell execution, content searches
-  (`grep`), external directory access, delegation, and additional MCP tools.
-  Reads, filename discovery, questions, skill loading, and web documentation
-  tools are allowed. Sharing remains disabled.
-- Sensitive reads are denied for environment files, private keys, common
-  credential stores, and Terraform state/variables. Rules cover root, nested,
-  and absolute paths. Conventional `.env.example` files are allowed by an
-  exception after the environment-file denies; other credential-store denies
-  still apply. Examples must contain placeholders, not secrets.
-- The shell allowlist contains exact inspection commands, such as
-  `git status --short` and `git diff --stat`. Other flags, staging, branch
-  mutation, commits, pushes, installers, and deletion commands ask. The old
-  destructive-command blacklist was removed in favor of this narrow allowlist.
-- Custom agents have their own permissions, independent of their parent's.
-  Check each agent's configuration before authorizing it; a parent's restrictions
-  do not automatically limit its children.
-- The built-in `plan` agent also denies edits (including plan-file writes), shell,
-  and delegation. The built-in `general` agent cannot ask questions or launch
-  more agents. Explicit agent rules retain these limits after the global defaults.
+- Normal edits, searches, shell commands, and delegation use OpenCode's native
+  agent defaults. Build allows routine coding without a prompt for every tool
+  call. There is no blanket permission override or shell allowlist.
+- Reads are allowed, including environment files: secret handling relies on the
+  shared `AGENTS.md` instructions. Those instructions guide the agent but do not
+  enforce access control. This deliberately removes filename-based secret blocks
+  and OpenCode's default environment-file read prompts.
+- Access outside the project asks. Common `git push` commands, including forms
+  with Git options before `push`, also ask. Staging and local commits follow
+  native permissions; the shared instructions still require a user request to push.
+- Built-in agent restrictions remain native: Plan denies normal file edits but
+  permits plan files, and General cannot ask questions or launch more agents.
+  Custom agents use their own permissions, independent of their parent's.
+  Check their configuration before authorizing them. Sharing remains disabled.
 
-These controls are **not a sandbox or a complete secret filter**. Read denies
-do not automatically protect shell, content-search, MCP, or network tools. The
-shell scanner checks extracted commands and infers directories on a best-effort
-basis; approved scripts still run with the host user's filesystem, process, and
-network authority. Even inspection commands can invoke repository-configured
-helpers. Review commands and repository configuration before approval. Web tools
-can transmit data in URLs/queries; disabled sharing does not prevent model-provider
-traffic. Plugins and MCP servers also need independent trust and access review.
+This is a permissive setup for trusted projects, **not a sandbox or secret
+filter**. Shell commands run with the host user's filesystem, process, and
+network authority. Directory inference is best effort, and push prompts match
+command text rather than every possible way to publish data. Scripts, aliases,
+or other executables can perform the same actions without matching those patterns.
+Disabled sharing does not prevent model-provider traffic. Plugins and MCP servers
+need independent trust and access review.
 
 Agent-specific rules can override global permission denies. For restrictions
 that must survive agent overrides, use managed/global
@@ -166,7 +160,7 @@ that must survive agent overrides, use managed/global
 deny on `shell:*` blocks shell checks after agent rules and saved approvals.
 Policies still do not sandbox plugin code. Use OS/container isolation, limited
 credentials, and network controls for untrusted repositories or stronger
-boundaries. The shipped config is a personal approval baseline, not an enforced
+boundaries. The shipped config is a personal convenience baseline, not an enforced
 organization policy.
 
 ## Edit prompts
