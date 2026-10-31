@@ -29,7 +29,7 @@ MODELS_FILE = ROOT / "source" / "models.toml"
 BUILD = ROOT / "build"
 
 HARNESSES = ("codex", "claude", "opencode")
-OPENCODE_PROVIDERS = ("openai", "github-copilot", "opencode")
+OPENCODE_PROVIDERS = ("openai", "opencode")
 TOKEN_RE = re.compile(r"\{\{(prompt|model|agent):([a-z0-9_-]+)\}\}")
 INCLUDE_RE = re.compile(r"\{\{include:([A-Za-z0-9_.-]+)\}\}")
 NAME_RE = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*")

@@ -78,14 +78,36 @@ class BuildTests(unittest.TestCase):
         for args, model in (
             ((), "openai/gpt-6-astra#medium"),
             (("--work",), "google-vertex/claude-opus-5-5#high"),
-            (("--opencode-provider", "github-copilot"), "github-copilot/gpt-6-astra#medium"),
-            (("--work", "--opencode-provider", "github-copilot"), "github-copilot/claude-opus-5-5#high"),
+            (("--opencode-provider", "openai"), "openai/gpt-6-astra#medium"),
+            (("--work", "--opencode-provider", "openai"), "openai/claude-opus-5-5#high"),
+            (("--opencode-provider", "opencode"), "opencode/gpt-6-astra#medium"),
+            (("--work", "--opencode-provider", "opencode"), "opencode/claude-opus-5-5#high"),
         ):
             with self.subTest(args=args):
                 self.build("opencode", *args)
                 self.assertIn(f"model: {model}\n", brainstorm.read_text())
                 skill = self.root / "build/opencode/skills/mode-brainstorm/SKILL.md"
                 self.assertIn(f"select `{model}`", skill.read_text())
+
+    def test_github_copilot_is_rejected_without_replacing_build(self):
+        self.build("opencode")
+        output = self.root / "build"
+        original = {path.relative_to(output): path.read_bytes()
+                    for path in output.rglob("*") if path.is_file()}
+        for args in ((), ("--work",)):
+            with self.subTest(args=args):
+                result = subprocess.run(
+                    [sys.executable, "build.py", "opencode", *args,
+                     "--opencode-provider", "github-copilot"],
+                    cwd=self.root, capture_output=True, text=True,
+                )
+                self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
+                self.assertIn("invalid choice: 'github-copilot'", result.stderr)
+                self.assertEqual(
+                    {path.relative_to(output): path.read_bytes()
+                     for path in output.rglob("*") if path.is_file()},
+                    original,
+                )
 
     def test_shared_skills_and_prompt_modes_exist_for_every_harness(self):
         self.build()

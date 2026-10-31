@@ -90,6 +90,17 @@ class InstallTests(unittest.TestCase):
         for entry in ("agents/mine.md", "commands/mine.md", "skills/mine/SKILL.md", "agent/legacy.md"):
             self.assertEqual((opencode / entry).read_text(), "keep me")
 
+    def test_github_copilot_is_rejected_without_installing(self):
+        for args in ((), ("--work",)):
+            with self.subTest(args=args):
+                result = self.run_install(
+                    "opencode", *args, "--opencode-provider", "github-copilot",
+                )
+                self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
+                self.assertIn("invalid choice: 'github-copilot'", result.stderr)
+                self.assertFalse((self.root / "build").exists())
+                self.assertEqual(list(self.home.iterdir()), [])
+
     def test_shared_base_installs_without_replacing_opencode_settings(self):
         config = self.home / ".config/opencode/opencode.json"
         config.parent.mkdir(parents=True)
