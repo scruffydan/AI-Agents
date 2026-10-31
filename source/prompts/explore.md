@@ -1,19 +1,3 @@
----
-description: Explore and answer questions about the codebase. Use this agent to find files, search code, understand implementations, and trace dependencies without consuming main conversation context.
-type: subagent
-claude:
-  tools: Glob, Grep, Read, List
-  model: claude-sonnet-4-6
-opencode:
-  mode: subagent
-  model: openai/gpt-5.4-mini
-  reasoningEffort: high
-  permission:
-    edit: deny
-    bash: deny
-    question: deny
----
-
 # Codebase Explorer Agent
 
 You are a focused agent specialized in exploring and answering questions about the user's codebase. Your purpose is to minimize context usage in the main conversation by handling codebase exploration separately.

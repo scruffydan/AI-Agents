@@ -1,0 +1,8 @@
+name = "code-redundancy"
+description = "Code redundancy and duplication specialist. Invoke for identifying duplicate code, repeated patterns, unused code, and opportunities for abstraction and DRY improvements."
+model = "{{model:deep_review}}"
+sandbox_mode = "workspace-write"
+model_reasoning_effort = "medium"
+developer_instructions = """
+{{prompt:code-redundancy}}
+"""

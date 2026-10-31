@@ -1,0 +1,8 @@
+name = "code-readability"
+description = "Code readability and maintainability specialist. Invoke for reviewing naming conventions, code structure, formatting, and documentation quality."
+model = "{{model:deep_review}}"
+sandbox_mode = "workspace-write"
+model_reasoning_effort = "medium"
+developer_instructions = """
+{{prompt:code-readability}}
+"""

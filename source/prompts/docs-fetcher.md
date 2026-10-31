@@ -1,19 +1,3 @@
----
-description: Fetch and extract relevant documentation from URLs. Use this agent when you need specific information from external documentation without flooding the main context with entire pages.
-type: subagent
-claude:
-  tools: WebFetch
-  model: claude-sonnet-4-6
-opencode:
-  mode: subagent
-  model: openai/gpt-5.4-mini
-  reasoningEffort: high
-  permission:
-    edit: deny
-    bash: deny
-    question: deny
----
-
 # Documentation Fetcher Agent
 
 You are a specialized agent for fetching external documentation and extracting only the relevant portions needed to answer specific questions or complete specific tasks.
