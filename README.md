@@ -9,6 +9,7 @@ folders copied to each harness. Commands and modes keep explicit native template
 ## Requirements
 
 - Python 3.11 or newer
+- OpenCode V2 for the OpenCode configuration
 - Bash for the optional installer
 
 There are no third-party Python dependencies.
@@ -97,6 +98,29 @@ Invalid agent metadata, missing references, recursive includes, invalid TOML, an
 duplicate output paths fail the build. YAML templates remain directly editable;
 the build does not validate their harness-specific fields.
 
+OpenCode output uses V2's `agents/`, `commands/`, and `skills/` directories.
+Agent permissions use ordered `permissions` rules, and reasoning effort is
+selected with a model variant such as `openai/gpt-6.1-sol#high`.
+
+## Skills and modes
+
+All three harnesses receive every shared skill under `source/skills/`, plus
+brainstorming, thorough planning, and full code review skills. The shared skills
+are copied without changing their instructions.
+
+- OpenCode: load `@mode-brainstorm`, `@mode-thorough-plan`, or
+  `@command-code-full-review`. The `brainstorm` and `thorough-plan` primary agents
+  and `/code-full-review` command remain available.
+- Claude Code: use `/mode-brainstorm`, `/mode-thorough-plan`, or `/code-full-review`.
+- Codex: use `$mode-brainstorm`, `$mode-thorough-plan`, or
+  `$command-code-full-review`.
+
+Claude's brainstorming skill selects its configured model for the current turn.
+Codex's brainstorming skill uses the `brainstorm` custom agent to select its
+configured model. OpenCode retains an existing session's selected model when
+changing agents, so select the brainstorm model in `/models` as well as the
+`brainstorm` agent.
+
 ## Install
 
 Build and install all configs:
@@ -112,8 +136,18 @@ Install selected harnesses:
 ./install.sh claude codex
 ```
 
-Existing managed paths require confirmation. Use `--force` to replace them
-without prompting:
+Agents, commands, and skills are installed one entry at a time, so anything
+else in those directories is left alone. Unchanged files are skipped. Changed
+files require confirmation, and the replaced version is moved to
+`~/.ai-agents-backups/<timestamp>/` instead of being deleted. Removing a prompt
+from this repository does not remove its installed copy; delete that by hand.
+
+OpenCode entries install into `~/.config/opencode/agents`, `commands`, and
+`skills`. Existing V1 `agent`, `command`, and `skill` directories are left in
+place; review and remove obsolete entries after verifying V2 discovery to avoid
+loading stale definitions alongside the new files.
+
+Use `--force` to replace changed files without prompting:
 
 ```bash
 ./install.sh opencode --work --force
@@ -130,6 +164,14 @@ PYTHON=/path/to/python3.11 ./install.sh
 ```bash
 ./opencode-init.sh
 ```
+
+This replaces the entire OpenCode config, including local provider settings.
+For an existing setup, merge the rules from `source/opencode.json` manually or
+review the replacement first. The initializer confirms replacements, backs up
+the old file under `~/.ai-agents-backups/` with private permissions, and installs
+the new file with mode `600`. `--yes` skips confirmation but still backs up;
+unchanged files are skipped. It refuses a symlink at the destination file.
+`install.sh` does not install or update `opencode.json`.
 
 ## Customize an agent for one harness
 
@@ -177,12 +219,28 @@ Agent bodies and explicit prompt bodies can include a fragment from `source/prom
 
 For example, the referenced `_report-only-intro.md` is shared across review agents.
 
+`source/prompts/AGENTS.md` is the shared base for all three harnesses: the build
+copies it to OpenCode/Codex `AGENTS.md` and Claude `CLAUDE.md`. Edit the source
+and rebuild/reinstall rather than editing generated copies. OpenCode V2
+recognizes the exact name `AGENTS.md`, not `Agent.md` or a `CLAUDE.md` fallback.
+
 ## Change models
 
 `source/models.toml` contains the small set of model profiles referenced by the
 templates. Each profile can provide `opencode`, `claude`, and `codex` values,
 plus optional `*_work` overrides. Work values fall back to the normal harness
 value when omitted.
+
+OpenCode profile values include the reasoning variant, so work mappings can use
+a different effort from normal mappings. Sol and Opus roles use high effort;
+Astra brainstorming stays at medium. The OpenCode work docs-fetcher and git-commit
+agents use Claude Sonnet 5.5 at high effort; explore uses Gemini 4 Argon at high
+effort. Claude templates set `effort: high` for Opus
+roles, and Codex templates set high reasoning effort for Sol roles.
+
+OpenCode V2 uses the `google-vertex` provider for both Gemini and Claude work
+models. Configure Google Cloud project, location, credentials, and model access
+on the work machine; the repository's build does not verify live provider access.
 
 ## Add a command or mode
 
@@ -195,11 +253,48 @@ These templates can use `{{prompt:name}}` for a shared prompt body and
 `{{model:profile}}` for a model. Command/skill and mode mappings differ by harness,
 so these remain explicit. `new.py agent` creates subagents only.
 
-## Migration from the template branch
+## Add a shared skill
+
+Create `source/skills/<name>/SKILL.md`, using a lowercase, hyphen-separated name
+such as `review-migrations`. Start with YAML frontmatter describing the skill's
+name and when to use it, followed by the instructions:
+
+```markdown
+---
+name: review-migrations
+description: Use when reviewing database migrations for correctness and deployment risks.
+---
+
+# Review database migrations
+
+1. Read the migration and related schema.
+2. Check for data loss, locking, and compatibility issues.
+3. Check the rollback approach.
+4. Report concrete findings with file references and suggested fixes.
+```
+
+The build copies the entire skill folder into all three harnesses; no separate
+template is needed. Keep instructions portable: describe actions such as
+"search the repository" instead of naming a harness-specific tool. Keep model
+selection and agent configuration in the harness-specific templates. Supporting
+scripts, references, and assets can live inside the skill folder; reference them
+from `SKILL.md` using relative paths.
+
+Shared skills are copied verbatim. Tokens such as `{{prompt:...}}`,
+`{{model:...}}`, and `{{include:...}}` are not expanded there. Choose a skill name
+that does not overlap a skill under `templates/`; duplicate output file paths
+fail the build rather than overwriting shared files.
+
+Run `./build.py` to generate all three configurations, or `./install.sh` to build
+and install them. Then try a representative request in each harness to confirm
+that it discovers the skill and follows the intended steps. The build does not
+validate skill metadata or behavior.
+
+## Migration from current main
 
 The nine subagent bodies moved from `source/prompts/` to `source/agents/`, with
 their common metadata added as TOML frontmatter. Their 27 individual templates
-became three defaults and ten overrides for existing tool/reasoning differences.
+became three defaults and five overrides for existing tool/reasoning differences.
 Edit the new source file for shared changes and the relevant override for exceptions.
 Commands, modes, shared skills, model profiles, output paths, and installation
 commands retain their existing layout and behavior.
@@ -212,14 +307,15 @@ python3 -m unittest discover -s tests
 
 The small test suite creates temporary copies to check agent creation, native
 escaping, target selection, override isolation, skill copying, and overwrite
-refusal. It does not install anything. During this migration, generated configs
-were also compared byte-for-byte against the template branch for default, work,
-provider override, and combined work/provider builds.
+refusal. Installer checks use isolated home directories, leaving real harness
+configs untouched. During this migration, generated configs were also compared
+byte-for-byte against main (`50b8e9d`) for default, work, provider override, and
+combined work/provider builds.
 
 ## Adoption checklist
 
-See [TODO.md](TODO.md) for the remaining rollout checks. Before merging this
-branch, install each harness independently and confirm that it discovers the
+See [TODO.md](TODO.md) for the remaining rollout checks. Before adopting these
+configs, install each harness independently and confirm that it discovers the
 rendered agents, commands, and skills. Also verify the work profile and the
 OpenCode provider override against the providers used in the real environment.
 

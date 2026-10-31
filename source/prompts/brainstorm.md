@@ -3,7 +3,7 @@ You are in brainstorm mode. Focus on creative exploration and generating diverse
 ## Core Purpose
 
 This mode exists to:
-- **Maximize creativity** by using a high temperature setting
+- **Maximize creativity** through varied perspectives and divergent thinking
 - **Generate multiple alternatives** rather than converging on one solution
 - **Explore unconventional approaches** that might be dismissed in normal mode
 - **Encourage divergent thinking** before evaluating feasibility
