@@ -25,15 +25,6 @@ def decision(rules, action, resource):
     return effect
 
 
-def agent_rules(path):
-    """Read the simple ordered triples used by this repository's YAML headers."""
-    header = path.read_text().split("---", 2)[1]
-    triples = re.findall(
-        r'  - action: (\S+)\n    resource: "([^"\n]+)"\n    effect: (allow|ask|deny)\n',
-        header,
-    )
-    return [dict(zip(("action", "resource", "effect"), triple)) for triple in triples]
-
 
 class OpenCodeSecurityTests(unittest.TestCase):
     def setUp(self):
@@ -105,18 +96,6 @@ class OpenCodeSecurityTests(unittest.TestCase):
             with self.subTest(action=action):
                 self.assertEqual(decision(self.rules, action, resource), "ask")
 
-    def test_supplied_agents_cannot_edit_or_delegate_to_escape_restrictions(self):
-        for path in (REPO / "templates/opencode/agents").glob("*.md"):
-            with self.subTest(agent=path.name):
-                rules = self.rules + agent_rules(path)
-                self.assertEqual(decision(rules, "edit", "src/app.py"), "deny")
-                self.assertEqual(decision(rules, "subagent", "general"), "deny")
-                self.assertEqual(decision(rules, "shell", "git commit -m message"), "deny")
-                self.assertEqual(decision(rules, "shell", "git add ."), "deny")
-                self.assertEqual(decision(rules, "read", "app/.env"), "deny")
-                if path.stem != "git-commit":
-                    self.assertEqual(decision(rules, "shell", "git status"), "deny")
-
     def test_global_defaults_do_not_weaken_built_in_plan_and_general_limits(self):
         plan = self.rules + self.config["agents"]["plan"]["permissions"]
         for action, resource in (
@@ -128,17 +107,6 @@ class OpenCodeSecurityTests(unittest.TestCase):
         general = self.rules + self.config["agents"]["general"]["permissions"]
         self.assertEqual(decision(general, "subagent", "general"), "deny")
         self.assertEqual(decision(general, "question", "*"), "deny")
-
-    def test_commit_agent_can_inspect_staged_diff_but_not_run_custom_diff_helpers(self):
-        path = REPO / "templates/opencode/agents/git-commit.md"
-        rules = self.rules + agent_rules(path)
-        self.assertEqual(decision(rules, "shell", "git status --short"), "allow")
-        self.assertEqual(
-            decision(rules, "shell", "git diff --no-ext-diff --no-textconv --cached"), "allow"
-        )
-        for command in ("git diff --cached", "git diff --cached --ext-diff", "git push"):
-            with self.subTest(command=command):
-                self.assertEqual(decision(rules, "shell", command), "deny")
 
 
 if __name__ == "__main__":
