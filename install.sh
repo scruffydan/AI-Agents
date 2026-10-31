@@ -10,7 +10,9 @@ PROVIDER=""
 HARNESSES=()
 
 usage() {
-    echo "Usage: ./install.sh [opencode|claude|codex ...] [OPTIONS]"
+    echo "Usage: ./install.sh [codex|claude|opencode ...] [OPTIONS]"
+    echo
+    echo "Defaults to codex. List multiple harnesses to install more than one."
     echo
     echo "Options:"
     echo "  --work                       Use work model mappings"
@@ -20,7 +22,7 @@ usage() {
 
 while [ "$#" -gt 0 ]; do
     case "$1" in
-        opencode|claude|codex)
+        codex|claude|opencode)
             HARNESSES+=("$1")
             shift
             ;;
@@ -49,7 +51,7 @@ while [ "$#" -gt 0 ]; do
     esac
 done
 
-[ "${#HARNESSES[@]}" -gt 0 ] || HARNESSES=(opencode claude codex)
+[ "${#HARNESSES[@]}" -gt 0 ] || HARNESSES=(codex)
 : "${HOME:?HOME must be set}"
 
 BUILD_ARGS=("${HARNESSES[@]}")
@@ -101,12 +103,10 @@ install_entries() {
 
 for harness in "${HARNESSES[@]}"; do
     case "$harness" in
-        opencode)
-            target="$HOME/.config/opencode"
-            install_item "$ROOT/build/opencode/AGENTS.md" "$target/AGENTS.md"
-            install_entries "$ROOT/build/opencode/agents" "$target/agents"
-            install_entries "$ROOT/build/opencode/commands" "$target/commands"
-            install_entries "$ROOT/build/opencode/skills" "$target/skills"
+        codex)
+            install_item "$ROOT/build/codex/AGENTS.md" "$HOME/.codex/AGENTS.md"
+            install_entries "$ROOT/build/codex/.codex/agents" "$HOME/.codex/agents"
+            install_entries "$ROOT/build/codex/.agents/skills" "$HOME/.agents/skills"
             ;;
         claude)
             target="$HOME/.claude"
@@ -114,10 +114,12 @@ for harness in "${HARNESSES[@]}"; do
             install_entries "$ROOT/build/claude/agents" "$target/agents"
             install_entries "$ROOT/build/claude/skills" "$target/skills"
             ;;
-        codex)
-            install_item "$ROOT/build/codex/AGENTS.md" "$HOME/.codex/AGENTS.md"
-            install_entries "$ROOT/build/codex/.codex/agents" "$HOME/.codex/agents"
-            install_entries "$ROOT/build/codex/.agents/skills" "$HOME/.agents/skills"
+        opencode)
+            target="$HOME/.config/opencode"
+            install_item "$ROOT/build/opencode/AGENTS.md" "$target/AGENTS.md"
+            install_entries "$ROOT/build/opencode/agents" "$target/agents"
+            install_entries "$ROOT/build/opencode/commands" "$target/commands"
+            install_entries "$ROOT/build/opencode/skills" "$target/skills"
             ;;
     esac
 done

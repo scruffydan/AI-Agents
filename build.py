@@ -28,7 +28,7 @@ SKILLS = ROOT / "source" / "skills"
 MODELS_FILE = ROOT / "source" / "models.toml"
 BUILD = ROOT / "build"
 
-HARNESSES = ("opencode", "claude", "codex")
+HARNESSES = ("codex", "claude", "opencode")
 OPENCODE_PROVIDERS = ("openai", "github-copilot", "opencode")
 TOKEN_RE = re.compile(r"\{\{(prompt|model|agent):([a-z0-9_-]+)\}\}")
 INCLUDE_RE = re.compile(r"\{\{include:([A-Za-z0-9_.-]+)\}\}")
