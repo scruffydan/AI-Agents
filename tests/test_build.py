@@ -27,15 +27,28 @@ class BuildTests(unittest.TestCase):
         )
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
-    def test_codex_prompt_text_survives_toml_rendering(self):
+    def test_codex_agent_text_survives_toml_rendering(self):
         body = 'Match \\bword\\b in C:\\queries, keep the literal """ delimiter.'
-        (self.root / "source/prompts/explore.md").write_text(body)
+        source = self.root / "source/agents/explore.md"
+        _, metadata, _ = source.read_text().split("+++", 2)
+        source.write_text(f"+++{metadata}+++\n\n{body}")
 
         self.build("codex")
 
         rendered = self.root / "build/codex/.codex/agents/explore.toml"
         instructions = tomllib.loads(rendered.read_text())["developer_instructions"]
         self.assertEqual(instructions.strip(), body)
+
+    def test_codex_explicit_prompt_text_survives_toml_rendering(self):
+        body = 'Match \\bword\\b in C:\\queries, keep the literal """ delimiter.'
+        (self.root / "source/prompts/brainstorm.md").write_text(body)
+
+        self.build("codex")
+
+        rendered = self.root / "build/codex/.codex/agents/brainstorm.toml"
+        instructions = tomllib.loads(rendered.read_text())["developer_instructions"]
+        self.assertEqual(instructions.strip(),
+                         "Explore ideas without modifying files or running shell commands.\n\n" + body)
 
     def test_default_build_renders_all_harnesses_with_bare_codex_models(self):
         self.build()

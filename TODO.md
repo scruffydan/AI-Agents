@@ -13,13 +13,15 @@
       providers actually used day to day.
 - [ ] Review the provider-native templates and remove prompts or skills that are
       no longer useful.
+- [ ] Try `new.py agent` and `new.py skill` for the next addition; edit their TODO
+      instructions before installing and add an override only when needed.
 
 ## Later, only if needed
 
 - [ ] Decide whether installation should use repository symlinks instead of
       replacing managed directories.
-- [ ] Add a small compatibility check only when a harness changes its native
-      configuration format.
+- [ ] Extend the small authoring tests only when a real bug or harness-format
+      change needs coverage.
 
 ## Explicit non-goals
 

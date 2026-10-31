@@ -1,4 +1,4 @@
-# Build output - generated from source/prompts/
+# Build output - generated from source/ and templates/
 /build/
 
 # OS files
@@ -7,3 +7,6 @@
 # Python cache files
 __pycache__/
 *.pyc
+
+# Local comparison snapshots and scratch files
+/work/
