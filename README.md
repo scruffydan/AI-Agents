@@ -145,10 +145,8 @@ proposed patterns before choosing **Allow always**.
   mutation, commits, pushes, installers, and deletion commands ask. The old
   destructive-command blacklist was removed in favor of this narrow allowlist.
 - Custom agents have their own permissions, independent of their parent's.
-  The supplied planning/review agents deny edits, shell execution, and launching
-  other agents. The commit-message agent permits only specific Git inspection
-  commands and cannot edit, stage, commit, push, or launch another agent through
-  those tools. Inspect additional agents before authorizing them.
+  Check each agent's configuration before authorizing it; a parent's restrictions
+  do not automatically limit its children.
 - The built-in `plan` agent also denies edits (including plan-file writes), shell,
   and delegation. The built-in `general` agent cannot ask questions or launch
   more agents. Explicit agent rules retain these limits after the global defaults.
