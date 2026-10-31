@@ -95,8 +95,10 @@ Override OpenCode's provider prefix:
 
 Generated files are written to a fresh `build/` directory after rendering succeeds.
 Invalid agent metadata, missing references, recursive includes, invalid TOML, and
-duplicate output paths fail the build. YAML templates remain directly editable;
-the build does not validate their harness-specific fields.
+duplicate output paths or file/directory collisions fail before the previous build
+is replaced. Finder's `.DS_Store` files are ignored when scanning templates and
+overrides. YAML templates remain directly editable; the build does not validate
+their harness-specific fields.
 
 OpenCode output uses V2's `agents/`, `commands/`, and `skills/` directories.
 Agent permissions use ordered `permissions` rules, and reasoning effort is
@@ -290,14 +292,13 @@ and install them. Then try a representative request in each harness to confirm
 that it discovers the skill and follows the intended steps. The build does not
 validate skill metadata or behavior.
 
-## Migration from current main
+## Agent definition layout
 
-The nine subagent bodies moved from `source/prompts/` to `source/agents/`, with
-their common metadata added as TOML frontmatter. Their 27 individual templates
-became three defaults and five overrides for existing tool/reasoning differences.
-Edit the new source file for shared changes and the relevant override for exceptions.
-Commands, modes, shared skills, model profiles, output paths, and installation
-commands retain their existing layout and behavior.
+The nine shared subagent definitions live in `source/agents/`, with common metadata
+in TOML frontmatter and instructions below it. Three native defaults and five
+overrides provide their harness-specific settings. Edit an agent's source file for
+shared changes and its relevant override for exceptions. Commands and modes keep
+explicit templates under `templates/<harness>/`.
 
 ## Checks
 
@@ -305,12 +306,16 @@ commands retain their existing layout and behavior.
 python3 -m unittest discover -s tests
 ```
 
-The small test suite creates temporary copies to check agent creation, native
-escaping, target selection, override isolation, skill copying, and overwrite
-refusal. Installer checks use isolated home directories, leaving real harness
-configs untouched. During this migration, generated configs were also compared
-byte-for-byte against main (`50b8e9d`) for default, work, provider override, and
-combined work/provider builds.
+The test suite creates temporary copies to check agent creation, Unicode and native
+escaping, target selection, override isolation, skill copying, overwrite refusal,
+Finder metadata handling, and preservation of the previous build after rendering
+or collision errors. Installer checks use isolated home directories, leaving real
+harness configs untouched.
+
+Before the shared-agent authoring change was merged, generated configs were also
+compared byte-for-byte against the previous main (`50b8e9d`) across all 56
+combinations of harness subsets, work mode, and provider options. This was a
+migration check; the test suite does not automatically compare against Git history.
 
 ## Adoption checklist
 

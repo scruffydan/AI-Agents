@@ -1,6 +1,6 @@
 # TODO
 
-## Before merging
+## Rollout checks
 
 - [ ] Ensure the normal `python3` on the target machine is Python 3.11 or newer,
       or set `PYTHON` when running `install.sh`.
