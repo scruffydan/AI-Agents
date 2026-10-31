@@ -2,7 +2,7 @@ name = "code-security"
 description = "Security review specialist for identifying vulnerabilities and ensuring secure coding practices. Invoke for security audits, vulnerability assessments, and OWASP compliance checks."
 model = "{{model:deep_review}}"
 sandbox_mode = "workspace-write"
-model_reasoning_effort = "medium"
+model_reasoning_effort = "high"
 developer_instructions = """
 {{prompt:code-security}}
 """

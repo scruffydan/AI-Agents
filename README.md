@@ -49,7 +49,7 @@ directory and fails if a prompt, include, model, or TOML template is invalid.
 
 OpenCode output uses V2's `agents/`, `commands/`, and `skills/` directories.
 Agent permissions use ordered `permissions` rules, and reasoning effort is
-selected with a model variant such as `openai/gpt-6.1-sol#medium`.
+selected with a model variant such as `openai/gpt-6.1-sol#high`.
 
 ## Skills and modes
 
@@ -187,6 +187,12 @@ what the harness receives.
 templates. Each profile can provide `opencode`, `claude`, and `codex` values,
 plus optional `*_work` overrides. Work values fall back to the normal harness
 value when omitted.
+
+OpenCode profile values include the reasoning variant, so work mappings can use
+a different effort from normal mappings. Sol and Opus roles use high effort;
+Astra brainstorming stays at medium. The OpenCode work git-commit agent uses
+Claude Sonnet 5.5 at high effort. Claude templates set `effort: high` for Opus
+roles, and Codex templates set high reasoning effort for Sol roles.
 
 OpenCode V2 uses the `google-vertex` provider for both Gemini and Claude work
 models. Configure Google Cloud project, location, credentials, and model access

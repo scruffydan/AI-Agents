@@ -63,13 +63,16 @@ class BuildTests(unittest.TestCase):
     def test_brainstorm_follows_work_and_provider_options(self):
         brainstorm = self.root / "build/opencode/agents/brainstorm.md"
         for args, model in (
-            ((), "openai/gpt-6-astra"),
-            (("--work",), "google-vertex/claude-opus-5-5"),
-            (("--opencode-provider", "github-copilot"), "github-copilot/gpt-6-astra"),
+            ((), "openai/gpt-6-astra#medium"),
+            (("--work",), "google-vertex/claude-opus-5-5#high"),
+            (("--opencode-provider", "github-copilot"), "github-copilot/gpt-6-astra#medium"),
+            (("--work", "--opencode-provider", "github-copilot"), "github-copilot/claude-opus-5-5#high"),
         ):
             with self.subTest(args=args):
                 self.build("opencode", *args)
-                self.assertIn(f"model: {model}#medium\n", brainstorm.read_text())
+                self.assertIn(f"model: {model}\n", brainstorm.read_text())
+                skill = self.root / "build/opencode/skills/mode-brainstorm/SKILL.md"
+                self.assertIn(f"select `{model}`", skill.read_text())
 
     def test_shared_skills_and_prompt_modes_exist_for_every_harness(self):
         self.build()
@@ -104,9 +107,11 @@ class BuildTests(unittest.TestCase):
                 self.build(*args)
                 claude = self.root / "build/claude/skills/mode-brainstorm/SKILL.md"
                 self.assertIn("model: claude-opus-5-5\n", claude.read_text())
+                self.assertIn("effort: high\n", claude.read_text())
                 agent = self.root / "build/codex/.codex/agents/brainstorm.toml"
                 parsed = tomllib.loads(agent.read_text())
                 self.assertEqual(parsed["model"], "gpt-6-astra")
+                self.assertEqual(parsed["model_reasoning_effort"], "medium")
                 self.assertFalse(parsed["features"]["shell_tool"])
                 skill = self.root / "build/codex/.agents/skills/mode-brainstorm/SKILL.md"
                 self.assertIn("`brainstorm` custom agent", skill.read_text())
@@ -142,8 +147,10 @@ class BuildTests(unittest.TestCase):
                 self.assertNotIn("\ntemperature:", header)
                 self.assertNotIn("google-vertex-anthropic/", header)
         reviewer = (output / "agents/code-security.md").read_text()
-        self.assertIn("model: google-vertex/claude-opus-5-5#medium\n", reviewer)
+        self.assertIn("model: google-vertex/claude-opus-5-5#high\n", reviewer)
         self.assertIn("action: shell\n    resource: \"*\"\n    effect: deny", reviewer)
+        commit = (output / "agents/git-commit.md").read_text()
+        self.assertIn("model: google-vertex/claude-sonnet-5-5#high\n", commit)
 
 
 if __name__ == "__main__":

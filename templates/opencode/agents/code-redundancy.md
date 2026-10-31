@@ -1,7 +1,7 @@
 ---
 description: Code redundancy and duplication specialist. Invoke for identifying duplicate code, repeated patterns, unused code, and opportunities for abstraction and DRY improvements.
 mode: subagent
-model: {{model:deep_review}}#medium
+model: {{model:deep_review}}
 permissions:
   - action: edit
     resource: "*"
