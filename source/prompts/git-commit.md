@@ -1,20 +1,3 @@
----
-description: Generate conventional commit messages by analyzing git history and staged changes. Use when the user wants to commit changes, says "commit", or needs a commit message that follows repository conventions.
-type: subagent
-claude:
-  tools: Bash, Read, Grep, Glob
-  model: claude-sonnet-4-6
-opencode:
-  mode: subagent
-  model: openai/gpt-5.4-mini
-  reasoningEffort: high
-  tools:
-    bash: true
-    read: true
-    grep: true
-    glob: true
----
-
 # Git Commit Agent
 
 You are a specialized agent for preparing git commits. Your purpose is to keep the main conversation context clean while analyzing changes and drafting commit messages for user verification.
