@@ -18,6 +18,96 @@ The executable scripts use `python3`. If yours is older than 3.11, invoke them
 with a newer interpreter, for example `python3.11 new.py agent database-review`
 and `python3.11 build.py`.
 
+## Build
+
+Build all harnesses:
+
+```bash
+./build.py
+```
+
+Build selected harnesses:
+
+```bash
+./build.py opencode
+./build.py claude codex
+```
+
+Use work model mappings:
+
+```bash
+./build.py --work
+```
+
+Override OpenCode's provider prefix:
+
+```bash
+./build.py opencode --opencode-provider github-copilot
+```
+
+Generated files are written to a fresh `build/` directory after rendering succeeds.
+Invalid agent metadata, missing references, recursive includes, invalid TOML, and
+duplicate output paths or file/directory collisions fail before the previous build
+is replaced. Finder's `.DS_Store` files are ignored when scanning templates and
+overrides. YAML templates remain directly editable; the build does not validate
+their harness-specific fields.
+
+OpenCode output uses V2's `agents/`, `commands/`, and `skills/` directories.
+Agent permissions use ordered `permissions` rules, and reasoning effort is
+selected with a model variant such as `openai/gpt-6.1-sol#high`.
+
+## Install
+
+Build and install all configs:
+
+```bash
+./install.sh
+```
+
+Install selected harnesses:
+
+```bash
+./install.sh opencode
+./install.sh claude codex
+```
+
+Agents, commands, and skills are installed one entry at a time, so anything
+else in those directories is left alone. Unchanged files are skipped. Changed
+files require confirmation, and the replaced version is moved to
+`~/.ai-agents-backups/<timestamp>/` instead of being deleted. Removing a prompt
+from this repository does not remove its installed copy; delete that by hand.
+
+OpenCode entries install into `~/.config/opencode/agents`, `commands`, and
+`skills`. Existing V1 `agent`, `command`, and `skill` directories are left in
+place; review and remove obsolete entries after verifying V2 discovery to avoid
+loading stale definitions alongside the new files.
+
+Use `--force` to replace changed files without prompting:
+
+```bash
+./install.sh opencode --work --force
+```
+
+Set `PYTHON` if `python3` is not Python 3.11 or newer:
+
+```bash
+PYTHON=/path/to/python3.11 ./install.sh
+```
+
+`opencode.json` remains an explicit, one-time setup:
+
+```bash
+./opencode-init.sh
+```
+
+This replaces the entire OpenCode config, including local provider settings.
+For an existing setup, merge the rules from `source/opencode.json` manually or
+review the replacement first. The initializer confirms replacements, backs up
+the old file under `~/.ai-agents-backups/` with private permissions, and installs
+the new file with mode `600`. `--yes` skips confirmation but still backs up;
+unchanged files are skipped. It refuses a symlink at the destination file.
+`install.sh` does not install or update `opencode.json`.
+
 ## Create a subagent
 
 ```bash
@@ -75,44 +165,6 @@ Both creation commands use lowercase names with hyphens and refuse to overwrite
 existing content. They create editable starting files with TODO instructions;
 finish those before installing. `--description` is optional for either command.
 
-## Build
-
-Build all harnesses:
-
-```bash
-./build.py
-```
-
-Build selected harnesses:
-
-```bash
-./build.py opencode
-./build.py claude codex
-```
-
-Use work model mappings:
-
-```bash
-./build.py --work
-```
-
-Override OpenCode's provider prefix:
-
-```bash
-./build.py opencode --opencode-provider github-copilot
-```
-
-Generated files are written to a fresh `build/` directory after rendering succeeds.
-Invalid agent metadata, missing references, recursive includes, invalid TOML, and
-duplicate output paths or file/directory collisions fail before the previous build
-is replaced. Finder's `.DS_Store` files are ignored when scanning templates and
-overrides. YAML templates remain directly editable; the build does not validate
-their harness-specific fields.
-
-OpenCode output uses V2's `agents/`, `commands/`, and `skills/` directories.
-Agent permissions use ordered `permissions` rules, and reasoning effort is
-selected with a model variant such as `openai/gpt-6.1-sol#high`.
-
 ## Skills and modes
 
 All three harnesses receive every shared skill under `source/skills/`, plus
@@ -131,58 +183,6 @@ Codex's brainstorming skill uses the `brainstorm` custom agent to select its
 configured model. OpenCode retains an existing session's selected model when
 changing agents, so select the brainstorm model in `/models` as well as the
 `brainstorm` agent.
-
-## Install
-
-Build and install all configs:
-
-```bash
-./install.sh
-```
-
-Install selected harnesses:
-
-```bash
-./install.sh opencode
-./install.sh claude codex
-```
-
-Agents, commands, and skills are installed one entry at a time, so anything
-else in those directories is left alone. Unchanged files are skipped. Changed
-files require confirmation, and the replaced version is moved to
-`~/.ai-agents-backups/<timestamp>/` instead of being deleted. Removing a prompt
-from this repository does not remove its installed copy; delete that by hand.
-
-OpenCode entries install into `~/.config/opencode/agents`, `commands`, and
-`skills`. Existing V1 `agent`, `command`, and `skill` directories are left in
-place; review and remove obsolete entries after verifying V2 discovery to avoid
-loading stale definitions alongside the new files.
-
-Use `--force` to replace changed files without prompting:
-
-```bash
-./install.sh opencode --work --force
-```
-
-Set `PYTHON` if `python3` is not Python 3.11 or newer:
-
-```bash
-PYTHON=/path/to/python3.11 ./install.sh
-```
-
-`opencode.json` remains an explicit, one-time setup:
-
-```bash
-./opencode-init.sh
-```
-
-This replaces the entire OpenCode config, including local provider settings.
-For an existing setup, merge the rules from `source/opencode.json` manually or
-review the replacement first. The initializer confirms replacements, backs up
-the old file under `~/.ai-agents-backups/` with private permissions, and installs
-the new file with mode `600`. `--yes` skips confirmation but still backs up;
-unchanged files are skipped. It refuses a symlink at the destination file.
-`install.sh` does not install or update `opencode.json`.
 
 ## Customize an agent for one harness
 
