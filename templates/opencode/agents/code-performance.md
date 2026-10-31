@@ -1,7 +1,7 @@
 ---
 description: Performance optimization specialist. Invoke for identifying bottlenecks, optimizing algorithms, memory usage, I/O operations, and concurrency patterns.
 mode: subagent
-model: {{model:deep_review}}#medium
+model: {{model:deep_review}}
 permissions:
   - action: edit
     resource: "*"
