@@ -18,7 +18,7 @@ usage() {
     echo "Options:"
     echo "  --all                        Install Codex, Claude Code, and OpenCode"
     echo "  --work                       Use work model mappings"
-    echo "  --opencode-provider NAME     openai, github-copilot, or opencode"
+    echo "  --opencode-provider NAME     openai or opencode"
     echo "  -y, --force                  Replace changed files without prompting"
 }
 
