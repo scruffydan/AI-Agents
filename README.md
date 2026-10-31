@@ -114,6 +114,63 @@ PYTHON=/path/to/python3.11 ./install.sh
 ./opencode-init.sh
 ```
 
+This replaces the entire OpenCode config, including local provider settings.
+For an existing setup, merge the rules from `source/opencode.json` manually or
+review the replacement first. The initializer confirms replacements, backs up
+the old file under `~/.ai-agents-backups/` with private permissions, and installs
+the new file with mode `600`. `--yes` skips confirmation but still backs up;
+unchanged files are skipped. It refuses a symlink at the destination file.
+`install.sh` does not install or update `opencode.json`.
+
+## OpenCode security defaults
+
+The config targets [OpenCode V2 permissions](https://opencode.ai/v2/docs/permissions),
+reviewed on 2026-10-30. Keep the ordered `permissions` array with
+`action`/`resource`/`effect` and the `shell` action; V1's `permission`/`bash`
+format is different. The last matching rule wins, including agent rules appended
+after global rules. Saved approvals are durable and project-scoped: review their
+proposed patterns before choosing **Allow always**.
+
+- Unlisted actions ask, including edits, shell execution, content searches
+  (`grep`), external directory access, delegation, and additional MCP tools.
+  Reads, filename discovery, questions, skill loading, and web documentation
+  tools are allowed. Sharing remains disabled.
+- Sensitive reads are denied for environment files, private keys, common
+  credential stores, and Terraform state/variables. Rules cover root, nested,
+  and absolute paths. Conventional `.env.example` files are allowed by an
+  exception after the environment-file denies; other credential-store denies
+  still apply. Examples must contain placeholders, not secrets.
+- The shell allowlist contains exact inspection commands, such as
+  `git status --short` and `git diff --stat`. Other flags, staging, branch
+  mutation, commits, pushes, installers, and deletion commands ask. The old
+  destructive-command blacklist was removed in favor of this narrow allowlist.
+- Custom agents have their own permissions, independent of their parent's.
+  The supplied planning/review agents deny edits, shell execution, and launching
+  other agents. The commit-message agent permits only specific Git inspection
+  commands and cannot edit, stage, commit, push, or launch another agent through
+  those tools. Inspect additional agents before authorizing them.
+- The built-in `plan` agent also denies edits (including plan-file writes), shell,
+  and delegation. The built-in `general` agent cannot ask questions or launch
+  more agents. Explicit agent rules retain these limits after the global defaults.
+
+These controls are **not a sandbox or a complete secret filter**. Read denies
+do not automatically protect shell, content-search, MCP, or network tools. The
+shell scanner checks extracted commands and infers directories on a best-effort
+basis; approved scripts still run with the host user's filesystem, process, and
+network authority. Even inspection commands can invoke repository-configured
+helpers. Review commands and repository configuration before approval. Web tools
+can transmit data in URLs/queries; disabled sharing does not prevent model-provider
+traffic. Plugins and MCP servers also need independent trust and access review.
+
+Agent-specific rules can override global permission denies. For restrictions
+that must survive agent overrides, use managed/global
+[V2 policies](https://opencode.ai/v2/docs/policies); for example, a `tool.use`
+deny on `shell:*` blocks shell checks after agent rules and saved approvals.
+Policies still do not sandbox plugin code. Use OS/container isolation, limited
+credentials, and network controls for untrusted repositories or stronger
+boundaries. The shipped config is a personal approval baseline, not an enforced
+organization policy.
+
 ## Edit prompts
 
 Reusable prompt bodies live in `source/prompts/`. They are ordinary Markdown
@@ -122,6 +179,11 @@ without configuration frontmatter. Shared fragments use:
 ```text
 {{include:_report-only-intro.md}}
 ```
+
+`source/prompts/AGENTS.md` is the shared base for all three harnesses: the build
+copies it to OpenCode/Codex `AGENTS.md` and Claude `CLAUDE.md`. Edit the source
+and rebuild/reinstall rather than editing generated copies. OpenCode V2
+recognizes the exact name `AGENTS.md`, not `Agent.md` or a `CLAUDE.md` fallback.
 
 Provider-specific frontmatter and file formats live under `templates/` in their
 final output layout. Editing a template is intentionally direct: what you see is

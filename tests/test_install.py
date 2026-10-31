@@ -87,6 +87,19 @@ class InstallTests(unittest.TestCase):
         for entry in ("agents/mine.md", "commands/mine.md", "skills/mine/SKILL.md", "agent/legacy.md"):
             self.assertEqual((opencode / entry).read_text(), "keep me")
 
+    def test_shared_base_installs_without_replacing_opencode_settings(self):
+        config = self.home / ".config/opencode/opencode.json"
+        config.parent.mkdir(parents=True)
+        config.write_text('{"providers": {"local": {}}}')
+
+        self.install()
+
+        body = (self.root / "source/prompts/AGENTS.md").read_bytes()
+        for target in (".config/opencode/AGENTS.md", ".claude/CLAUDE.md", ".codex/AGENTS.md"):
+            with self.subTest(target=target):
+                self.assertEqual((self.home / target).read_bytes(), body)
+        self.assertEqual(config.read_text(), '{"providers": {"local": {}}}')
+
     def init_opencode(self, *args):
         shutil.copy2(REPO / "opencode-init.sh", self.root / "opencode-init.sh")
         return subprocess.run(
@@ -113,6 +126,56 @@ class InstallTests(unittest.TestCase):
 
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertEqual(config.read_text(), (REPO / "source/opencode.json").read_text())
+        self.assertEqual(config.stat().st_mode & 0o777, 0o600)
+        backups = list((self.home / ".ai-agents-backups").glob("opencode-*/opencode.json"))
+        self.assertEqual([path.read_text() for path in backups], ["old"])
+        self.assertEqual(backups[0].stat().st_mode & 0o777, 0o600)
+        self.assertEqual(backups[0].parent.stat().st_mode & 0o777, 0o700)
+
+    def test_opencode_init_without_confirmation_preserves_existing_config(self):
+        config = self.home / ".config/opencode/opencode.json"
+        config.parent.mkdir(parents=True)
+        config.write_text("keep me")
+
+        result = self.init_opencode()
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(config.read_text(), "keep me")
+        self.assertFalse((self.home / ".ai-agents-backups").exists())
+
+    def test_opencode_init_refuses_existing_and_dangling_symlinks(self):
+        config = self.home / ".config/opencode/opencode.json"
+        config.parent.mkdir(parents=True)
+        target = self.home / "other.json"
+        for existing in (True, False):
+            with self.subTest(existing=existing):
+                if existing:
+                    target.write_text("keep me")
+                config.symlink_to(target)
+                result = self.init_opencode("--yes")
+                self.assertNotEqual(result.returncode, 0)
+                self.assertTrue(config.is_symlink())
+                if existing:
+                    self.assertEqual(target.read_text(), "keep me")
+                    target.unlink()
+                else:
+                    self.assertFalse(target.exists())
+                config.unlink()
+
+    def test_opencode_init_fresh_and_unchanged_installs_have_private_permissions(self):
+        config = self.home / ".config/opencode/opencode.json"
+        result = self.init_opencode()
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(config.read_bytes(), (REPO / "source/opencode.json").read_bytes())
+        self.assertEqual(config.stat().st_mode & 0o777, 0o600)
+        config.chmod(0o644)
+
+        result = self.init_opencode()
+
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("Unchanged:", result.stdout)
+        self.assertEqual(config.stat().st_mode & 0o777, 0o600)
+        self.assertFalse((self.home / ".ai-agents-backups").exists())
 
 
 if __name__ == "__main__":
