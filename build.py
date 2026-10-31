@@ -34,13 +34,13 @@ TOKEN_RE = re.compile(r"\{\{(prompt|model|agent):([a-z0-9_-]+)\}\}")
 INCLUDE_RE = re.compile(r"\{\{include:([A-Za-z0-9_.-]+)\}\}")
 NAME_RE = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*")
 LAYOUT = {
-    "opencode": {"base": "AGENTS.md", "skills": "skill"},
+    "opencode": {"base": "AGENTS.md", "skills": "skills"},
     "claude": {"base": "CLAUDE.md", "skills": "skills"},
     "codex": {"base": "AGENTS.md", "skills": ".agents/skills"},
 }
 AGENT_PATHS = {
     "claude": ("agent.md", "agents/{name}.md"),
-    "opencode": ("agent.md", "agent/{name}.md"),
+    "opencode": ("agent.md", "agents/{name}.md"),
     "codex": ("agent.toml", ".codex/agents/{name}.toml"),
 }
 
@@ -130,11 +130,13 @@ def agent_value(value: str, key: str, toml: bool) -> str:
     if toml:
         if key == "body":
             # Inside a TOML multiline basic string. Preserve newlines and ordinary quotes.
-            value = value.replace("\\", "\\\\").replace('"""', '\\"\\"\\"')
-            return re.sub(r"[\x00-\x08\x0b-\x1f\x7f]", lambda m: f"\\u{ord(m[0]):04x}", value)
+            return toml_multiline(value)
         # Inside a TOML single-line basic string; JSON escapes are compatible here.
         return json.dumps(value, ensure_ascii=False)[1:-1].replace("\x7f", "\\u007f")
     if key == "body":
+        return value
+    # Model variants contain a literal '#' without whitespace before it.
+    if key == "model" and re.fullmatch(r"[A-Za-z0-9_][A-Za-z0-9_./@-]*#[A-Za-z0-9_-]+", value):
         return value
     # Plain YAML scalars are readable; quote values with YAML syntax or implicit types.
     if (re.fullmatch(r"[A-Za-z_][A-Za-z0-9_ .,/()@\"'?!-]*", value)
@@ -166,6 +168,12 @@ def expand_includes(text: str, stack: tuple[str, ...]) -> str:
     return INCLUDE_RE.sub(replace, text)
 
 
+def toml_multiline(text: str) -> str:
+    """Escape text for a TOML multiline basic string so it parses back unchanged."""
+    text = text.replace("\\", "\\\\").replace('"""', '\\"\\"\\"')
+    return re.sub(r"[\x00-\x08\x0b-\x1f\x7f]", lambda m: f"\\u{ord(m[0]):04x}", text)
+
+
 def render_template(
     path: Path,
     harness: str,
@@ -176,7 +184,9 @@ def render_template(
     def replace(match: re.Match[str]) -> str:
         kind, name = match.groups()
         if kind == "prompt":
-            return prompt_body(name)
+            body = prompt_body(name)
+            # TOML templates embed prompts inside """ strings.
+            return toml_multiline(body) if path.suffix == ".toml" else body
         if kind == "agent":
             if agent is None or name not in {"name", "description", "model", "body"}:
                 raise ValueError(f"Invalid agent token {match[0]} in {path}")
@@ -265,6 +275,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "harnesses",
         nargs="*",
+        metavar="{" + ",".join(HARNESSES) + "}",
         help="Harnesses to build. Defaults to all.",
     )
     parser.add_argument("--work", action="store_true", help="Use work model mappings.")
@@ -274,6 +285,10 @@ def main(argv: list[str] | None = None) -> int:
         help="Override the provider prefix for rendered OpenCode models.",
     )
     args = parser.parse_args(argv)
+    # Python < 3.12 rejects an empty nargs="*" list when choices is set.
+    unknown = [name for name in args.harnesses if name not in HARNESSES]
+    if unknown:
+        parser.error(f"invalid harness: {', '.join(unknown)} (choose from {', '.join(HARNESSES)})")
     try:
         build(
             args.harnesses or list(HARNESSES),

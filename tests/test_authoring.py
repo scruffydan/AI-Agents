@@ -45,7 +45,7 @@ class AuthoringTests(unittest.TestCase):
         self.assertEqual(rendered["developer_instructions"].strip(),
                          body.replace("{{include:_example.md}}", "Explain the result."))
         claude = self.root / "build/claude/agents/database-review.md"
-        opencode = self.root / "build/opencode/agent/database-review.md"
+        opencode = self.root / "build/opencode/agents/database-review.md"
         for path in (claude, opencode):
             line = next(line for line in path.read_text().splitlines() if line.startswith("description: "))
             self.assertEqual(json.loads(line.removeprefix("description: ")), description)
@@ -66,9 +66,9 @@ class AuthoringTests(unittest.TestCase):
         (skill / "example.sql").write_text("EXPLAIN SELECT 1;\n")
         self.cli("build.py")
         self.assertTrue((self.root / "build/claude/agents/database-review.md").exists())
-        self.assertFalse((self.root / "build/opencode/agent/database-review.md").exists())
+        self.assertFalse((self.root / "build/opencode/agents/database-review.md").exists())
         self.assertFalse((self.root / "build/codex/.codex/agents/database-review.toml").exists())
-        for target in ("claude/skills", "opencode/skill", "codex/.agents/skills"):
+        for target in ("claude/skills", "opencode/skills", "codex/.agents/skills"):
             for path in skill.iterdir():
                 self.assertEqual(path.read_bytes(), (self.root / "build" / target / skill.name / path.name).read_bytes())
         self.cli("build.py", "claude")
@@ -86,6 +86,31 @@ class AuthoringTests(unittest.TestCase):
         self.assertFalse((self.root / "source/agents/missing-profile.md").exists())
         self.cli("new.py", "agent", "brainstorm", success=False)
         self.cli("new.py", "skill", "code-full-review", success=False)
+
+    def test_failed_build_preserves_previous_output(self):
+        self.cli("build.py")
+        output = self.root / "build"
+
+        def snapshot():
+            return {p.relative_to(output): p.read_bytes()
+                    for p in output.rglob("*") if p.is_file()}
+
+        original = snapshot()
+        cases = (
+            ("templates/claude/agents/broken.md", "{{prompt:missing}}", "Unknown prompt"),
+            ("templates/codex/.codex/agents/explore.toml",
+             (output / "codex/.codex/agents/explore.toml").read_text(), "Duplicate output"),
+            ("templates/claude/skills/git-commit/SKILL.md", "conflict", "Duplicate output"),
+        )
+        for relative, content, error in cases:
+            with self.subTest(path=relative):
+                path = self.root / relative
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text(content)
+                result = self.cli("build.py", success=False)
+                self.assertIn(error, result.stderr)
+                self.assertEqual(snapshot(), original)
+                path.unlink()
 
 
 if __name__ == "__main__":

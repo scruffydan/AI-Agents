@@ -1,6 +1,6 @@
 +++
 description = "Fetch and extract relevant documentation from URLs. Use this agent when you need specific information from external documentation without flooding the main context with entire pages."
-model_profile = "mini_reasoning"
+model_profile = "docs_fetcher"
 harnesses = ["opencode", "claude", "codex"]
 +++
 

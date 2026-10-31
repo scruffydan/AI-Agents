@@ -2,11 +2,16 @@
 description: {{agent:description}}
 mode: subagent
 model: {{agent:model}}
-reasoningEffort: medium
-permission:
-  edit: deny
-  bash: deny
-  question: deny
+permissions:
+  - action: edit
+    resource: "*"
+    effect: deny
+  - action: shell
+    resource: "*"
+    effect: deny
+  - action: question
+    resource: "*"
+    effect: deny
 ---
 
 {{agent:body}}
