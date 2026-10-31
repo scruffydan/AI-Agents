@@ -317,11 +317,4 @@ compared byte-for-byte against the previous main (`50b8e9d`) across all 56
 combinations of harness subsets, work mode, and provider options. This was a
 migration check; the test suite does not automatically compare against Git history.
 
-## Adoption checklist
-
-See [TODO.md](TODO.md) for the remaining rollout checks. Before adopting these
-configs, install each harness independently and confirm that it discovers the
-rendered agents, commands, and skills. Also verify the work profile and the
-OpenCode provider override against the providers used in the real environment.
-
 Keep future changes focused on concrete authoring or harness compatibility needs.
