@@ -104,9 +104,9 @@ for harness in "${HARNESSES[@]}"; do
         opencode)
             target="$HOME/.config/opencode"
             install_item "$ROOT/build/opencode/AGENTS.md" "$target/AGENTS.md"
-            install_entries "$ROOT/build/opencode/agent" "$target/agent"
-            install_entries "$ROOT/build/opencode/command" "$target/command"
-            install_entries "$ROOT/build/opencode/skill" "$target/skill"
+            install_entries "$ROOT/build/opencode/agents" "$target/agents"
+            install_entries "$ROOT/build/opencode/commands" "$target/commands"
+            install_entries "$ROOT/build/opencode/skills" "$target/skills"
             ;;
         claude)
             target="$HOME/.claude"

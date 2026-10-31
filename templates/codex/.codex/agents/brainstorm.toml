@@ -1,0 +1,12 @@
+name = "brainstorm"
+description = "Generate diverse ideas and explore unconventional approaches before choosing a solution."
+model = "{{model:brainstorm}}"
+model_reasoning_effort = "medium"
+developer_instructions = """
+Explore ideas without modifying files or running shell commands.
+
+{{prompt:brainstorm}}
+"""
+
+[features]
+shell_tool = false

@@ -1,12 +1,17 @@
 ---
 description: Code readability and maintainability specialist. Invoke for reviewing naming conventions, code structure, formatting, and documentation quality.
 mode: subagent
-model: {{model:deep_review}}
-reasoningEffort: medium
-permission:
-  edit: deny
-  bash: deny
-  question: deny
+model: {{model:deep_review}}#medium
+permissions:
+  - action: edit
+    resource: "*"
+    effect: deny
+  - action: shell
+    resource: "*"
+    effect: deny
+  - action: question
+    resource: "*"
+    effect: deny
 ---
 
 {{prompt:code-readability}}

@@ -31,7 +31,7 @@ OPENCODE_PROVIDERS = ("openai", "github-copilot", "opencode")
 TOKEN_RE = re.compile(r"\{\{(prompt|model):([a-z0-9_-]+)\}\}")
 INCLUDE_RE = re.compile(r"\{\{include:([A-Za-z0-9_.-]+)\}\}")
 LAYOUT = {
-    "opencode": {"base": "AGENTS.md", "skills": "skill"},
+    "opencode": {"base": "AGENTS.md", "skills": "skills"},
     "claude": {"base": "CLAUDE.md", "skills": "skills"},
     "codex": {"base": "AGENTS.md", "skills": ".agents/skills"},
 }
