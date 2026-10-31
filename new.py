@@ -44,7 +44,7 @@ def create_skill(name: str, description: str) -> None:
     path = build.SKILLS / name
     path.mkdir()  # Exclusive: never replace an existing folder or symlink.
     (path / "SKILL.md").write_text(
-        f"---\nname: {name}\ndescription: {json.dumps(description, ensure_ascii=False)}\n---\n\n"
+        f"---\nname: {name}\ndescription: {build.yaml_string(description)}\n---\n\n"
         f"# {name.replace('-', ' ').title()}\n\n"
         "TODO: Describe when to use this skill, its steps, and the expected result.\n"
     )

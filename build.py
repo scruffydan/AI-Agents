@@ -125,6 +125,12 @@ def load_agents() -> dict[str, dict]:
     return agents
 
 
+def yaml_string(value: str) -> str:
+    """Quote Unicode without JSON surrogate pairs or YAML line normalization."""
+    quoted = json.dumps(value, ensure_ascii=False)
+    return re.sub(r"[\x7f-\x9f\u2028\u2029]", lambda m: f"\\u{ord(m[0]):04x}", quoted)
+
+
 def agent_value(value: str, key: str, toml: bool) -> str:
     """Escape for the documented template position, preserving simple output."""
     if toml:
@@ -143,7 +149,7 @@ def agent_value(value: str, key: str, toml: bool) -> str:
             and value == value.strip()
             and value.lower() not in {"null", "true", "false", "yes", "no", "on", "off"}):
         return value
-    return json.dumps(value)
+    return yaml_string(value)
 
 
 @lru_cache
@@ -212,10 +218,14 @@ def build(
     prompt_body.cache_clear()
     agents = load_agents()
     for harness_dir in (TEMPLATES / "overrides").glob("*"):
+        if harness_dir.name == ".DS_Store":
+            continue
         if not harness_dir.is_dir() or harness_dir.name not in HARNESSES:
             raise ValueError(f"Unknown override harness: {harness_dir}")
         suffix = Path(AGENT_PATHS[harness_dir.name][0]).suffix
         for path in harness_dir.iterdir():
+            if path.name == ".DS_Store":
+                continue
             if not path.is_file() or path.suffix != suffix or path.stem not in agents:
                 raise ValueError(f"Override has no matching agent: {path}")
             if harness_dir.name not in agents[path.stem]["harnesses"]:
@@ -223,19 +233,37 @@ def build(
 
     # Render and check collisions before replacing an existing successful build.
     outputs = {}
+    output_files = set()
+    output_directories = set()
+
+    def reserve_file(destination: Path) -> None:
+        if (destination in output_files or destination in output_directories
+                or any(parent in output_files for parent in destination.parents)):
+            raise ValueError(f"Duplicate output: {destination}")
+        output_files.add(destination)
+        output_directories.update(destination.parents)
+
     for harness in harnesses:
-        shared_skills = {
-            Path(harness) / LAYOUT[harness]["skills"] / p.relative_to(SKILLS)
-            for p in SKILLS.rglob("*") if p.is_file()
-        }
+        layout = LAYOUT[harness]
+        reserve_file(Path(harness) / layout["base"])
+        shared_root = Path(harness) / layout["skills"]
+        output_directories.add(shared_root)
+        output_directories.update(shared_root.parents)
+        for path in SKILLS.rglob("*"):
+            destination = shared_root / path.relative_to(SKILLS)
+            if path.is_dir():
+                output_directories.add(destination)
+                output_directories.update(destination.parents)
+            elif path.is_file():
+                reserve_file(destination)
 
         def add(relative: Path, rendered: str) -> None:
             destination = Path(harness) / relative
-            if destination in outputs or destination in shared_skills or relative == Path(LAYOUT[harness]["base"]):
-                raise ValueError(f"Duplicate output: {destination}")
+            reserve_file(destination)
             outputs[destination] = rendered
 
-        for template in sorted(p for p in (TEMPLATES / harness).rglob("*") if p.is_file()):
+        for template in sorted(p for p in (TEMPLATES / harness).rglob("*")
+                               if p.is_file() and p.name != ".DS_Store"):
             add(template.relative_to(TEMPLATES / harness), render_template(template, harness, work, opencode_provider))
         default_name, output_pattern = AGENT_PATHS[harness]
         for name, agent in agents.items():
