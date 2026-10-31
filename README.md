@@ -202,10 +202,47 @@ on the work machine; the repository's build does not verify live provider access
 There is no harness registry, schema version, manifest, plugin API, or generated
 domain model. The checked-in templates are the configuration contract.
 
+## Add a shared skill
+
+Create `source/skills/<name>/SKILL.md`, using a lowercase, hyphen-separated name
+such as `review-migrations`. Start with YAML frontmatter describing the skill's
+name and when to use it, followed by the instructions:
+
+```markdown
+---
+name: review-migrations
+description: Use when reviewing database migrations for correctness and deployment risks.
+---
+
+# Review database migrations
+
+1. Read the migration and related schema.
+2. Check for data loss, locking, and compatibility issues.
+3. Check the rollback approach.
+4. Report concrete findings with file references and suggested fixes.
+```
+
+The build copies the entire skill folder into all three harnesses; no separate
+template is needed. Keep instructions portable: describe actions such as
+"search the repository" instead of naming a harness-specific tool. Keep model
+selection and agent configuration in the harness-specific templates. Supporting
+scripts, references, and assets can live inside the skill folder; reference them
+from `SKILL.md` using relative paths.
+
+Shared skills are copied verbatim. Tokens such as `{{prompt:...}}`,
+`{{model:...}}`, and `{{include:...}}` are not expanded there. Choose a skill name
+that does not overlap a skill under `templates/`, because templates are rendered
+after shared skills and can overwrite matching files.
+
+Run `./build.py` to generate all three configurations, or `./install.sh` to build
+and install them. Then try a representative request in each harness to confirm
+that it discovers the skill and follows the intended steps. The build does not
+validate skill metadata or behavior.
+
 ## Adoption checklist
 
-See [TODO.md](TODO.md) for the remaining rollout checks. Before merging this
-branch, install each harness independently and confirm that it discovers the
+See [TODO.md](TODO.md) for the remaining rollout checks. Before adopting these
+configs, install each harness independently and confirm that it discovers the
 rendered agents, commands, and skills. Also verify the work profile and the
 OpenCode provider override against the providers used in the real environment.
 
