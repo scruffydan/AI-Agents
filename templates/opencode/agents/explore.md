@@ -1,7 +1,7 @@
 ---
 description: Explore and answer questions about the codebase. Use this agent to find files, search code, understand implementations, and trace dependencies without consuming main conversation context.
 mode: subagent
-model: {{model:mini_reasoning}}#high
+model: {{model:mini_reasoning}}
 permissions:
   - action: edit
     resource: "*"

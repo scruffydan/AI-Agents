@@ -1,7 +1,7 @@
 ---
 description: Answer general questions unrelated to the current coding session. Use this agent to handle tangential questions without consuming main conversation context.
 mode: subagent
-model: {{model:sidebar}}#medium
+model: {{model:sidebar}}
 permissions:
   - action: edit
     resource: "*"

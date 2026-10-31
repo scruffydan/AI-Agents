@@ -1,7 +1,7 @@
 ---
 description: Simplifies and refines code for clarity, consistency, and maintainability while preserving all functionality. Focuses on recently modified code unless instructed otherwise.
 mode: subagent
-model: {{model:deep_review}}#medium
+model: {{model:deep_review}}
 permissions:
   - action: edit
     resource: "*"
