@@ -1,6 +1,6 @@
 # AI harness configs
 
-Personal prompt and skill configuration for OpenCode, Claude Code, and Codex.
+Personal prompt and skill configuration for Codex, Claude Code, and OpenCode.
 
 Create each subagent or skill once. Subagents use a shared definition and one
 default native template per harness, with optional overrides. Skills are shared
@@ -29,8 +29,9 @@ Build all harnesses:
 Build selected harnesses:
 
 ```bash
+./build.py codex
+./build.py codex claude
 ./build.py opencode
-./build.py claude codex
 ```
 
 Use work model mappings:
@@ -58,18 +59,21 @@ selected with a model variant such as `openai/gpt-6.1-sol#high`.
 
 ## Install
 
-Build and install all configs:
+Build and install Codex configs (the default):
 
 ```bash
 ./install.sh
 ```
 
-Install selected harnesses:
+Install selected harnesses, or all three in the preferred order:
 
 ```bash
-./install.sh opencode
-./install.sh claude codex
+./install.sh codex claude
+./install.sh codex claude opencode
 ```
+
+The option order is Codex, Claude Code, then OpenCode. Only explicitly selected
+harnesses are installed; with no harness arguments, only Codex is installed.
 
 Agents, commands, and skills are installed one entry at a time, so anything
 else in those directories is left alone. Unchanged files are skipped. Changed
@@ -85,7 +89,7 @@ loading stale definitions alongside the new files.
 Use `--force` to replace changed files without prompting:
 
 ```bash
-./install.sh opencode --work --force
+./install.sh --work --force
 ```
 
 Set `PYTHON` if `python3` is not Python 3.11 or newer:
@@ -122,7 +126,7 @@ contains a description, a model profile from `source/models.toml`, and targets:
 +++
 description = "Review database queries and identify performance problems."
 model_profile = "deep_review"
-harnesses = ["claude", "opencode", "codex"]
+harnesses = ["codex", "claude", "opencode"]
 +++
 
 Review query plans, indexes, and transaction boundaries.
@@ -133,7 +137,7 @@ Explain each finding and suggest a concrete improvement.
 three. To create an agent for selected harnesses, repeat `--harness`:
 
 ```bash
-./new.py agent database-review --harness claude --harness codex \
+./new.py agent database-review --harness codex --harness claude \
   --description "Review database queries and identify performance problems."
 ```
 
@@ -171,12 +175,12 @@ All three harnesses receive every shared skill under `source/skills/`, plus
 brainstorming, thorough planning, and full code review skills. The shared skills
 are copied without changing their instructions.
 
+- Codex: use `$mode-brainstorm`, `$mode-thorough-plan`, or
+  `$command-code-full-review`.
+- Claude Code: use `/mode-brainstorm`, `/mode-thorough-plan`, or `/code-full-review`.
 - OpenCode: load `@mode-brainstorm`, `@mode-thorough-plan`, or
   `@command-code-full-review`. The `brainstorm` and `thorough-plan` primary agents
   and `/code-full-review` command remain available.
-- Claude Code: use `/mode-brainstorm`, `/mode-thorough-plan`, or `/code-full-review`.
-- Codex: use `$mode-brainstorm`, `$mode-thorough-plan`, or
-  `$command-code-full-review`.
 
 Claude's brainstorming skill selects its configured model for the current turn.
 Codex's brainstorming skill uses the `brainstorm` custom agent to select its
@@ -189,9 +193,9 @@ changing agents, so select the brainstorm model in `/models` as well as the
 Default templates live in:
 
 ```text
+templates/defaults/codex/agent.toml
 templates/defaults/claude/agent.md
 templates/defaults/opencode/agent.md
-templates/defaults/codex/agent.toml
 ```
 
 Changing a default affects every agent using it for that harness. For an exception,
@@ -241,8 +245,8 @@ Edit `source/models.toml` to change the models behind each profile. An agent sel
 its profile with `model_profile` in `source/agents/<name>.md`; explicit templates
 use `{{model:profile}}`.
 
-Each profile provides model IDs for its target harnesses using `opencode`, `claude`,
-and `codex` keys. Optional `opencode_work`, `claude_work`, and `codex_work` values
+Each profile provides model IDs for its target harnesses using `codex`, `claude`,
+and `opencode` keys. Optional `codex_work`, `claude_work`, and `opencode_work` values
 apply with `--work`, falling back to the normal value when omitted.
 
 OpenCode model IDs include their reasoning variant. Claude and Codex reasoning
