@@ -1,6 +1,6 @@
 ---
 name: git-push
-description: You MUST use this when performing a git push. Pre-push checklist for README updates, tests/linters, commit hygiene, secret scanning, and branch/remote status. Use when preparing to run git push, reviewing a branch before publishing, or verifying release readiness.
+description: You MUST use this when performing a git push. Pre-push checklist for README and AGENTS.md updates, tests/linters, commit hygiene, secret scanning, and branch/remote status. Use when preparing to run git push, reviewing a branch before publishing, or verifying release readiness.
 ---
 
 # Git Push Checklist
@@ -9,8 +9,8 @@ Systematic checks to perform before pushing code to remote repositories.
 
 ## Pre-Push Verification
 
-### 1. README Update Check
-**CRITICAL: Verify README is current with changes**
+### 1. README and AGENTS.md Update Check
+**CRITICAL: Verify README and existing AGENTS.md files are current with changes**
 
 Before pushing, check if README needs updates:
 
@@ -23,6 +23,12 @@ ls -la README.md 2>/dev/null
 - New features, commands, or configuration changes
 - Installation, dependencies, or requirements change
 - Breaking changes or API changes
+
+Whenever checking the README, also review the repository's existing `AGENTS.md`
+and any `AGENTS.md` files that apply to the changed directories. Verify that setup
+steps, build/test commands, project structure, and agent instructions still match
+the project. Correct stale guidance before pushing; no new `AGENTS.md` is required
+if none exists.
 
 ### 2. Commit Quality
 
@@ -122,6 +128,7 @@ After pushing:
 
 Before `git push`:
 - [ ] README updated (if repo has one and changes warrant it)
+- [ ] Existing applicable AGENTS.md files reviewed and updated if stale
 - [ ] Tests passing
 - [ ] Linting clean
 - [ ] Build successful

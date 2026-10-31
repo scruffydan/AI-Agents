@@ -1,6 +1,6 @@
 ---
 name: update-readme
-description: Use when making code changes that affect user-facing behavior, before committing or pushing - reminds AI to check if README needs updates to stay in sync with implementation changes
+description: Use when making code changes that affect user-facing behavior, before committing or pushing - reminds AI to check if README and existing AGENTS.md files need updates to stay in sync with implementation changes
 ---
 
 # Update README Reminder
@@ -8,6 +8,13 @@ description: Use when making code changes that affect user-facing behavior, befo
 ## Overview
 
 Documentation drift is inevitable - code changes, README doesn't. This skill ensures the README stays current.
+
+Whenever checking the README, also review the repository's existing `AGENTS.md`
+and any `AGENTS.md` files that apply to the changed directories, even if the README
+needs no edits or is absent. Verify that setup steps, build/test commands, project
+structure, and agent instructions still match the project. Correct stale guidance
+before completion, committing, or pushing. No new `AGENTS.md` is required if none
+exists.
 
 **Core principle:** If users need to know about the change, the README probably needs updating.
 
