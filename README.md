@@ -40,10 +40,10 @@ Use work model mappings:
 ./build.py --work
 ```
 
-Override OpenCode's provider prefix:
+Override OpenCode's provider prefix with `openai` or `opencode`:
 
 ```bash
-./build.py opencode --opencode-provider github-copilot
+./build.py opencode --opencode-provider opencode
 ```
 
 Generated files are written to a fresh `build/` directory after rendering succeeds.
