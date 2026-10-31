@@ -61,6 +61,32 @@ class InstallTests(unittest.TestCase):
         self.assertEqual(result.stdout.count("Backed up:"), 1)
         self.assertEqual(result.stdout.count("Installed:"), 1)
 
+    def test_all_harnesses_install_shared_skills_and_prompt_modes(self):
+        for args in ((), ("--work",)):
+            with self.subTest(args=args):
+                self.install(*args)
+                for directory in (".config/opencode/skills", ".claude/skills", ".agents/skills"):
+                    for skill in (self.root / "source/skills").glob("*/SKILL.md"):
+                        self.assertTrue((self.home / directory / skill.parent.name / "SKILL.md").is_file())
+                    for mode in ("mode-brainstorm", "mode-thorough-plan"):
+                        self.assertTrue((self.home / directory / mode / "SKILL.md").is_file())
+                opencode = self.home / ".config/opencode"
+                self.assertTrue((opencode / "agents/brainstorm.md").is_file())
+                self.assertTrue((opencode / "commands/code-full-review.md").is_file())
+                for legacy in ("agent", "command", "skill"):
+                    self.assertFalse((opencode / legacy).exists())
+                self.assertTrue((self.home / ".codex/agents/brainstorm.toml").is_file())
+
+    def test_opencode_v2_install_preserves_unrelated_entries(self):
+        opencode = self.home / ".config/opencode"
+        for entry in ("agents/mine.md", "commands/mine.md", "skills/mine/SKILL.md", "agent/legacy.md"):
+            path = opencode / entry
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text("keep me")
+        self.install("opencode")
+        for entry in ("agents/mine.md", "commands/mine.md", "skills/mine/SKILL.md", "agent/legacy.md"):
+            self.assertEqual((opencode / entry).read_text(), "keep me")
+
     def init_opencode(self, *args):
         shutil.copy2(REPO / "opencode-init.sh", self.root / "opencode-init.sh")
         return subprocess.run(

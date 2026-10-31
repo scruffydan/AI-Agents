@@ -1,6 +1,12 @@
 ---
 name: mode-brainstorm
-description: Creative brainstorming mode with high temperature for generating diverse ideas and exploring unconventional solutions.
+description: Generate diverse ideas and explore unconventional approaches before choosing a solution.
 ---
 
-{{prompt:brainstorm}}
+Use the `brainstorm` custom agent to explore the user's request with the configured
+brainstorming model. Pass the request and relevant conversation context,
+constraints, and decisions to the agent so it can work independently. Return its
+ideas to the user and incorporate any follow-up feedback.
+
+The agent owns the brainstorming instructions and model selection. Do not edit
+files as part of this mode.

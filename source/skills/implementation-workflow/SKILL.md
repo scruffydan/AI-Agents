@@ -1,6 +1,6 @@
 ---
 name: implementation-workflow
-description: Six-phase implementation method for complex work: requirements, architecture, strategy, QA, security, optimization. Use for multi-step features, refactors, or high-risk changes that need structured planning and verification.
+description: "Six-phase implementation method for complex work: requirements, architecture, strategy, QA, security, optimization. Use for multi-step features, refactors, or high-risk changes that need structured planning and verification."
 ---
 
 # Implementation Workflow
