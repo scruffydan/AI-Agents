@@ -56,9 +56,9 @@ class BuildTests(unittest.TestCase):
     def test_brainstorm_follows_work_and_provider_options(self):
         brainstorm = self.root / "build/opencode/agent/brainstorm.md"
         for args, model in (
-            ((), "openai/gpt-5.5"),
-            (("--work",), "google-vertex/gemini-3.1-pro-preview"),
-            (("--opencode-provider", "github-copilot"), "github-copilot/gpt-5.5"),
+            ((), "openai/gpt-6-astra"),
+            (("--work",), "google-vertex-anthropic/claude-opus-5-5"),
+            (("--opencode-provider", "github-copilot"), "github-copilot/gpt-6-astra"),
         ):
             with self.subTest(args=args):
                 self.build("opencode", *args)
