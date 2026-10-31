@@ -54,15 +54,89 @@ class BuildTests(unittest.TestCase):
         self.assertIn("invalid harness: cursor", result.stderr)
 
     def test_brainstorm_follows_work_and_provider_options(self):
-        brainstorm = self.root / "build/opencode/agent/brainstorm.md"
+        brainstorm = self.root / "build/opencode/agents/brainstorm.md"
         for args, model in (
-            ((), "openai/gpt-5.5"),
-            (("--work",), "google-vertex/gemini-3.1-pro-preview"),
-            (("--opencode-provider", "github-copilot"), "github-copilot/gpt-5.5"),
+            ((), "openai/gpt-6-astra"),
+            (("--work",), "google-vertex/claude-opus-5-5"),
+            (("--opencode-provider", "github-copilot"), "github-copilot/gpt-6-astra"),
         ):
             with self.subTest(args=args):
                 self.build("opencode", *args)
-                self.assertIn(f"model: {model}\n", brainstorm.read_text())
+                self.assertIn(f"model: {model}#medium\n", brainstorm.read_text())
+
+    def test_shared_skills_and_prompt_modes_exist_for_every_harness(self):
+        self.build()
+        layouts = {
+            "opencode": "skills",
+            "claude": "skills",
+            "codex": ".agents/skills",
+        }
+        for harness, directory in layouts.items():
+            output = self.root / "build" / harness / directory
+            for source in (self.root / "source/skills").glob("*/SKILL.md"):
+                with self.subTest(harness=harness, skill=source.parent.name):
+                    self.assertEqual(
+                        (output / source.relative_to(self.root / "source/skills")).read_bytes(),
+                        source.read_bytes(),
+                    )
+                    for resource in source.parent.glob("*.md"):
+                        self.assertEqual(
+                            (output / source.parent.name / resource.name).read_bytes(),
+                            resource.read_bytes(),
+                        )
+            review = "code-full-review" if harness == "claude" else "command-code-full-review"
+            for name in ("mode-brainstorm", "mode-thorough-plan", review):
+                with self.subTest(harness=harness, skill=name):
+                    content = (output / name / "SKILL.md").read_text()
+                    self.assertIn(f"name: {name}\n", content)
+                    self.assertNotIn("{{prompt:", content)
+
+    def test_brainstorm_models_are_used_by_claude_and_codex(self):
+        for args in ((), ("--work",)):
+            with self.subTest(args=args):
+                self.build(*args)
+                claude = self.root / "build/claude/skills/mode-brainstorm/SKILL.md"
+                self.assertIn("model: claude-opus-5-5\n", claude.read_text())
+                agent = self.root / "build/codex/.codex/agents/brainstorm.toml"
+                parsed = tomllib.loads(agent.read_text())
+                self.assertEqual(parsed["model"], "gpt-6-astra")
+                self.assertFalse(parsed["features"]["shell_tool"])
+                skill = self.root / "build/codex/.agents/skills/mode-brainstorm/SKILL.md"
+                self.assertIn("`brainstorm` custom agent", skill.read_text())
+
+    def test_referenced_shared_skill_support_files_exist(self):
+        references = {
+            "subagent-driven-development": (
+                "implementer-prompt.md", "spec-reviewer-prompt.md", "code-quality-reviewer-prompt.md",
+            ),
+            "systematic-debugging": (
+                "root-cause-tracing.md", "defense-in-depth.md", "condition-based-waiting.md",
+            ),
+        }
+        for skill, filenames in references.items():
+            for filename in filenames:
+                with self.subTest(skill=skill, resource=filename):
+                    path = self.root / "source/skills" / skill / filename
+                    self.assertTrue(path.is_file())
+                    self.assertTrue(path.read_text().strip())
+
+    def test_opencode_v2_build_has_native_directories_and_no_legacy_agent_fields(self):
+        self.build("opencode", "--work")
+        output = self.root / "build/opencode"
+        for name in ("agents", "commands", "skills"):
+            self.assertTrue((output / name).is_dir())
+        for name in ("agent", "command", "skill"):
+            self.assertFalse((output / name).exists())
+        for agent in (output / "agents").glob("*.md"):
+            with self.subTest(agent=agent.name):
+                header = agent.read_text().split("---", 2)[1]
+                self.assertNotIn("\npermission:", header)
+                self.assertNotIn("\nreasoningEffort:", header)
+                self.assertNotIn("\ntemperature:", header)
+                self.assertNotIn("google-vertex-anthropic/", header)
+        reviewer = (output / "agents/code-security.md").read_text()
+        self.assertIn("model: google-vertex/claude-opus-5-5#medium\n", reviewer)
+        self.assertIn("action: shell\n    resource: \"*\"\n    effect: deny", reviewer)
 
 
 if __name__ == "__main__":

@@ -12,6 +12,7 @@ small script expands two token types:
 ## Requirements
 
 - Python 3.11 or newer
+- OpenCode V2 for the OpenCode configuration
 - Bash for the optional installer
 
 There are no third-party Python dependencies.
@@ -46,6 +47,29 @@ Override OpenCode's provider prefix:
 Generated files are written to `build/`. Every build starts from a clean output
 directory and fails if a prompt, include, model, or TOML template is invalid.
 
+OpenCode output uses V2's `agents/`, `commands/`, and `skills/` directories.
+Agent permissions use ordered `permissions` rules, and reasoning effort is
+selected with a model variant such as `openai/gpt-6.1-sol#medium`.
+
+## Skills and modes
+
+All three harnesses receive every shared skill under `source/skills/`, plus
+brainstorming, thorough planning, and full code review skills. The shared skills
+are copied without changing their instructions.
+
+- OpenCode: load `@mode-brainstorm`, `@mode-thorough-plan`, or
+  `@command-code-full-review`. The `brainstorm` and `thorough-plan` primary agents
+  and `/code-full-review` command remain available.
+- Claude Code: use `/mode-brainstorm`, `/mode-thorough-plan`, or `/code-full-review`.
+- Codex: use `$mode-brainstorm`, `$mode-thorough-plan`, or
+  `$command-code-full-review`.
+
+Claude's brainstorming skill selects its configured model for the current turn.
+Codex's brainstorming skill uses the `brainstorm` custom agent to select its
+configured model. OpenCode retains an existing session's selected model when
+changing agents, so select the brainstorm model in `/models` as well as the
+`brainstorm` agent.
+
 ## Install
 
 Build and install all configs:
@@ -66,6 +90,11 @@ else in those directories is left alone. Unchanged files are skipped. Changed
 files require confirmation, and the replaced version is moved to
 `~/.ai-agents-backups/<timestamp>/` instead of being deleted. Removing a prompt
 from this repository does not remove its installed copy; delete that by hand.
+
+OpenCode entries install into `~/.config/opencode/agents`, `commands`, and
+`skills`. Existing V1 `agent`, `command`, and `skill` directories are left in
+place; review and remove obsolete entries after verifying V2 discovery to avoid
+loading stale definitions alongside the new files.
 
 Use `--force` to replace changed files without prompting:
 
@@ -104,6 +133,10 @@ what the harness receives.
 templates. Each profile can provide `opencode`, `claude`, and `codex` values,
 plus optional `*_work` overrides. Work values fall back to the normal harness
 value when omitted.
+
+OpenCode V2 uses the `google-vertex` provider for both Gemini and Claude work
+models. Configure Google Cloud project, location, credentials, and model access
+on the work machine; the repository's build does not verify live provider access.
 
 ## Add a prompt
 
