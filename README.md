@@ -182,9 +182,11 @@ finish those before installing. `--description` is optional for either command.
 
 ## Skills and modes
 
-All three harnesses receive every shared skill under `source/skills/`, plus
-native templates for `brainstorm-with-agent` and `mode-thorough-plan`. The shared
-skills are copied without changing their instructions.
+All three harnesses receive every shared skill under `source/skills/`, including
+`mode-thorough-plan`, plus native templates for `brainstorm-with-agent`. The
+shared skills are copied without changing their instructions. OpenCode's
+`thorough-plan` primary agent loads the shared planning skill while retaining
+its edit and shell restrictions.
 
 - Codex: use `$brainstorm-with-agent`, `$mode-thorough-plan`, or `$code-review`.
 - Claude Code: use `/brainstorm-with-agent`, `/mode-thorough-plan`, or `/code-review`.
