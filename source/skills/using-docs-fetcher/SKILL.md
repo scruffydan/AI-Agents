@@ -1,25 +1,34 @@
 ---
 name: using-docs-fetcher
-description: How to use @docs-fetcher to pull current, targeted external documentation (APIs, SDKs, configs, errors, version changes). Use when you need authoritative docs or examples instead of relying on memory.
+description: Delegate external documentation research to the docs-fetcher subagent. Use when API, framework, configuration, or version-specific facts need checking while keeping documentation pages out of the main conversation.
 ---
 
-# Using the Documentation Fetcher
+# Request Targeted Documentation
 
-When you need to look up external documentation (APIs, libraries, frameworks, configuration options, or any technical reference), use the `@docs-fetcher` agent to fetch and extract only the relevant portions. This keeps the main context clean and avoids flooding it with entire documentation pages.
+Use the environment's delegation tools to launch the `docs-fetcher` subagent for
+external documentation lookups. Keep searching, fetching, and extracting pages
+in that child's context. The parent should receive focused findings, not full
+documentation pages.
 
-## When to Use @docs-fetcher
+Give the child the concrete question, installed or targeted version, known
+official URLs, and relevant constraints. Request a compact answer with the needed
+details or examples, source links, version caveats, and unresolved uncertainty.
+The child performs the lookup itself without delegating further.
 
-Use the docs-fetcher agent when you need to:
+For example: "Check the targeted PostgreSQL version's JSONB containment operators
+and the indexes supported for this query. Return official sources and a small
+applicable example."
 
-- **Look up API methods, endpoints, or parameters** - Understanding how to call specific APIs or what parameters are available
-- **Check configuration options for libraries/frameworks** - Finding available config settings and their expected values
-- **Find code examples for specific use cases** - Locating official examples that demonstrate best practices
-- **Research version-specific features or breaking changes** - Understanding what changed between versions
-- **Troubleshoot errors with official documentation** - Finding solutions to error messages or unexpected behavior
+Use the returned findings to continue the task. Send follow-up documentation
+questions to the child rather than fetching the pages again in the parent.
 
-## How to Use @docs-fetcher
+Honor the user's delegation restrictions. If the agent or needed web capability
+is unavailable, explain the limitation and continue independent authorized work.
+Do not search or fetch documentation in the main conversation as a fallback.
+Local code, types, and repository documentation can still be inspected directly;
+this isolation rule applies to external documentation lookups.
 
-### Basic Pattern
+## Example Requests
 
 ```
 @docs-fetcher: Fetch the Stripe Payment Intents API documentation,
@@ -31,28 +40,6 @@ specifically how to create a payment intent with metadata.
 ```
 @docs-fetcher: Get the Next.js 13 App Router documentation about
 server components and data fetching patterns.
-```
-
-## Benefits of Using @docs-fetcher
-
-- **Reduces context bloat** - Only relevant portions are retrieved
-- **Ensures current information** - Fetches latest docs, not training data
-- **Targeted extraction** - Focuses on specific topics you need
-- **Better accuracy** - Uses official sources rather than memory
-
-## Best Practices
-
-1. **Be specific** - Tell docs-fetcher exactly what information you need
-2. **Mention the library/framework version** - If version-specific behavior matters
-3. **Request examples** - Official examples often show best practices
-4. **Use for unfamiliar APIs** - When you're not certain about current syntax
-5. **Verify breaking changes** - Check docs when upgrading dependencies
-
-## Example
-
-```
-@docs-fetcher: Fetch the PostgreSQL documentation for the JSONB
-data type, specifically the containment operators and indexing strategies.
 ```
 
 ## When NOT to Use @docs-fetcher

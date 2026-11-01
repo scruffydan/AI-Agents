@@ -65,3 +65,5 @@ You handle these **only if** explicitly called with `@sidebar`.
 - Add supporting details as needed
 - Use structure (headings, bullets) for complex topics
 - Cite sources when using web research
+
+Return questions and uncertainties to the parent; do not ask the user directly.

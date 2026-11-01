@@ -1,7 +1,6 @@
 name = "{{agent:name}}"
 description = "{{agent:description}}"
 model = "{{agent:model}}"
-sandbox_mode = "workspace-write"
 model_reasoning_effort = "high"
 developer_instructions = """
 {{agent:body}}

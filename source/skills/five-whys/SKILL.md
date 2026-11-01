@@ -207,7 +207,6 @@ Solutions:
 - Simplified 3-step onboarding
 - In-app progress indicators
 
-Result: 60% decrease in churn, 35% increase in trial conversion
 ```
 
 ### Software Bug Example

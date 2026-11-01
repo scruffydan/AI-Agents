@@ -85,12 +85,8 @@ Agents, commands, and skills are installed one entry at a time, so anything
 else in those directories is left alone. Unchanged files are skipped. Changed
 files require confirmation, and the replaced version is moved to
 `~/.ai-agents-backups/<timestamp>/` instead of being deleted. Removing a prompt
-from this repository normally does not remove its installed copy.
-
-OpenCode's retired `commands/code-full-review.md` shortcut is removed directly,
-without confirmation or backup, once the shared `code-review` skill is installed.
-Skipping the replacement skill preserves that command. Other retired prompts
-still need manual removal; unrelated skills and commands are left alone.
+from this repository does not remove its installed copy; clean up obsolete
+entries explicitly. The installer has no special cases for retired prompts.
 
 OpenCode entries install into `~/.config/opencode/agents`, `commands`, and
 `skills`. Existing V1 `agent`, `command`, and `skill` directories are left in
@@ -182,9 +178,11 @@ finish those before installing. `--description` is optional for either command.
 
 ## Skills and modes
 
-All three harnesses receive every shared skill under `source/skills/`, plus
-native templates for `brainstorm-with-agent` and `mode-thorough-plan`. The shared
-skills are copied without changing their instructions.
+All three harnesses receive every shared skill under `source/skills/`, including
+`mode-thorough-plan`, plus native templates for `brainstorm-with-agent`. The
+shared skills are copied without changing their instructions. OpenCode's
+`thorough-plan` primary agent loads the shared planning skill while retaining
+its edit and shell restrictions.
 
 - Codex: use `$brainstorm-with-agent`, `$mode-thorough-plan`, or `$code-review`.
 - Claude Code: use `/brainstorm-with-agent`, `/mode-thorough-plan`, or `/code-review`.
@@ -203,10 +201,24 @@ small changes do not need that workflow. `brainstorm-with-agent` uses the
 configured brainstorming model; `mode-thorough-plan` produces a plan without
 editing files and asks only questions that materially affect the outcome.
 
+External documentation research uses the `docs-fetcher` subagent through
+`using-docs-fetcher`. Searches and page contents stay in the child's context;
+the main conversation receives focused findings, examples, and source links.
+If delegation is unavailable, the skill reports the limitation instead of
+fetching pages in the main conversation.
+
 `update-readme` owns README and existing AGENTS.md checks, while
 `verification-before-completion` owns verification evidence. Git skills reference
 these checks and reuse valid results when relevant inputs are unchanged. Commit
 messages follow the repository's conventions, including free-form subjects.
+
+Shared workflows scale planning, testing, and review to the task's stakes. They
+reuse established decisions and authorization rather than adding fixed approval
+or review loops. Specialist reviewers share one report format while retaining
+their domain checklists, language-specific guidance, and examples. Debugging
+retains its detailed testing and investigation techniques. The
+commit helper returns its proposal to the main agent, which handles user
+interaction and the actual commit.
 
 Claude's brainstorming skill selects its configured model for the current turn.
 Codex's brainstorming skill uses the `brainstorm` custom agent to select its
@@ -243,9 +255,12 @@ double-quoted strings and keep the body token inside a multiline double-quoted
 string, as shown in the default template. The renderer escapes inserted values
 for those positions.
 
-Permissions, tool lists, and reasoning settings stay in native templates. The
-defaults preserve the existing settings; they do not promise equivalent permission
-behavior across harnesses. An override for a missing agent or a disabled target
+Tool lists and reasoning settings stay in native templates. Claude's review
+agents use file reading and search tools; its documentation and sidebar agents
+can search the web and fetch pages. OpenCode permissions also live in templates.
+Codex custom agents inherit the parent session's sandbox and approval policy;
+their agent files do not establish a separate permission boundary. Report-only
+instructions still apply. An override for a missing agent or a disabled target
 is an error: remove or rename it when changing the agent's name or targets.
 
 ## Edit shared instructions

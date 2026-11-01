@@ -5,7 +5,9 @@ description: Git commit workflow that analyzes recent history to match repo-spec
 
 # Git Commit Skill
 
-This skill ensures commit messages follow the repository's established conventions by analyzing recent commit history.
+Inspect the working tree and preserve unrelated edits and untracked files. Follow
+the user's and repository's authorization for commits. Use the history below
+only when the relevant conventions are not already established in this session.
 
 ## Pre-Commit Workflow
 
@@ -94,53 +96,16 @@ git commit -m "feat: add payment processing" -m "
 Explain why, impact, and any references."
 ```
 
-## Verification Before Commit
+## Verification and Commit
 
-### Check Staged Changes
-```sh
-git status
-git diff --cached
-```
+Before committing:
 
-**Ensure:**
-- Only intended files are staged
-- No debug code or console.logs
-- No sensitive data (secrets, keys, tokens)
-- Changes are cohesive and atomic
+- Use `verification-before-completion` for relevant checks and `update-readme`
+  for README and existing AGENTS.md accuracy. Reuse valid session evidence.
+- Inspect the diff for unintended edits, debugging leftovers, and sensitive data.
+- Stage only the intended paths and inspect `git diff --cached` before committing.
+- Keep each commit focused and report its hash and verification results.
 
-### Review Commit Preview
-```sh
-# See what will be committed
-git diff --cached --stat
-
-# Verify commit message locally
-git commit --dry-run
-```
-
-## Special Cases
-
-- Amend only if not pushed and fixing a typo/forgotten file.
-- Add co-authors in commit body when needed.
-- Use empty commits only if explicitly required.
-
-## Integration with Other Skills
-
-**Before committing:**
-- Use `verification-before-completion` for relevant checks and their evidence.
-- Use `update-readme` for README and existing AGENTS.md accuracy.
-- Review the staged diff for unintended changes and sensitive data.
-
-**After committing:**
-- Use `git-push` only when pushing is authorized; committing does not authorize it.
-
-## Checklist
-
-Before running `git commit`:
-- [ ] Analyzed last 10 commits for conventions (if not already known)
-- [ ] Identified repository's commit message pattern (if not already known)
-- [ ] Matched format, style, and conventions
-- [ ] Wrote clear, specific message explaining WHY
-- [ ] Verified staged changes are correct
-- [ ] No secrets or sensitive data in commit
-- [ ] Message length matches repository style
-- [ ] Used imperative/past tense matching repo style
+Do not add an approval step when the commit is already authorized. Amend or
+rewrite history only within authorization. Pushing requires separate permission;
+use `git-push` when a push is requested.
