@@ -26,12 +26,30 @@ class T3ServiceEnvTests(unittest.TestCase):
             "cat >/dev/null\nprintf 'username=fixture\\npassword=fixture\\n'\n"
         )
         gh.chmod(0o700)
+        launchctl = self.bin / "launchctl"
+        launchctl.write_text(
+            '#!/bin/sh\ncase "$1" in\n'
+            'managername) printf "%s\\n" "${TEST_MANAGER_NAME:-Aqua}" ;;\n'
+            'manageruid) printf "%s\\n" "${TEST_MANAGER_UID:-$(id -u)}" ;;\n'
+            'getenv) [ "$2" = GIT_CONFIG_COUNT ] || exit 9\n'
+            '  [ "${TEST_LAUNCHCTL_FAIL:-0}" = 0 ] || exit 8\n'
+            '  printf "%s" "${TEST_LAUNCHD_COUNT:-}" ;;\n'
+            '*) exit 9 ;;\nesac\n'
+        )
+        launchctl.chmod(0o700)
         self.env = {
             "HOME": str(self.home), "PATH": f"{self.bin}:{os.defpath}",
             "GIT_CONFIG_NOSYSTEM": "1", "GIT_CONFIG_GLOBAL": os.devnull,
             "GIT_TERMINAL_PROMPT": "0",
         }
         self.destination = self.home / ".t3/service.env"
+
+    def service_environment(self, inherited=None):
+        environment = {**self.env, **(inherited or {})}
+        for line in self.destination.read_text().splitlines():
+            key, value = line.split("=", 1)
+            environment[key] = value.strip("'")
+        return environment
 
     def install(self, *args, answer=None):
         return subprocess.run(
@@ -43,10 +61,7 @@ class T3ServiceEnvTests(unittest.TestCase):
         result = self.install()
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(self.destination.stat().st_mode & 0o777, 0o600)
-        git_env = dict(self.env)
-        for line in self.destination.read_text().splitlines():
-            key, value = line.split("=", 1)
-            git_env[key] = value.strip("'")
+        git_env = self.service_environment()
         git = shutil.which("git")
         for url in ("git@github.com:example/repo.git", "ssh://git@github.com/example/repo.git"):
             scoped = subprocess.check_output([git, "ls-remote", "--get-url", url], env=git_env, text=True)
@@ -67,6 +82,54 @@ class T3ServiceEnvTests(unittest.TestCase):
         self.assertEqual(credential.returncode, 0, credential.stderr)
         self.assertIn("username=fixture", credential.stdout)
         self.assertIn("password=fixture", credential.stdout)
+
+    def test_appends_after_launchd_config_even_when_installer_shell_differs(self):
+        self.env["TEST_LAUNCHD_COUNT"] = "2"
+        # The installer shell does not necessarily inherit launchd's Git config.
+        self.env["GIT_CONFIG_COUNT"] = "0"
+        inherited = {
+            "GIT_CONFIG_COUNT": "2",
+            "GIT_CONFIG_KEY_0": "demo.inherited", "GIT_CONFIG_VALUE_0": "launcher",
+            "GIT_CONFIG_KEY_1": "core.quotepath", "GIT_CONFIG_VALUE_1": "false",
+        }
+        result = self.install()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        config = self.service_environment(inherited)
+        self.assertEqual(config["GIT_CONFIG_COUNT"], "6")
+        git = shutil.which("git")
+        for key, value in (("demo.inherited", "launcher"), ("core.quotepath", "false")):
+            actual = subprocess.check_output([git, "config", "--get", key], env=config, text=True)
+            self.assertEqual(actual.strip(), value)
+        rewritten = subprocess.check_output(
+            [git, "ls-remote", "--get-url", "git@github.com:example/repo.git"], env=config, text=True,
+        )
+        self.assertEqual(rewritten.strip(), "https://github.com/example/repo.git")
+        self.assertNotIn("GIT_CONFIG_KEY_0=", self.destination.read_text())
+
+    def test_launchd_failures_leave_existing_file_unchanged(self):
+        self.destination.parent.mkdir()
+        self.destination.write_text("KEEP=private-fixture\n")
+        for name, value in (
+            ("TEST_MANAGER_NAME", "Background"), ("TEST_MANAGER_UID", "other-user"),
+            ("TEST_LAUNCHCTL_FAIL", "1"), ("TEST_LAUNCHD_COUNT", "-1"),
+            ("TEST_LAUNCHD_COUNT", "invalid-private-fixture"),
+            ("TEST_LAUNCHD_COUNT", "10001"),
+        ):
+            with self.subTest(variable=name, value=value):
+                self.env[name] = value
+                result = self.install(answer="yes\n")
+                self.assertNotEqual(result.returncode, 0)
+                self.assertEqual(self.destination.read_text(), "KEEP=private-fixture\n")
+                self.assertNotIn("private-fixture", result.stdout + result.stderr)
+                del self.env[name]
+
+    def test_leading_zero_launchd_count_is_decimal_and_rerun_does_not_grow(self):
+        self.env["TEST_LAUNCHD_COUNT"] = "00008"
+        self.assertEqual(self.install().returncode, 0)
+        contents = self.destination.read_bytes()
+        self.assertTrue(contents.startswith(b"GIT_CONFIG_COUNT=12\nGIT_CONFIG_KEY_8="))
+        self.assertEqual(self.install(answer="yes\n").returncode, 0)
+        self.assertEqual(self.destination.read_bytes(), contents)
 
     def test_replacement_requires_confirmation_and_creates_no_backup(self):
         self.destination.parent.mkdir()

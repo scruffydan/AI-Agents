@@ -126,8 +126,10 @@ The separate [T3 background-service guide](docs/t3-background-service.md) covers
 the official app on Dan's Mac, with a service-owned backend and the Dock app as
 a client. Run `./t3-service-env.sh` to install `~/.t3/service.env` with GitHub
 HTTPS/`gh` authentication scoped to T3. It asks before replacing an existing
-file, creates no backups, and leaves service activation separate. SSH remotes
-and ordinary terminal behavior stay unchanged. `install.sh` does not configure T3.
+file, preserves launchd's inherited indexed Git settings, creates no backups,
+and leaves service activation separate. Run it in the Mac user's desktop session.
+SSH remotes and ordinary terminal behavior stay unchanged. `install.sh` does not
+configure T3.
 
 ## Create a subagent
 
