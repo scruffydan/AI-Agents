@@ -209,6 +209,19 @@ explicitly remove its obsolete installed folder from each harness you use:
 `~/.config/opencode/skills/brainstorm-with-agent`. The installer preserves retired
 entries, so they otherwise remain visible alongside the merged skill.
 
+`five-whys` remains discoverable for explicit Five Whys requests and noncoding
+investigations such as churn, delays, and process failures. Its short entry point
+loads the shared technique from `systematic-debugging/five-whys.md`;
+`systematic-debugging` uses that technique optionally for recurring failures or
+unclear causal links. Routine bugs do not require a question chain or incident
+report. Both entry points honor analysis-only requests without implementing fixes.
+
+When updating an existing installation, reinstall both skill folders together for
+each harness you use. The `five-whys` entry point depends on its sibling
+`systematic-debugging` folder, so copying it alone is insufficient. Neither skill
+is retired, and no installed-folder cleanup is needed. Existing copies keep their
+old instructions until updated; removing a source skill would not uninstall it.
+
 External documentation research uses the `docs-fetcher` subagent through
 `using-docs-fetcher`. Searches and page contents stay in the child's context;
 the main conversation receives focused findings, examples, and source links.
