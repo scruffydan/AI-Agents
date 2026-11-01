@@ -124,10 +124,10 @@ unchanged files are skipped. It refuses a symlink at the destination file.
 
 The separate [T3 background-service guide](docs/t3-background-service.md) covers
 the official app on Dan's Mac, with a service-owned backend and the Dock app as
-a client. `node t3-service-env.mjs --help` describes the standalone candidate
-generator (Node 22.16+, no packages). It prepares service-scoped GitHub HTTPS/`gh`
-authentication while preserving SSH remotes and ordinary terminal behavior.
-Activation and rollback are manual; `install.sh` does not configure T3.
+a client. Run `./t3-service-env.sh` to install `~/.t3/service.env` with GitHub
+HTTPS/`gh` authentication scoped to T3. It asks before replacing an existing
+file, creates no backups, and leaves service activation separate. SSH remotes
+and ordinary terminal behavior stay unchanged. `install.sh` does not configure T3.
 
 ## Create a subagent
 
@@ -315,6 +315,5 @@ python3 -m unittest discover -s tests
 ```
 
 Tests use temporary repositories and isolated home directories, leaving real
-harness configs untouched. The T3 setup tests additionally require Node 22.16+
-and Git and use a fake `gh` without network access; they skip if Node or Git is
-absent. No live T3 service or host authentication is exercised by the suite.
+harness configs untouched. T3 setup tests use Bash, Git, and a fake `gh` without
+network access. No live T3 service or host authentication is exercised by the suite.
