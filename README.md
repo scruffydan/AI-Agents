@@ -120,6 +120,17 @@ the new file with mode `600`. `--yes` skips confirmation but still backs up;
 unchanged files are skipped. It refuses a symlink at the destination file.
 `install.sh` does not install or update `opencode.json`.
 
+## T3 Code remote host setup
+
+The separate [T3 background-service guide](docs/t3-background-service.md) covers
+the official app on Dan's Mac, with a service-owned backend and the Dock app as
+a client. Run `./t3-service-env.sh` to install `~/.t3/service.env` with GitHub
+HTTPS/`gh` authentication scoped to T3. It asks before replacing an existing
+file, preserves launchd's inherited indexed Git settings, creates no backups,
+and leaves service activation separate. Run it in the Mac user's desktop session.
+SSH remotes and ordinary terminal behavior stay unchanged. `install.sh` does not
+configure T3.
+
 ## Create a subagent
 
 ```bash
@@ -306,4 +317,5 @@ python3 -m unittest discover -s tests
 ```
 
 Tests use temporary repositories and isolated home directories, leaving real
-harness configs untouched.
+harness configs untouched. T3 setup tests use Bash, Git, and a fake `gh` without
+network access. No live T3 service or host authentication is exercised by the suite.
