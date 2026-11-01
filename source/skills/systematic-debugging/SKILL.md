@@ -9,6 +9,12 @@ Find the cause from evidence before changing behavior. Match the depth of the
 investigation to the problem; a clear local failure does not need a formal
 incident process. Use the following phases to avoid speculative fixes.
 
+Honor analysis-only requests throughout these phases: inspect permitted evidence
+and recommend tests or fixes without changing files, adding diagnostics, or
+performing other mutations. Hypothesis testing and implementation steps apply
+only within the authorized task; stop at findings and recommendations when
+implementation is out of scope.
+
 ### Phase 1: Root Cause Investigation
 
 **BEFORE attempting ANY fix:**
@@ -63,6 +69,10 @@ incident process. Use the following phases to avoid speculative fixes.
    - What called this with bad value?
    - Keep tracing up until you find the source
    - Fix at source, not at symptom
+
+For recurring failures, unclear causal links, or an explicit Five Whys request,
+optionally use [five-whys.md](five-whys.md). Follow the evidence across multiple
+causal paths when needed; do not force a question chain for a clear local bug.
 
 ### Phase 2: Pattern Analysis
 
@@ -138,6 +148,7 @@ If systematic investigation reveals issue is truly environmental, timing-depende
 
 These techniques are part of systematic debugging and available in this directory:
 
+- **[five-whys.md](five-whys.md)** - Optional evidence-backed causal questioning for recurring or unclear failures
 - **`root-cause-tracing.md`** - Trace bugs backward through call stack to find original trigger
 - **`defense-in-depth.md`** - Add validation at multiple layers after finding root cause
 - **`condition-based-waiting.md`** - Replace arbitrary timeouts with condition polling
