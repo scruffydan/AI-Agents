@@ -2,9 +2,10 @@
 
 Personal prompt and skill configuration for Codex, Claude Code, and OpenCode.
 
-Create each subagent or skill once. Subagents use a shared definition and one
-default native template per harness, with optional overrides. Skills are shared
-folders copied to each harness. Commands and modes keep explicit native templates.
+Define subagents and skills once, then build and install them for each harness.
+Subagents combine shared instructions with native templates and optional overrides.
+Skills are copied as complete folders. Commands and modes use explicit native
+templates.
 
 ## Requirements
 
@@ -46,12 +47,10 @@ Override OpenCode's provider prefix with `openai` or `opencode`:
 ./build.py opencode --opencode-provider opencode
 ```
 
-Generated files are written to a fresh `build/` directory after rendering succeeds.
-Invalid agent metadata, missing references, recursive includes, invalid TOML, and
-duplicate output paths or file/directory collisions fail before the previous build
-is replaced. Finder's `.DS_Store` files are ignored when scanning templates and
-overrides. YAML templates remain directly editable; the build does not validate
-their harness-specific fields.
+Each build replaces `build/` with output for the selected harnesses. Agent
+metadata, references, includes, TOML, and output paths are checked before the
+previous build is replaced. YAML templates and shared skill metadata are not
+validated for harness-specific requirements.
 
 OpenCode output uses V2's `agents/` and `skills/` directories, plus `commands/`
 when command templates are present.
@@ -77,21 +76,23 @@ Skip the picker by naming harnesses, or use `--all` to install all three:
 ./install.sh --all
 ```
 
-`--all` installs in Codex, Claude Code, OpenCode order and cannot be combined with
-explicit harness names. For unattended use, pass harness names or `--all`; the
-picker exits without installing if input ends before a selection is received.
+`--all` cannot be combined with explicit harness names. For unattended use, pass
+harness names or `--all`.
 
 Agents, commands, and skills are installed one entry at a time, so anything
 else in those directories is left alone. Unchanged files are skipped. Changed
 files require confirmation, and the replaced version is moved to
 `~/.ai-agents-backups/<timestamp>/` instead of being deleted. Removing a prompt
 from this repository does not remove its installed copy; clean up obsolete
-entries explicitly. The installer has no special cases for retired prompts.
+entries explicitly.
 
-OpenCode entries install into `~/.config/opencode/agents`, `commands`, and
-`skills`. Existing V1 `agent`, `command`, and `skill` directories are left in
-place; review and remove obsolete entries after verifying V2 discovery to avoid
-loading stale definitions alongside the new files.
+Installation destinations:
+
+| Harness | Base instructions | Agents and commands | Skills |
+|---|---|---|---|
+| Codex | `~/.codex/AGENTS.md` | `~/.codex/agents/` | `~/.agents/skills/` |
+| Claude Code | `~/.claude/CLAUDE.md` | `~/.claude/agents/` | `~/.claude/skills/` |
+| OpenCode | `~/.config/opencode/AGENTS.md` | `~/.config/opencode/agents/`, `commands/` | `~/.config/opencode/skills/` |
 
 Use `--force` to replace changed files without prompting:
 
@@ -105,7 +106,7 @@ Set `PYTHON` if `python3` is not Python 3.11 or newer:
 PYTHON=/path/to/python3.11 ./install.sh
 ```
 
-`opencode.json` remains an explicit, one-time setup:
+Set up `opencode.json` separately:
 
 ```bash
 ./opencode-init.sh
@@ -178,115 +179,44 @@ finish those before installing. `--description` is optional for either command.
 
 ## Skills and modes
 
-All three harnesses receive every shared skill under `source/skills/`, including
-`brainstorming` and `mode-thorough-plan`. Shared skills are copied without changing
-their instructions. OpenCode's
-`thorough-plan` primary agent loads the shared planning skill while retaining
-its edit and shell restrictions.
+All three harnesses receive the shared skills under `source/skills/`.
 
 - Codex: use `$brainstorming`, `$mode-thorough-plan`, or `$code-review`.
 - Claude Code: use `/brainstorming`, `/mode-thorough-plan`, or `/code-review`.
 - OpenCode: load `@brainstorming`, `@mode-thorough-plan`, or `@code-review`.
-  The `brainstorm` and `thorough-plan` primary agents remain available. Request a
-  full review through `code-review`; the `/code-full-review` shortcut is retired.
+  The `brainstorm` and `thorough-plan` primary agents are also available.
 
-`code-review` has separate routes for reviewing code and evaluating supplied
-feedback. Targeted code reviews use relevant perspectives; explicit full reviews
-cover all five specialists. Feedback evaluation validates the supplied claims and
-proposed fixes without automatically launching specialists or a full review.
-Both routes remain report-only unless fixes are authorized. Agent tools and
-permissions come from the current harness rather than assumptions in a shared
-skill.
+Choose a workflow for the task:
 
-`receiving-code-review` has been merged into `code-review`; use the existing
-`code-review` invocation for supplied feedback as well. After rebuilding and
-reinstalling, verify that `code-review/SKILL.md` and its sibling `feedback.md` are
-present. Preserve any local customizations, then explicitly remove the obsolete
-installed folder from each harness you use: `~/.agents/skills/receiving-code-review`,
-`~/.claude/skills/receiving-code-review`, or
-`~/.config/opencode/skills/receiving-code-review`. The installer preserves retired
-entries, so they otherwise remain discoverable. Replace old invocations and
-refresh skill discovery as needed.
-
-`brainstorming` supports design decisions in the current conversation when
-requirements or approaches need exploration. Routine edits and fully specified
-small changes do not need that workflow. When explicitly asked to use the
-configured brainstorming model or agent, the same skill routes to read-only
-creative exploration. `mode-thorough-plan` produces a plan without editing files
-and asks only questions that materially affect the outcome.
-
-`brainstorm-with-agent` has been merged into `brainstorming`. After reinstalling,
-explicitly remove its obsolete installed folder from each harness you use:
-`~/.agents/skills/brainstorm-with-agent`,
-`~/.claude/skills/brainstorm-with-agent`, or
-`~/.config/opencode/skills/brainstorm-with-agent`. The installer preserves retired
-entries, so they otherwise remain visible alongside the merged skill.
-
-`five-whys` remains discoverable for explicit Five Whys requests and noncoding
-investigations such as churn, delays, and process failures. Its short entry point
-loads the shared technique from `systematic-debugging/five-whys.md`;
-`systematic-debugging` uses that technique optionally for recurring failures or
-unclear causal links. Routine bugs do not require a question chain or incident
-report. Both entry points honor analysis-only requests without implementing fixes.
-
-When updating an existing installation, reinstall both skill folders together for
-each harness you use. The `five-whys` entry point depends on its sibling
-`systematic-debugging` folder, so copying it alone is insufficient. Neither skill
-is retired, and no installed-folder cleanup is needed. Existing copies keep their
-old instructions until updated; removing a source skill would not uninstall it.
+- `brainstorming` explores requirements and design alternatives in the current
+  conversation. Explicit requests for the configured brainstorming agent use
+  read-only creative exploration.
+- `mode-thorough-plan` produces an implementation plan without editing files.
+  OpenCode's `thorough-plan` agent loads this skill with edit and shell access
+  denied.
+- `code-review` reviews code or evaluates supplied feedback. Targeted reviews use
+  relevant perspectives; explicit full reviews cover all five specialists.
+  Feedback evaluation checks the supplied claims and proposed fixes. Both routes
+  are report-only unless fixes are authorized.
+- `systematic-debugging` guides bug investigation. `five-whys` supports explicit
+  causal analysis for coding and noncoding problems. Its shared technique lives
+  in `systematic-debugging/five-whys.md`, so keep both skill folders installed.
+- `git-commit` handles verification, staging, and committing in the current
+  conversation, using the configured drafting agent when available. `git-push`
+  checks readiness for a separately authorized push.
+- `update-readme` checks README and existing AGENTS.md accuracy;
+  `verification-before-completion` checks the evidence behind completion claims.
 
 External documentation research uses the `docs-fetcher` subagent under the shared
-AGENTS.md instructions. Briefs include the concrete question, installed or
-targeted version, known official URLs, and relevant constraints. Searches, page
-contents, and follow-up research stay in the child's context; the main
-conversation receives focused findings, examples, primary-source links, version
-caveats, and uncertainty. If delegation is prohibited or the agent or required web
-capability is unavailable, report the limitation and continue independent
-authorized work without fetching documentation in the main conversation.
+AGENTS.md instructions. The child receives the question, target version, official
+URLs, and constraints, then returns focused findings and primary-source links.
+If delegation or web access is unavailable, report the limitation and continue
+independent work.
 
-`using-docs-fetcher` has been retired into the shared AGENTS.md instructions.
-After rebuilding and reinstalling the updated base instructions, manually remove
-its obsolete installed folder from each harness you use, preserving any local
-customizations first: `~/.agents/skills/using-docs-fetcher`,
-`~/.claude/skills/using-docs-fetcher`, or
-`~/.config/opencode/skills/using-docs-fetcher`. The installer preserves retired
-entries. The `docs-fetcher` agent and its model and tool settings remain available.
-
-`update-readme` owns README and existing AGENTS.md checks, while
-`verification-before-completion` owns verification evidence. Git skills reference
-these checks and reuse valid results when relevant inputs are unchanged. Commit
-messages follow the repository's conventions, including free-form subjects.
-
-`git-commit` is the canonical workflow in the current conversation. It
-automatically uses the configured `git-commit` drafting agent when available and
-delegation is permitted; no separate request to check conventions is needed.
-The child reads repository guidance, the intended diff, and recent history on
-the configured cheaper drafting model. Raw history stays in the child's context;
-the parent receives the proposed message, reviewed files, a brief summary of
-changes and conventions, and concerns. The parent owns verification, staging,
-checking the proposal against the final staged diff, and committing within
-authorization. A message-only request does not authorize staging or committing.
-If delegation cannot be used, report the limitation and reuse reliable
-conventions already in context; otherwise ask how to proceed before loading
-history into the parent or substituting another model. `git-push` remains a
-separate workflow requiring publication authorization.
-
-The drafting agent retains its `git_commit` profile in `source/models.toml` and
-its native tool settings. Those settings enable Git inspection but do not create
-a separate read-only sandbox; its instructions prohibit editing, staging,
-committing, pushing, verification commands, and further delegation.
-
-Shared workflows scale planning, testing, and review to the task's stakes. They
-reuse established decisions and authorization rather than adding fixed approval
-or review loops. Specialist reviewers share one report format while retaining
-their domain checklists, language-specific guidance, and examples. Debugging
-retains its detailed testing and investigation techniques.
-
-The brainstorming skill keeps the current conversation and model by default.
-Explicit configured-agent requests use the `brainstorm` agent in Codex and
-Claude Code, with model selection in the native agent templates. OpenCode retains
-an existing session's selected model when changing agents, so select the
-configured brainstorm model in `/models` as well as the `brainstorm` primary agent.
+For configured brainstorming in Codex and Claude Code, the `brainstorm` agent
+selects its model through native templates. OpenCode retains an existing session's
+model when changing agents; select the configured model in `/models` as well as
+the `brainstorm` primary agent.
 
 ## Customize an agent for one harness
 
@@ -339,8 +269,7 @@ For example, the referenced `_report-only-intro.md` is shared across review agen
 
 `source/prompts/AGENTS.md` is the shared base for all three harnesses: the build
 copies it to OpenCode/Codex `AGENTS.md` and Claude `CLAUDE.md`. Edit the source
-and rebuild/reinstall rather than editing generated copies. OpenCode V2
-recognizes the exact name `AGENTS.md`, not `Agent.md` or a `CLAUDE.md` fallback.
+and rebuild and reinstall to update the harnesses.
 
 ## Change models
 
