@@ -120,6 +120,15 @@ the new file with mode `600`. `--yes` skips confirmation but still backs up;
 unchanged files are skipped. It refuses a symlink at the destination file.
 `install.sh` does not install or update `opencode.json`.
 
+## T3 Code remote host setup
+
+The separate [T3 background-service guide](docs/t3-background-service.md) covers
+the official app on Dan's Mac, with a service-owned backend and the Dock app as
+a client. `node t3-service-env.mjs --help` describes the standalone candidate
+generator (Node 22.16+, no packages). It prepares service-scoped GitHub HTTPS/`gh`
+authentication while preserving SSH remotes and ordinary terminal behavior.
+Activation and rollback are manual; `install.sh` does not configure T3.
+
 ## Create a subagent
 
 ```bash
@@ -306,4 +315,6 @@ python3 -m unittest discover -s tests
 ```
 
 Tests use temporary repositories and isolated home directories, leaving real
-harness configs untouched.
+harness configs untouched. The T3 setup tests additionally require Node 22.16+
+and Git and use a fake `gh` without network access; they skip if Node or Git is
+absent. No live T3 service or host authentication is exercised by the suite.
