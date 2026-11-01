@@ -40,8 +40,8 @@ API docs, syntax guides, tool documentation (office docs)
 **Frontmatter (YAML):**
 - Shared skills use `name` and `description`; keep native settings in harness templates
 - `name`: Use lowercase letters, numbers, and hyphens only
-- `description`: Third-person, describes ONLY when to use (NOT what it does)
-  - Start with "Use when..." to focus on triggering conditions
+- `description`: Third-person; describes what the skill does and when to use it
+  - State the capability and the requests or conditions that should trigger it
   - Include specific symptoms, situations, and contexts
   - Keep workflow details in the body (see Skill Discovery below)
   - Keep under 500 characters if possible
@@ -49,7 +49,7 @@ API docs, syntax guides, tool documentation (office docs)
 ```markdown
 ---
 name: skill-name-with-hyphens
-description: Use when [specific triggering conditions and symptoms]
+description: "[Capability]. Use when [specific requests or triggering conditions]."
 ---
 
 # Skill Name
@@ -89,26 +89,25 @@ Concrete results
 
 **Purpose:** The description helps decide which skill applies. Make it answer: "Should I read this skill right now?"
 
-**Format:** Start with "Use when..." to focus on triggering conditions
+**Format:** State the capability and the specific requests or conditions that should trigger it.
 
-**CRITICAL: Description = When to Use, NOT What the Skill Does**
+**Include both what the skill does and when it applies.**
 
-The description should ONLY describe triggering conditions. Do NOT summarize the skill's process or workflow in the description.
-
-Put workflow details in the body so the description remains a clear discovery signal.
+Keep the summary specific and concise. Describe the outcome and trigger context;
+leave the detailed procedure in the body.
 
 ```yaml
-# ❌ BAD: Summarizes workflow - Claude may follow this instead of reading skill
-description: Use when executing plans - dispatches subagent per task with code review between tasks
+# ❌ BAD: Too vague to distinguish from other development skills
+description: Helps with development
 
 # ❌ BAD: Too much process detail
 description: Use for TDD - write test first, watch it fail, write minimal code, refactor
 
-# ✅ GOOD: Just triggering conditions, no workflow
-description: Use when executing implementation plans with independent tasks in the current session
+# ✅ GOOD: Capability and trigger context
+description: Executes written implementation plans. Use when carrying out an agreed plan with independent tasks in the current session.
 
-# ✅ GOOD: Triggering conditions only
-description: Use when implementing any feature or bugfix, before writing implementation code
+# ✅ GOOD: Outcome and concrete symptoms
+description: Diagnoses software failures from evidence. Use when investigating bugs, failing tests, or unexpected behavior.
 ```
 
 **Content:**
@@ -116,8 +115,8 @@ description: Use when implementing any feature or bugfix, before writing impleme
 - Describe the *problem* (race conditions, inconsistent behavior) not *language-specific symptoms* (setTimeout, sleep)
 - Keep triggers technology-agnostic unless the skill itself is technology-specific
 - If skill is technology-specific, make that explicit in the trigger
-- Write in third person (injected into system prompt)
-- **NEVER summarize the skill's process or workflow**
+- Write in third person
+- Summarize the capability and trigger context; keep procedural steps in the body
 
 ```yaml
 # ❌ BAD: Too abstract, vague, doesn't include when to use
@@ -129,11 +128,11 @@ description: I can help you with async tests when they're flaky
 # ❌ BAD: Mentions technology but skill isn't specific to it
 description: Use when tests use setTimeout/sleep and are flaky
 
-# ✅ GOOD: Starts with "Use when", describes problem, no workflow
-description: Use when tests have race conditions, timing dependencies, or pass/fail inconsistently
+# ✅ GOOD: Capability and concrete symptoms
+description: Investigates asynchronous test failures. Use when tests have race conditions, timing dependencies, or inconsistent results.
 
-# ✅ GOOD: Technology-specific skill with explicit trigger
-description: Use when using React Router and handling authentication redirects
+# ✅ GOOD: Technology-specific capability and trigger
+description: Reviews React Router authentication redirects. Use when diagnosing route guards or redirect loops in React Router applications.
 ```
 
 ### 2. Keyword Coverage
