@@ -74,6 +74,7 @@ class InstallTests(unittest.TestCase):
                     for mode in ("brainstorming", "mode-thorough-plan"):
                         self.assertTrue((self.home / directory / mode / "SKILL.md").is_file())
                     self.assertFalse((self.home / directory / "brainstorm-with-agent").exists())
+                    self.assertFalse((self.home / directory / "receiving-code-review").exists())
                 opencode = self.home / ".config/opencode"
                 self.assertTrue((opencode / "agents/brainstorm.md").is_file())
                 self.assertFalse((opencode / "commands/code-full-review.md").exists())
@@ -81,6 +82,31 @@ class InstallTests(unittest.TestCase):
                     self.assertFalse((opencode / legacy).exists())
                 self.assertTrue((self.home / ".codex/agents/brainstorm.toml").is_file())
                 self.assertTrue((self.home / ".claude/agents/brainstorm.md").is_file())
+
+    def test_merged_review_skill_installs_without_removing_retired_or_unrelated_skills(self):
+        directories = (".agents/skills", ".claude/skills", ".config/opencode/skills")
+        for directory in directories:
+            for name in ("receiving-code-review", "my-own-skill"):
+                path = self.home / directory / name / "SKILL.md"
+                path.parent.mkdir(parents=True)
+                path.write_text(f"keep {name}\n")
+
+        self.install("--all")
+
+        source = self.root / "source/skills/code-review"
+        for directory in directories:
+            with self.subTest(directory=directory):
+                for filename in ("SKILL.md", "feedback.md"):
+                    self.assertEqual(
+                        (self.home / directory / "code-review" / filename).read_bytes(),
+                        (source / filename).read_bytes(),
+                    )
+                for name in ("receiving-code-review", "my-own-skill"):
+                    self.assertEqual(
+                        (self.home / directory / name / "SKILL.md").read_text(),
+                        f"keep {name}\n",
+                    )
+        self.assertFalse((self.home / ".ai-agents-backups").exists())
 
     def test_opencode_v2_install_preserves_unrelated_entries(self):
         opencode = self.home / ".config/opencode"

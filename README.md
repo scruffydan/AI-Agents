@@ -190,10 +190,23 @@ its edit and shell restrictions.
   The `brainstorm` and `thorough-plan` primary agents remain available. Request a
   full review through `code-review`; the `/code-full-review` shortcut is retired.
 
-`code-review` handles targeted reviews and explicit full reviews. Ordinary reviews
-use relevant perspectives; full reviews cover all five specialists. Findings are
-report-only unless fixes are also requested. Agent tools and permissions come
-from the current harness rather than assumptions in a shared skill.
+`code-review` has separate routes for reviewing code and evaluating supplied
+feedback. Targeted code reviews use relevant perspectives; explicit full reviews
+cover all five specialists. Feedback evaluation validates the supplied claims and
+proposed fixes without automatically launching specialists or a full review.
+Both routes remain report-only unless fixes are authorized. Agent tools and
+permissions come from the current harness rather than assumptions in a shared
+skill.
+
+`receiving-code-review` has been merged into `code-review`; use the existing
+`code-review` invocation for supplied feedback as well. After rebuilding and
+reinstalling, verify that `code-review/SKILL.md` and its sibling `feedback.md` are
+present. Preserve any local customizations, then explicitly remove the obsolete
+installed folder from each harness you use: `~/.agents/skills/receiving-code-review`,
+`~/.claude/skills/receiving-code-review`, or
+`~/.config/opencode/skills/receiving-code-review`. The installer preserves retired
+entries, so they otherwise remain discoverable. Replace old invocations and
+refresh skill discovery as needed.
 
 `brainstorming` supports design decisions in the current conversation when
 requirements or approaches need exploration. Routine edits and fully specified
@@ -208,6 +221,19 @@ explicitly remove its obsolete installed folder from each harness you use:
 `~/.claude/skills/brainstorm-with-agent`, or
 `~/.config/opencode/skills/brainstorm-with-agent`. The installer preserves retired
 entries, so they otherwise remain visible alongside the merged skill.
+
+`five-whys` remains discoverable for explicit Five Whys requests and noncoding
+investigations such as churn, delays, and process failures. Its short entry point
+loads the shared technique from `systematic-debugging/five-whys.md`;
+`systematic-debugging` uses that technique optionally for recurring failures or
+unclear causal links. Routine bugs do not require a question chain or incident
+report. Both entry points honor analysis-only requests without implementing fixes.
+
+When updating an existing installation, reinstall both skill folders together for
+each harness you use. The `five-whys` entry point depends on its sibling
+`systematic-debugging` folder, so copying it alone is insufficient. Neither skill
+is retired, and no installed-folder cleanup is needed. Existing copies keep their
+old instructions until updated; removing a source skill would not uninstall it.
 
 External documentation research uses the `docs-fetcher` subagent under the shared
 AGENTS.md instructions. Briefs include the concrete question, installed or
@@ -231,13 +257,30 @@ entries. The `docs-fetcher` agent and its model and tool settings remain availab
 these checks and reuse valid results when relevant inputs are unchanged. Commit
 messages follow the repository's conventions, including free-form subjects.
 
+`git-commit` is the canonical workflow in the current conversation. It
+automatically uses the configured `git-commit` drafting agent when available and
+delegation is permitted; no separate request to check conventions is needed.
+The child reads repository guidance, the intended diff, and recent history on
+the configured cheaper drafting model. Raw history stays in the child's context;
+the parent receives the proposed message, reviewed files, a brief summary of
+changes and conventions, and concerns. The parent owns verification, staging,
+checking the proposal against the final staged diff, and committing within
+authorization. A message-only request does not authorize staging or committing.
+If delegation cannot be used, report the limitation and reuse reliable
+conventions already in context; otherwise ask how to proceed before loading
+history into the parent or substituting another model. `git-push` remains a
+separate workflow requiring publication authorization.
+
+The drafting agent retains its `git_commit` profile in `source/models.toml` and
+its native tool settings. Those settings enable Git inspection but do not create
+a separate read-only sandbox; its instructions prohibit editing, staging,
+committing, pushing, verification commands, and further delegation.
+
 Shared workflows scale planning, testing, and review to the task's stakes. They
 reuse established decisions and authorization rather than adding fixed approval
 or review loops. Specialist reviewers share one report format while retaining
 their domain checklists, language-specific guidance, and examples. Debugging
-retains its detailed testing and investigation techniques. The
-commit helper returns its proposal to the main agent, which handles user
-interaction and the actual commit.
+retains its detailed testing and investigation techniques.
 
 The brainstorming skill keeps the current conversation and model by default.
 Explicit configured-agent requests use the `brainstorm` agent in Codex and
