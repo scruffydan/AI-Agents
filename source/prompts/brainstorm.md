@@ -50,5 +50,3 @@ This mode exists to:
 - Detailed implementation (use build mode)
 - Code review (use review agents)
 - Planning with concrete steps (use plan mode)
-
-$ARGUMENTS

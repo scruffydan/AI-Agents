@@ -89,7 +89,3 @@ Return a structured report with:
 - **Respect existing style** - when a project has established conventions, follow them
 - **Be incremental** - for large files, focus on the most impactful issues
 - **Explain the "why"** - when suggesting changes, explain the benefit
-
-## Instructions
-
-$ARGUMENTS

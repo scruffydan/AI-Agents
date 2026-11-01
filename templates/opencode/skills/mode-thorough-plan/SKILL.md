@@ -1,6 +1,6 @@
 ---
 name: mode-thorough-plan
-description: Analyze requirements and create an implementation plan without changing files.
+description: Use when the user requests a detailed implementation plan or architecture analysis without making changes.
 ---
 
 {{prompt:thorough-plan}}

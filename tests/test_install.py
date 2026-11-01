@@ -24,10 +24,10 @@ class InstallTests(unittest.TestCase):
         for name in ("build.py", "install.sh"):
             shutil.copy2(REPO / name, self.root / name)
 
-    def run_install(self, *args, input_text=""):
+    def run_install(self, *args, input_text="", force=True):
         env = {**os.environ, "HOME": str(self.home), "PYTHON": sys.executable}
         return subprocess.run(
-            ["bash", "install.sh", *args, "--force"],
+            ["bash", "install.sh", *args, *(["--force"] if force else [])],
             cwd=self.root, env=env, capture_output=True, text=True, input=input_text,
         )
 
@@ -71,11 +71,11 @@ class InstallTests(unittest.TestCase):
                 for directory in (".config/opencode/skills", ".claude/skills", ".agents/skills"):
                     for skill in (self.root / "source/skills").glob("*/SKILL.md"):
                         self.assertTrue((self.home / directory / skill.parent.name / "SKILL.md").is_file())
-                    for mode in ("mode-brainstorm", "mode-thorough-plan"):
+                    for mode in ("brainstorm-with-agent", "mode-thorough-plan"):
                         self.assertTrue((self.home / directory / mode / "SKILL.md").is_file())
                 opencode = self.home / ".config/opencode"
                 self.assertTrue((opencode / "agents/brainstorm.md").is_file())
-                self.assertTrue((opencode / "commands/code-full-review.md").is_file())
+                self.assertFalse((opencode / "commands/code-full-review.md").exists())
                 for legacy in ("agent", "command", "skill"):
                     self.assertFalse((opencode / legacy).exists())
                 self.assertTrue((self.home / ".codex/agents/brainstorm.toml").is_file())
@@ -89,6 +89,49 @@ class InstallTests(unittest.TestCase):
         self.install("opencode")
         for entry in ("agents/mine.md", "commands/mine.md", "skills/mine/SKILL.md", "agent/legacy.md"):
             self.assertEqual((opencode / entry).read_text(), "keep me")
+
+    def test_retired_opencode_command_is_removed_only_when_opencode_is_selected(self):
+        command = self.home / ".config/opencode/commands/code-full-review.md"
+        command.parent.mkdir(parents=True)
+        command.write_text("locally edited review command")
+
+        self.install("codex")
+        self.assertEqual(command.read_text(), "locally edited review command")
+
+        self.install("opencode")
+        self.assertFalse(command.exists())
+        self.assertFalse((self.home / ".ai-agents-backups").exists())
+        self.assertTrue((command.parent.parent / "skills/code-review/SKILL.md").is_file())
+
+        result = self.install("opencode")
+        self.assertNotIn("Backed up:", result.stdout)
+        self.assertNotIn("Installed:", result.stdout)
+
+    def test_retired_opencode_command_is_removed_without_confirmation_or_backup(self):
+        self.install("opencode")
+        command = self.home / ".config/opencode/commands/code-full-review.md"
+        command.parent.mkdir(exist_ok=True)
+        command.write_text("obsolete command")
+
+        result = self.run_install("opencode", force=False)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertFalse(command.exists())
+        self.assertFalse((self.home / ".ai-agents-backups").exists())
+
+    def test_skipped_review_skill_preserves_retired_opencode_command(self):
+        self.install("opencode")
+        root = self.home / ".config/opencode"
+        replacement = root / "skills/code-review/SKILL.md"
+        replacement.write_text("keep my review skill")
+        command = root / "commands/code-full-review.md"
+        command.parent.mkdir(exist_ok=True)
+        command.write_text("keep my review command")
+
+        result = self.run_install("opencode", force=False, input_text="n\n")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(replacement.read_text(), "keep my review skill")
+        self.assertEqual(command.read_text(), "keep my review command")
+        self.assertFalse((self.home / ".ai-agents-backups").exists())
 
     def test_github_copilot_is_rejected_without_installing(self):
         for args in ((), ("--work",)):

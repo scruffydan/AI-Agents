@@ -1,6 +1,6 @@
 ---
-name: mode-brainstorm
-description: Generate diverse ideas and explore unconventional approaches before choosing a solution.
+name: brainstorm-with-agent
+description: Use when the user requests brainstorming with the configured brainstorming model or agent, without editing files.
 ---
 
 Use the `brainstorm` custom agent to explore the user's request with the configured

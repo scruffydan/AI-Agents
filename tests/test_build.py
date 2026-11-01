@@ -86,7 +86,7 @@ class BuildTests(unittest.TestCase):
             with self.subTest(args=args):
                 self.build("opencode", *args)
                 self.assertIn(f"model: {model}\n", brainstorm.read_text())
-                skill = self.root / "build/opencode/skills/mode-brainstorm/SKILL.md"
+                skill = self.root / "build/opencode/skills/brainstorm-with-agent/SKILL.md"
                 self.assertIn(f"select `{model}`", skill.read_text())
 
     def test_github_copilot_is_rejected_without_replacing_build(self):
@@ -129,18 +129,21 @@ class BuildTests(unittest.TestCase):
                             (output / source.parent.name / resource.name).read_bytes(),
                             resource.read_bytes(),
                         )
-            review = "code-full-review" if harness == "claude" else "command-code-full-review"
-            for name in ("mode-brainstorm", "mode-thorough-plan", review):
+            for name in ("brainstorm-with-agent", "mode-thorough-plan", "code-review"):
                 with self.subTest(harness=harness, skill=name):
                     content = (output / name / "SKILL.md").read_text()
                     self.assertIn(f"name: {name}\n", content)
                     self.assertNotIn("{{prompt:", content)
+            for retired in ("mode-brainstorm", "using-code-review", "code-full-review",
+                            "command-code-full-review"):
+                with self.subTest(harness=harness, retired=retired):
+                    self.assertFalse((output / retired).exists())
 
     def test_brainstorm_models_are_used_by_claude_and_codex(self):
         for args in ((), ("--work",)):
             with self.subTest(args=args):
                 self.build(*args)
-                claude = self.root / "build/claude/skills/mode-brainstorm/SKILL.md"
+                claude = self.root / "build/claude/skills/brainstorm-with-agent/SKILL.md"
                 self.assertIn("model: claude-opus-5-5\n", claude.read_text())
                 self.assertIn("effort: high\n", claude.read_text())
                 agent = self.root / "build/codex/.codex/agents/brainstorm.toml"
@@ -148,7 +151,7 @@ class BuildTests(unittest.TestCase):
                 self.assertEqual(parsed["model"], "gpt-6-astra")
                 self.assertEqual(parsed["model_reasoning_effort"], "medium")
                 self.assertFalse(parsed["features"]["shell_tool"])
-                skill = self.root / "build/codex/.agents/skills/mode-brainstorm/SKILL.md"
+                skill = self.root / "build/codex/.agents/skills/brainstorm-with-agent/SKILL.md"
                 self.assertIn("`brainstorm` custom agent", skill.read_text())
 
     def test_referenced_shared_skill_support_files_exist(self):
@@ -170,8 +173,9 @@ class BuildTests(unittest.TestCase):
     def test_opencode_v2_build_has_native_directories_and_no_legacy_agent_fields(self):
         self.build("opencode", "--work")
         output = self.root / "build/opencode"
-        for name in ("agents", "commands", "skills"):
+        for name in ("agents", "skills"):
             self.assertTrue((output / name).is_dir())
+        self.assertFalse((output / "commands/code-full-review.md").exists())
         for name in ("agent", "command", "skill"):
             self.assertFalse((output / name).exists())
         for agent in (output / "agents").glob("*.md"):

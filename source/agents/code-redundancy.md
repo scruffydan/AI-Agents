@@ -158,7 +158,3 @@ Consider whether this is coincidental or meaningful duplication.
 | MEDIUM | Moderate duplication | Repeated patterns, unused utilities |
 | LOW | Minor redundancy | Similar string literals, small dead code blocks |
 | INFO | Opportunities | Potential abstractions, style improvements |
-
-## Instructions
-
-$ARGUMENTS

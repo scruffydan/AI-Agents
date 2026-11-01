@@ -150,20 +150,28 @@ for harness in "${HARNESSES[@]}"; do
         codex)
             install_item "$ROOT/build/codex/AGENTS.md" "$HOME/.codex/AGENTS.md"
             install_entries "$ROOT/build/codex/.codex/agents" "$HOME/.codex/agents"
-            install_entries "$ROOT/build/codex/.agents/skills" "$HOME/.agents/skills"
+            skills_source="$ROOT/build/codex/.agents/skills"
+            skills_target="$HOME/.agents/skills"
             ;;
         claude)
             target="$HOME/.claude"
             install_item "$ROOT/build/claude/CLAUDE.md" "$target/CLAUDE.md"
             install_entries "$ROOT/build/claude/agents" "$target/agents"
-            install_entries "$ROOT/build/claude/skills" "$target/skills"
+            skills_source="$ROOT/build/claude/skills"
+            skills_target="$target/skills"
             ;;
         opencode)
             target="$HOME/.config/opencode"
             install_item "$ROOT/build/opencode/AGENTS.md" "$target/AGENTS.md"
             install_entries "$ROOT/build/opencode/agents" "$target/agents"
             install_entries "$ROOT/build/opencode/commands" "$target/commands"
-            install_entries "$ROOT/build/opencode/skills" "$target/skills"
+            skills_source="$ROOT/build/opencode/skills"
+            skills_target="$target/skills"
             ;;
     esac
+    install_entries "$skills_source" "$skills_target"
+    if [ "$harness" = opencode ] &&
+        diff -rq "$skills_source/code-review" "$skills_target/code-review" >/dev/null 2>&1; then
+        rm -f -- "$HOME/.config/opencode/commands/code-full-review.md"
+    fi
 done

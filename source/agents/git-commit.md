@@ -32,7 +32,3 @@ You are a specialized agent for preparing git commits. Your purpose is to keep t
 ## IMPORTANT
 
 **NEVER run `git commit`** - Your job is to analyze and prepare, not to commit. The main agent will handle the actual commit after user approval.
-
-## Instructions
-
-$ARGUMENTS
