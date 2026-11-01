@@ -80,3 +80,5 @@ Structure your response as follows:
 2. **Check for redirects** - If a page redirects, follow to the final destination
 3. **Handle multiple pages** - If information is spread across pages, fetch what's needed
 4. **Verify currency** - Note if documentation appears outdated
+
+Return questions and uncertainties to the parent; do not ask the user directly.

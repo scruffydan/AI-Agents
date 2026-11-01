@@ -10,4 +10,4 @@ permissions:
     effect: deny
 ---
 
-{{prompt:thorough-plan}}
+Load the `mode-thorough-plan` skill and follow its planning instructions.

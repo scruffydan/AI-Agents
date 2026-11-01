@@ -170,8 +170,4 @@ for harness in "${HARNESSES[@]}"; do
             ;;
     esac
     install_entries "$skills_source" "$skills_target"
-    if [ "$harness" = opencode ] &&
-        diff -rq "$skills_source/code-review" "$skills_target/code-review" >/dev/null 2>&1; then
-        rm -f -- "$HOME/.config/opencode/commands/code-full-review.md"
-    fi
 done

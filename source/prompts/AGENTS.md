@@ -37,6 +37,9 @@ guidance and the user's current request within the harness's instruction hierarc
 
 - Check relevant primary documentation for the project's installed or targeted
   version when behavior is uncertain or may have changed. Read only what is needed.
+- In the main conversation, use `using-docs-fetcher` to delegate external
+  documentation research to `docs-fetcher`. Keep page contents in the child's
+  context and return focused findings with source links.
 - Respect lockfiles and compatibility constraints. Upgrade dependencies only when
   needed for the task; do not automatically replace them with the latest release.
 - Use available skills when explicitly requested or when their workflow helps.

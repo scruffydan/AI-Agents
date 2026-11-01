@@ -5,13 +5,14 @@ description: Use when implementing complex features, substantial refactors, or h
 
 # Implementation Workflow
 
-This document outlines the systematic approach for implementing complex technical solutions.
+Use the following areas as a reference for complex changes. Choose the steps
+relevant to the actual users, lifespan, and tolerance for downtime or data loss;
+do not turn every checklist item into a requirement for a small personal tool.
+Reuse established decisions and existing dependencies where adequate.
 
-Use `brainstorming` when the design still needs exploration, and
-`mode-thorough-plan` for an analysis-only request. Reuse established requirements
-and designs rather than repeating those conversations. Routine edits do not need
-this full methodology. Follow `verification-before-completion` for evidence of
-completed checks and `update-readme` for documentation checks.
+Use `brainstorming` for unresolved design choices and `mode-thorough-plan` for an
+analysis-only request. Keep implementation focused, verify meaningful behavior
+changes, and optimize when requirements or measurements show a problem.
 
 ## Implementation Methodology
 
@@ -61,7 +62,8 @@ completed checks and `update-readme` for documentation checks.
 ### 5. Security Review
 **Vulnerability assessment and security best practices implementation**
 
-For automated security review, invoke the **@code-security** agent with target files.
+When a specialist review is warranted, use the `code-security` agent through the
+environment's supported tools and permissions.
 
 For manual review, verify:
 - Review code for common vulnerabilities (OWASP Top 10)
@@ -85,18 +87,9 @@ For manual review, verify:
 - Optimize bundle sizes and load times
 - Consider lazy loading and code splitting
 
-## Application of Workflow
+## Completion
 
-- **Simple features**: May skip formal architecture planning
-- **Complex features**: Full workflow recommended
-- **Bug fixes**: Focus on quality assurance and testing
-- **Refactoring**: Emphasize testing and incremental changes
-- **Performance work**: Deep dive into optimization phase
-
-## Best Practices
-
-- **Document decisions**: Keep a record of why choices were made
-- **Communicate early**: Share design proposals before implementation
-- **Fail fast**: Identify issues in planning rather than implementation
-- **Iterate**: Be prepared to revise plans based on new information
-- **Measure**: Use metrics to validate improvements
+Use `verification-before-completion` for observed checks and `update-readme` for
+README and existing AGENTS.md accuracy. Document substantial decisions when
+useful. Continue within existing authorization; commits, external messages,
+pushing, and deployment remain subject to user and repository instructions.
