@@ -85,12 +85,8 @@ Agents, commands, and skills are installed one entry at a time, so anything
 else in those directories is left alone. Unchanged files are skipped. Changed
 files require confirmation, and the replaced version is moved to
 `~/.ai-agents-backups/<timestamp>/` instead of being deleted. Removing a prompt
-from this repository normally does not remove its installed copy.
-
-OpenCode's retired `commands/code-full-review.md` shortcut is removed directly,
-without confirmation or backup, once the shared `code-review` skill is installed.
-Skipping the replacement skill preserves that command. Other retired prompts
-still need manual removal; unrelated skills and commands are left alone.
+from this repository does not remove its installed copy; clean up obsolete
+entries explicitly. The installer has no special cases for retired prompts.
 
 OpenCode entries install into `~/.config/opencode/agents`, `commands`, and
 `skills`. Existing V1 `agent`, `command`, and `skill` directories are left in
