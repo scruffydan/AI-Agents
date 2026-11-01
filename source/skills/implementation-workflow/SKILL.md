@@ -1,11 +1,17 @@
 ---
 name: implementation-workflow
-description: "Six-phase implementation method for complex work: requirements, architecture, strategy, QA, security, optimization. Use for multi-step features, refactors, or high-risk changes that need structured planning and verification."
+description: Use when implementing complex features, substantial refactors, or high-risk changes requiring coordinated architecture, testing, and delivery decisions.
 ---
 
 # Implementation Workflow
 
 This document outlines the systematic approach for implementing complex technical solutions.
+
+Use `brainstorming` when the design still needs exploration, and
+`mode-thorough-plan` for an analysis-only request. Reuse established requirements
+and designs rather than repeating those conversations. Routine edits do not need
+this full methodology. Follow `verification-before-completion` for evidence of
+completed checks and `update-readme` for documentation checks.
 
 ## Implementation Methodology
 

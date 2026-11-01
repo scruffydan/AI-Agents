@@ -24,10 +24,10 @@ class InstallTests(unittest.TestCase):
         for name in ("build.py", "install.sh"):
             shutil.copy2(REPO / name, self.root / name)
 
-    def run_install(self, *args, input_text=""):
+    def run_install(self, *args, input_text="", force=True):
         env = {**os.environ, "HOME": str(self.home), "PYTHON": sys.executable}
         return subprocess.run(
-            ["bash", "install.sh", *args, "--force"],
+            ["bash", "install.sh", *args, *(["--force"] if force else [])],
             cwd=self.root, env=env, capture_output=True, text=True, input=input_text,
         )
 
@@ -71,7 +71,7 @@ class InstallTests(unittest.TestCase):
                 for directory in (".config/opencode/skills", ".claude/skills", ".agents/skills"):
                     for skill in (self.root / "source/skills").glob("*/SKILL.md"):
                         self.assertTrue((self.home / directory / skill.parent.name / "SKILL.md").is_file())
-                    for mode in ("mode-brainstorm", "mode-thorough-plan"):
+                    for mode in ("brainstorm-with-agent", "mode-thorough-plan"):
                         self.assertTrue((self.home / directory / mode / "SKILL.md").is_file())
                 opencode = self.home / ".config/opencode"
                 self.assertTrue((opencode / "agents/brainstorm.md").is_file())
@@ -79,6 +79,95 @@ class InstallTests(unittest.TestCase):
                 for legacy in ("agent", "command", "skill"):
                     self.assertFalse((opencode / legacy).exists())
                 self.assertTrue((self.home / ".codex/agents/brainstorm.toml").is_file())
+
+    def test_retired_skills_are_backed_up_only_for_selected_harnesses(self):
+        layouts = {
+            ".agents/skills": "command-code-full-review",
+            ".claude/skills": "code-full-review",
+            ".config/opencode/skills": "command-code-full-review",
+        }
+        for directory, review in layouts.items():
+            retired = ("mode-brainstorm", "using-code-review", review)
+            for name in retired:
+                path = self.home / directory / name / "SKILL.md"
+                path.parent.mkdir(parents=True)
+                path.write_text(f"local {directory}/{name}")
+
+        self.install("codex")
+        for directory, review in layouts.items():
+            retired = ("mode-brainstorm", "using-code-review", review)
+            for name in retired:
+                path = self.home / directory / name / "SKILL.md"
+                with self.subTest(directory=directory, skill=name):
+                    if directory == ".agents/skills":
+                        self.assertFalse(path.parent.exists())
+                        backups = list((self.home / ".ai-agents-backups").glob(
+                            f"*/{directory}/{name}/SKILL.md"))
+                        self.assertEqual([p.read_text() for p in backups],
+                                         [f"local {directory}/{name}"])
+                    else:
+                        self.assertEqual(path.read_text(), f"local {directory}/{name}")
+
+        self.install("claude", "opencode")
+        for directory, review in layouts.items():
+            for name in ("mode-brainstorm", "using-code-review", review):
+                self.assertFalse((self.home / directory / name).exists())
+            for name in ("code-review", "brainstorm-with-agent"):
+                self.assertTrue((self.home / directory / name / "SKILL.md").is_file())
+        result = self.install("--all")
+        self.assertNotIn("Backed up:", result.stdout)
+        self.assertNotIn("Installed:", result.stdout)
+
+    def test_review_names_not_previously_generated_for_a_harness_are_preserved(self):
+        for directory, name in ((".agents/skills", "code-full-review"),
+                                (".claude/skills", "command-code-full-review"),
+                                (".config/opencode/skills", "code-full-review")):
+            path = self.home / directory / name / "SKILL.md"
+            path.parent.mkdir(parents=True)
+            path.write_text("my own review workflow")
+
+        self.install("--all")
+
+        for directory, name in ((".agents/skills", "code-full-review"),
+                                (".claude/skills", "command-code-full-review"),
+                                (".config/opencode/skills", "code-full-review")):
+            self.assertEqual((self.home / directory / name / "SKILL.md").read_text(),
+                             "my own review workflow")
+
+    def test_declining_retirement_keeps_old_skill_and_allows_later_backup(self):
+        self.install("codex")
+        old = self.home / ".agents/skills/using-code-review/SKILL.md"
+        old.parent.mkdir()
+        old.write_text("local review guide")
+
+        result = self.run_install("codex", force=False, input_text="n\n")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(old.read_text(), "local review guide")
+        self.assertFalse((self.home / ".ai-agents-backups").exists())
+
+        result = self.run_install("codex", force=False, input_text="y\n")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertFalse(old.parent.exists())
+        backups = list((self.home / ".ai-agents-backups").glob(
+            "*/.agents/skills/using-code-review/SKILL.md"))
+        self.assertEqual([p.read_text() for p in backups], ["local review guide"])
+
+    def test_skipped_replacement_keeps_its_retired_skills(self):
+        self.install("codex")
+        replacement = self.home / ".agents/skills/code-review/SKILL.md"
+        replacement.write_text("keep my replacement")
+        for name in ("using-code-review", "command-code-full-review"):
+            old = replacement.parent.parent / name / "SKILL.md"
+            old.parent.mkdir()
+            old.write_text("keep old skill")
+
+        result = self.run_install("codex", force=False, input_text="n\n")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(replacement.read_text(), "keep my replacement")
+        for name in ("using-code-review", "command-code-full-review"):
+            self.assertEqual((replacement.parent.parent / name / "SKILL.md").read_text(),
+                             "keep old skill")
+        self.assertFalse((self.home / ".ai-agents-backups").exists())
 
     def test_opencode_v2_install_preserves_unrelated_entries(self):
         opencode = self.home / ".config/opencode"

@@ -3,4 +3,6 @@ description: Full code review orchestrating security, readability, performance, 
 model: {{model:deep_review}}
 ---
 
-{{prompt:code-full-review}}
+Use the `code-review` skill for a full review of the user's requested files or
+changes, covering all five specialist perspectives. Return findings without
+editing files unless the user also requests fixes.

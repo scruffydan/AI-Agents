@@ -242,7 +242,3 @@ Present a comprehensive summary to return to the main agent:
 - ? operator for error propagation
 - Descriptive error types
 - Avoid unwrap() in production code
-
-## Instructions
-
-$ARGUMENTS

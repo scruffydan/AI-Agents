@@ -84,7 +84,15 @@ Agents, commands, and skills are installed one entry at a time, so anything
 else in those directories is left alone. Unchanged files are skipped. Changed
 files require confirmation, and the replaced version is moved to
 `~/.ai-agents-backups/<timestamp>/` instead of being deleted. Removing a prompt
-from this repository does not remove its installed copy; delete that by hand.
+from this repository normally does not remove its installed copy.
+
+The installer explicitly migrates the retired review skills (`using-code-review`,
+`command-code-full-review`, and `code-full-review`) to `code-review`, and
+`mode-brainstorm` to `brainstorm-with-agent`. Once a replacement is installed,
+each old skill folder is moved to the backup directory after confirmation, or
+with `--force`. Local modifications are preserved in that backup. If replacement
+is skipped, its old skills remain installed. Other retired prompts still need
+manual removal; unrelated skills are left alone.
 
 OpenCode entries install into `~/.config/opencode/agents`, `commands`, and
 `skills`. Existing V1 `agent`, `command`, and `skill` directories are left in
@@ -177,15 +185,30 @@ finish those before installing. `--description` is optional for either command.
 ## Skills and modes
 
 All three harnesses receive every shared skill under `source/skills/`, plus
-brainstorming, thorough planning, and full code review skills. The shared skills
-are copied without changing their instructions.
+native templates for `brainstorm-with-agent` and `mode-thorough-plan`. The shared
+skills are copied without changing their instructions.
 
-- Codex: use `$mode-brainstorm`, `$mode-thorough-plan`, or
-  `$command-code-full-review`.
-- Claude Code: use `/mode-brainstorm`, `/mode-thorough-plan`, or `/code-full-review`.
-- OpenCode: load `@mode-brainstorm`, `@mode-thorough-plan`, or
-  `@command-code-full-review`. The `brainstorm` and `thorough-plan` primary agents
-  and `/code-full-review` command remain available.
+- Codex: use `$brainstorm-with-agent`, `$mode-thorough-plan`, or `$code-review`.
+- Claude Code: use `/brainstorm-with-agent`, `/mode-thorough-plan`, or `/code-review`.
+- OpenCode: load `@brainstorm-with-agent`, `@mode-thorough-plan`, or `@code-review`.
+  The `brainstorm` and `thorough-plan` primary agents remain available. The
+  `/code-full-review` command invokes the same `code-review` skill for a full review.
+
+`code-review` handles targeted reviews and explicit full reviews. Ordinary reviews
+use relevant perspectives; full reviews cover all five specialists. Findings are
+report-only unless fixes are also requested. Agent tools and permissions come
+from the current harness rather than assumptions in a shared skill.
+
+`brainstorming` supports design decisions in the current conversation when
+requirements or approaches need exploration. Routine edits and fully specified
+small changes do not need that workflow. `brainstorm-with-agent` uses the
+configured brainstorming model; `mode-thorough-plan` produces a plan without
+editing files and asks only questions that materially affect the outcome.
+
+`update-readme` owns README and existing AGENTS.md checks, while
+`verification-before-completion` owns verification evidence. Git skills reference
+these checks and reuse valid results when relevant inputs are unchanged. Commit
+messages follow the repository's conventions, including free-form subjects.
 
 Claude's brainstorming skill selects its configured model for the current turn.
 Codex's brainstorming skill uses the `brainstorm` custom agent to select its
