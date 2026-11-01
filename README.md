@@ -190,10 +190,23 @@ its edit and shell restrictions.
   The `brainstorm` and `thorough-plan` primary agents remain available. Request a
   full review through `code-review`; the `/code-full-review` shortcut is retired.
 
-`code-review` handles targeted reviews and explicit full reviews. Ordinary reviews
-use relevant perspectives; full reviews cover all five specialists. Findings are
-report-only unless fixes are also requested. Agent tools and permissions come
-from the current harness rather than assumptions in a shared skill.
+`code-review` has separate routes for reviewing code and evaluating supplied
+feedback. Targeted code reviews use relevant perspectives; explicit full reviews
+cover all five specialists. Feedback evaluation validates the supplied claims and
+proposed fixes without automatically launching specialists or a full review.
+Both routes remain report-only unless fixes are authorized. Agent tools and
+permissions come from the current harness rather than assumptions in a shared
+skill.
+
+`receiving-code-review` has been merged into `code-review`; use the existing
+`code-review` invocation for supplied feedback as well. After rebuilding and
+reinstalling, verify that `code-review/SKILL.md` and its sibling `feedback.md` are
+present. Preserve any local customizations, then explicitly remove the obsolete
+installed folder from each harness you use: `~/.agents/skills/receiving-code-review`,
+`~/.claude/skills/receiving-code-review`, or
+`~/.config/opencode/skills/receiving-code-review`. The installer preserves retired
+entries, so they otherwise remain discoverable. Replace old invocations and
+refresh skill discovery as needed.
 
 `brainstorming` supports design decisions in the current conversation when
 requirements or approaches need exploration. Routine edits and fully specified
