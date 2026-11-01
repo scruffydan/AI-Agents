@@ -179,7 +179,7 @@ class InstallTests(unittest.TestCase):
         for entry in ("agents/mine.md", "commands/mine.md", "skills/mine/SKILL.md", "agent/legacy.md"):
             self.assertEqual((opencode / entry).read_text(), "keep me")
 
-    def test_retired_opencode_command_is_backed_up_only_when_opencode_is_selected(self):
+    def test_retired_opencode_command_is_removed_only_when_opencode_is_selected(self):
         command = self.home / ".config/opencode/commands/code-full-review.md"
         command.parent.mkdir(parents=True)
         command.write_text("locally edited review command")
@@ -189,33 +189,23 @@ class InstallTests(unittest.TestCase):
 
         self.install("opencode")
         self.assertFalse(command.exists())
-        backups = list((self.home / ".ai-agents-backups").glob(
-            "*/.config/opencode/commands/code-full-review.md"))
-        self.assertEqual([p.read_text() for p in backups], ["locally edited review command"])
+        self.assertFalse((self.home / ".ai-agents-backups").exists())
         self.assertTrue((command.parent.parent / "skills/code-review/SKILL.md").is_file())
 
         result = self.install("opencode")
         self.assertNotIn("Backed up:", result.stdout)
         self.assertNotIn("Installed:", result.stdout)
 
-    def test_retired_opencode_command_requires_confirmation(self):
+    def test_retired_opencode_command_is_removed_without_confirmation_or_backup(self):
         self.install("opencode")
         command = self.home / ".config/opencode/commands/code-full-review.md"
         command.parent.mkdir(exist_ok=True)
-        command.write_text("keep until confirmed")
+        command.write_text("obsolete command")
 
-        for answer in ("n\n", ""):
-            result = self.run_install("opencode", force=False, input_text=answer)
-            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-            self.assertEqual(command.read_text(), "keep until confirmed")
-            self.assertFalse((self.home / ".ai-agents-backups").exists())
-
-        result = self.run_install("opencode", force=False, input_text="y\n")
+        result = self.run_install("opencode", force=False)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertFalse(command.exists())
-        backups = list((self.home / ".ai-agents-backups").glob(
-            "*/.config/opencode/commands/code-full-review.md"))
-        self.assertEqual([p.read_text() for p in backups], ["keep until confirmed"])
+        self.assertFalse((self.home / ".ai-agents-backups").exists())
 
     def test_skipped_review_skill_preserves_retired_opencode_command(self):
         self.install("opencode")

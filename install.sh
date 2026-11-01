@@ -145,14 +145,14 @@ install_entries() {
     done
 }
 
-# Retire only known obsolete entries after their replacement was installed. Keep
+# Retire only known renamed skills after their replacement was installed. Keep
 # local edits recoverable, and leave old entries alone if replacement was skipped.
-retire_entry() {
+retire_skill() {
     local old="$1" replacement="$2" generated="$3"
     [ -e "$old" ] || [ -L "$old" ] || return 0
     diff -rq "$generated" "$replacement" >/dev/null 2>&1 || return 0
     if [ "$FORCE" = false ]; then
-        printf "Back up retired entry %s (replaced by %s)? [y/N]: " "$old" "$replacement"
+        printf "Back up retired skill %s (replaced by %s)? [y/N]: " "$old" "$replacement"
         local answer
         read -r answer || answer=n
         case "$answer" in
@@ -169,9 +169,9 @@ retire_entry() {
 retire_skills() {
     local generated="$1" installed="$2" legacy_review="$3" old
     for old in using-code-review "$legacy_review"; do
-        retire_entry "$installed/$old" "$installed/code-review" "$generated/code-review"
+        retire_skill "$installed/$old" "$installed/code-review" "$generated/code-review"
     done
-    retire_entry "$installed/mode-brainstorm" "$installed/brainstorm-with-agent" \
+    retire_skill "$installed/mode-brainstorm" "$installed/brainstorm-with-agent" \
         "$generated/brainstorm-with-agent"
 }
 
@@ -204,8 +204,8 @@ for harness in "${HARNESSES[@]}"; do
     esac
     install_entries "$skills_source" "$skills_target"
     retire_skills "$skills_source" "$skills_target" "$legacy_review"
-    if [ "$harness" = opencode ]; then
-        retire_entry "$HOME/.config/opencode/commands/code-full-review.md" \
-            "$skills_target/code-review" "$skills_source/code-review"
+    if [ "$harness" = opencode ] &&
+        diff -rq "$skills_source/code-review" "$skills_target/code-review" >/dev/null 2>&1; then
+        rm -f -- "$HOME/.config/opencode/commands/code-full-review.md"
     fi
 done
