@@ -246,13 +246,30 @@ fetching pages in the main conversation.
 these checks and reuse valid results when relevant inputs are unchanged. Commit
 messages follow the repository's conventions, including free-form subjects.
 
+`git-commit` is the canonical workflow in the current conversation. It
+automatically uses the configured `git-commit` drafting agent when available and
+delegation is permitted; no separate request to check conventions is needed.
+The child reads repository guidance, the intended diff, and recent history on
+the configured cheaper drafting model. Raw history stays in the child's context;
+the parent receives the proposed message, reviewed files, a brief summary of
+changes and conventions, and concerns. The parent owns verification, staging,
+checking the proposal against the final staged diff, and committing within
+authorization. A message-only request does not authorize staging or committing.
+If delegation cannot be used, report the limitation and reuse reliable
+conventions already in context; otherwise ask how to proceed before loading
+history into the parent or substituting another model. `git-push` remains a
+separate workflow requiring publication authorization.
+
+The drafting agent retains its `git_commit` profile in `source/models.toml` and
+its native tool settings. Those settings enable Git inspection but do not create
+a separate read-only sandbox; its instructions prohibit editing, staging,
+committing, pushing, verification commands, and further delegation.
+
 Shared workflows scale planning, testing, and review to the task's stakes. They
 reuse established decisions and authorization rather than adding fixed approval
 or review loops. Specialist reviewers share one report format while retaining
 their domain checklists, language-specific guidance, and examples. Debugging
-retains its detailed testing and investigation techniques. The
-commit helper returns its proposal to the main agent, which handles user
-interaction and the actual commit.
+retains its detailed testing and investigation techniques.
 
 The brainstorming skill keeps the current conversation and model by default.
 Explicit configured-agent requests use the `brainstorm` agent in Codex and
