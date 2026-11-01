@@ -233,6 +233,6 @@ Done!
 
 **Subagents should use:**
 - **`verification-before-completion`** - Verify work before claiming completion
-- **`using-code-review`** - Code review agents for reviewer subagents
+- **`code-review`** - Targeted or full code review for reviewer subagents
 
 **Note:** This skill was adapted from [obra/superpowers](https://github.com/obra/superpowers). Some referenced skills (writing-plans, test-driven-development, finishing-a-development-branch) are available in the upstream project.

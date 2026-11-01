@@ -1,5 +1,5 @@
 ---
-description: Planning and analysis mode that asks clarifying questions before proceeding. Never assumes - always seeks clarity.
+description: Analyze requirements and code to create an implementation plan without modifying files.
 mode: primary
 permissions:
   - action: edit

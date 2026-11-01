@@ -54,7 +54,3 @@ This agent exists to:
 - List relevant file paths with line numbers
 - Include brief code snippets only when they add clarity
 - Note any assumptions or areas of uncertainty
-
-## Instructions
-
-$ARGUMENTS

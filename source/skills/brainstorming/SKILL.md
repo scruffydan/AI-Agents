@@ -1,54 +1,27 @@
 ---
 name: brainstorming
-description: "You MUST use this before any creative work - creating features, building components, adding functionality, or modifying behavior. Explores user intent, requirements and design before implementation."
+description: Use before implementation when a feature, behavior change, or architecture decision has unresolved requirements or meaningful design alternatives. Routine text edits and fully specified small changes do not need this workflow.
 ---
 
-# Brainstorming Ideas Into Designs
+# Explore a Design Before Implementation
 
-## Overview
+Understand the current code and the user's intended outcome. Reuse requirements,
+constraints, and decisions already established in the conversation. Match the
+amount of design work to the project's stakes and the change's complexity.
 
-Help turn ideas into fully formed designs and specs through natural collaborative dialogue.
+Ask focused questions only when missing information materially affects the design.
+Continue independent investigation while waiting. For meaningful alternatives,
+explain their trade-offs and recommend the simplest adequate approach.
 
-Start by understanding the current project context, then ask questions one at a time to refine the idea. Once you understand what you're building, present the design in small sections (200-300 words), checking after each section whether it looks right so far.
+Present the proposed behavior, affected components, data flow, and relevant error
+handling and verification. Keep the explanation proportional to the change;
+validate unresolved decisions without requiring approval after every section.
+Honor authorization already given for implementation.
 
-## The Process
+Record substantial agreed decisions in a design document when useful to the task
+or required by the repository. Do not create documents, branches, or commits just
+because brainstorming occurred. Use `implementation-workflow` for complex
+implementation, reusing the design rather than restarting requirements analysis.
 
-**Understanding the idea:**
-- Check out the current project state first (files, docs, recent commits)
-- Ask questions one at a time to refine the idea
-- Prefer multiple choice questions when possible, but open-ended is fine too
-- Only one question per message - if a topic needs more exploration, break it into multiple questions
-- Focus on understanding: purpose, constraints, success criteria
-
-**Exploring approaches:**
-- Propose 2-3 different approaches with trade-offs
-- Present options conversationally with your recommendation and reasoning
-- Lead with your recommended option and explain why
-
-**Presenting the design:**
-- Once you believe you understand what you're building, present the design
-- Break it into sections of 200-300 words
-- Ask after each section whether it looks right so far
-- Cover: architecture, components, data flow, error handling, testing
-- Be ready to go back and clarify if something doesn't make sense
-
-## After the Design
-
-**Documentation:**
-- Write the validated design to `docs/plans/YYYY-MM-DD-<topic>-design.md`
-- Write clearly and concisely
-- Commit the design document to git
-
-**Implementation (if continuing):**
-- Ask: "Ready to set up for implementation?"
-- Create a git worktree or branch for isolated workspace
-- Use the `implementation-workflow` skill to create a detailed implementation plan
-
-## Key Principles
-
-- **One question at a time** - Don't overwhelm with multiple questions
-- **Multiple choice preferred** - Easier to answer than open-ended when possible
-- **YAGNI ruthlessly** - Remove unnecessary features from all designs
-- **Explore alternatives** - Always propose 2-3 approaches before settling
-- **Incremental validation** - Present design in sections, validate each
-- **Be flexible** - Go back and clarify when something doesn't make sense
+This skill guides design in the current conversation. Use `brainstorm-with-agent`
+when the user requests the configured brainstorming model or agent.

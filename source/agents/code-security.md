@@ -152,7 +152,3 @@ Consider weighing security vs. readability.
 
 **However, for Critical/High vulnerabilities:**
 > Security should almost always win. A readable SQL injection is still a SQL injection.
-
-## Instructions
-
-$ARGUMENTS

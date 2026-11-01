@@ -126,12 +126,12 @@ git commit --dry-run
 ## Integration with Other Skills
 
 **Before committing:**
-- Review changes for quality
-- Run tests if available
-- Check for secrets (part of git-push skill)
+- Use `verification-before-completion` for relevant checks and their evidence.
+- Use `update-readme` for README and existing AGENTS.md accuracy.
+- Review the staged diff for unintended changes and sensitive data.
 
 **After committing:**
-- See `git-push` skill for pre-push checklist
+- Use `git-push` only when pushing is authorized; committing does not authorize it.
 
 ## Checklist
 
