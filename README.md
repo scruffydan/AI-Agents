@@ -87,13 +87,6 @@ files require confirmation, and the replaced version is moved to
 `~/.ai-agents-backups/<timestamp>/` instead of being deleted. Removing a prompt
 from this repository normally does not remove its installed copy.
 
-The installer explicitly migrates the retired review skills (`using-code-review`,
-`command-code-full-review`, and `code-full-review`) to `code-review`, and
-`mode-brainstorm` to `brainstorm-with-agent`. Once a replacement is installed,
-each old skill folder is moved to the backup directory after confirmation, or
-with `--force`. Local modifications are preserved in that backup. If replacement
-is skipped, its old skills remain installed.
-
 OpenCode's retired `commands/code-full-review.md` shortcut is removed directly,
 without confirmation or backup, once the shared `code-review` skill is installed.
 Skipping the replacement skill preserves that command. Other retired prompts
