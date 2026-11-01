@@ -1,3 +1,8 @@
+---
+name: mode-thorough-plan
+description: Use when the user requests a detailed implementation plan or architecture analysis without making changes.
+---
+
 # Thorough Planning
 
 Analyze the requested change and produce an actionable plan without editing files
