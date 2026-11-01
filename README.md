@@ -215,8 +215,8 @@ messages follow the repository's conventions, including free-form subjects.
 Shared workflows scale planning, testing, and review to the task's stakes. They
 reuse established decisions and authorization rather than adding fixed approval
 or review loops. Specialist reviewers share one report format while retaining
-their domain checklists, language-specific guidance, and examples. Skill authoring
-and debugging retain their detailed testing and investigation techniques. The
+their domain checklists, language-specific guidance, and examples. Debugging
+retains its detailed testing and investigation techniques. The
 commit helper returns its proposal to the main agent, which handles user
 interaction and the actual commit.
 
