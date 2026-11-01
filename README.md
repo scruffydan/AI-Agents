@@ -209,11 +209,22 @@ explicitly remove its obsolete installed folder from each harness you use:
 `~/.config/opencode/skills/brainstorm-with-agent`. The installer preserves retired
 entries, so they otherwise remain visible alongside the merged skill.
 
-External documentation research uses the `docs-fetcher` subagent through
-`using-docs-fetcher`. Searches and page contents stay in the child's context;
-the main conversation receives focused findings, examples, and source links.
-If delegation is unavailable, the skill reports the limitation instead of
-fetching pages in the main conversation.
+External documentation research uses the `docs-fetcher` subagent under the shared
+AGENTS.md instructions. Briefs include the concrete question, installed or
+targeted version, known official URLs, and relevant constraints. Searches, page
+contents, and follow-up research stay in the child's context; the main
+conversation receives focused findings, examples, primary-source links, version
+caveats, and uncertainty. If delegation is prohibited or the agent or required web
+capability is unavailable, report the limitation and continue independent
+authorized work without fetching documentation in the main conversation.
+
+`using-docs-fetcher` has been retired into the shared AGENTS.md instructions.
+After rebuilding and reinstalling the updated base instructions, manually remove
+its obsolete installed folder from each harness you use, preserving any local
+customizations first: `~/.agents/skills/using-docs-fetcher`,
+`~/.claude/skills/using-docs-fetcher`, or
+`~/.config/opencode/skills/using-docs-fetcher`. The installer preserves retired
+entries. The `docs-fetcher` agent and its model and tool settings remain available.
 
 `update-readme` owns README and existing AGENTS.md checks, while
 `verification-before-completion` owns verification evidence. Git skills reference
