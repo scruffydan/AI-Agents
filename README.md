@@ -201,6 +201,12 @@ small changes do not need that workflow. `brainstorm-with-agent` uses the
 configured brainstorming model; `mode-thorough-plan` produces a plan without
 editing files and asks only questions that materially affect the outcome.
 
+External documentation research uses the `docs-fetcher` subagent through
+`using-docs-fetcher`. Searches and page contents stay in the child's context;
+the main conversation receives focused findings, examples, and source links.
+If delegation is unavailable, the skill reports the limitation instead of
+fetching pages in the main conversation.
+
 `update-readme` owns README and existing AGENTS.md checks, while
 `verification-before-completion` owns verification evidence. Git skills reference
 these checks and reuse valid results when relevant inputs are unchanged. Commit
