@@ -135,7 +135,8 @@ class BuildTests(unittest.TestCase):
                     self.assertIn(f"name: {name}\n", content)
                     self.assertNotIn("{{prompt:", content)
             for retired in ("mode-brainstorm", "using-code-review", "code-full-review",
-                            "command-code-full-review"):
+                            "command-code-full-review", "executing-plans",
+                            "subagent-driven-development"):
                 with self.subTest(harness=harness, retired=retired):
                     self.assertFalse((output / retired).exists())
 
@@ -156,9 +157,6 @@ class BuildTests(unittest.TestCase):
 
     def test_referenced_shared_skill_support_files_exist(self):
         references = {
-            "subagent-driven-development": (
-                "implementer-prompt.md", "spec-reviewer-prompt.md", "code-quality-reviewer-prompt.md",
-            ),
             "systematic-debugging": (
                 "root-cause-tracing.md", "defense-in-depth.md", "condition-based-waiting.md",
             ),

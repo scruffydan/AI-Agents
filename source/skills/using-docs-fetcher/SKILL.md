@@ -1,28 +1,34 @@
 ---
 name: using-docs-fetcher
-description: How to use @docs-fetcher to pull current, targeted external documentation (APIs, SDKs, configs, errors, version changes). Use when you need authoritative docs or examples instead of relying on memory.
+description: Delegate external documentation research to the docs-fetcher subagent. Use when API, framework, configuration, or version-specific facts need checking while keeping documentation pages out of the main conversation.
 ---
 
 # Request Targeted Documentation
 
-Use the `docs-fetcher` agent when a focused external lookup benefits from a
-separate context. Give it the concrete question, installed or targeted version,
-known official URLs, and relevant constraints. Request only the details or
-examples needed for the task, with source links and compatibility caveats.
+Use the environment's delegation tools to launch the `docs-fetcher` subagent for
+external documentation lookups. Keep searching, fetching, and extracting pages
+in that child's context. The parent should receive focused findings, not full
+documentation pages.
+
+Give the child the concrete question, installed or targeted version, known
+official URLs, and relevant constraints. Request a compact answer with the needed
+details or examples, source links, version caveats, and unresolved uncertainty.
+The child performs the lookup itself without delegating further.
 
 For example: "Check the targeted PostgreSQL version's JSONB containment operators
 and the indexes supported for this query. Return official sources and a small
 applicable example."
 
-Use the environment's actual delegation tools and honor user restrictions. If the
-agent or needed web capability is unavailable, fetch the relevant primary
-documentation directly when permitted and state any limitation. Prefer local
-code and types for internal implementation questions; use `explore` for a
-separate codebase investigation when appropriate.
+Use the returned findings to continue the task. Send follow-up documentation
+questions to the child rather than fetching the pages again in the parent.
+
+Honor the user's delegation restrictions. If the agent or needed web capability
+is unavailable, explain the limitation and continue independent authorized work.
+Do not search or fetch documentation in the main conversation as a fallback.
+Local code, types, and repository documentation can still be inspected directly;
+this isolation rule applies to external documentation lookups.
 
 ## Example Requests
-
-
 
 ```
 @docs-fetcher: Fetch the Stripe Payment Intents API documentation,
