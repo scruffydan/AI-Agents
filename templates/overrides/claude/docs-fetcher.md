@@ -1,7 +1,7 @@
 ---
 name: {{agent:name}}
 description: {{agent:description}}
-tools: WebFetch
+tools: WebSearch, WebFetch
 model: {{agent:model}}
 ---
 

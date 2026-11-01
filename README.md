@@ -249,9 +249,12 @@ double-quoted strings and keep the body token inside a multiline double-quoted
 string, as shown in the default template. The renderer escapes inserted values
 for those positions.
 
-Permissions, tool lists, and reasoning settings stay in native templates. The
-defaults preserve the existing settings; they do not promise equivalent permission
-behavior across harnesses. An override for a missing agent or a disabled target
+Tool lists and reasoning settings stay in native templates. Claude's review
+agents use file reading and search tools; its documentation and sidebar agents
+can search the web and fetch pages. OpenCode permissions also live in templates.
+Codex custom agents inherit the parent session's sandbox and approval policy;
+their agent files do not establish a separate permission boundary. Report-only
+instructions still apply. An override for a missing agent or a disabled target
 is an error: remove or rename it when changing the agent's name or targets.
 
 ## Edit shared instructions
