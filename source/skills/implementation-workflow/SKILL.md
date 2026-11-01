@@ -3,100 +3,27 @@ name: implementation-workflow
 description: Use when implementing complex features, substantial refactors, or high-risk changes requiring coordinated architecture, testing, and delivery decisions.
 ---
 
-# Implementation Workflow
+# Implement a Complex Change
 
-This document outlines the systematic approach for implementing complex technical solutions.
+Scale the process to the project's users, lifespan, and tolerance for downtime or
+data loss. Use existing architecture and dependencies where adequate. Routine
+edits do not need a formal design or every step below.
 
-Use `brainstorming` when the design still needs exploration, and
-`mode-thorough-plan` for an analysis-only request. Reuse established requirements
-and designs rather than repeating those conversations. Routine edits do not need
-this full methodology. Follow `verification-before-completion` for evidence of
-completed checks and `update-readme` for documentation checks.
+1. Establish the intended behavior, acceptance criteria, constraints, and relevant
+   callers. Reuse decisions already made. Use `brainstorming` for unresolved
+   design choices or `mode-thorough-plan` for a planning-only request.
+2. Choose the simplest adequate design. Identify affected interfaces, data changes,
+   dependencies, and failure paths. Explain meaningful trade-offs before making
+   a consequential choice; avoid speculative infrastructure or flexibility.
+3. Implement in small, verifiable steps. Preserve unrelated work and compatibility
+   constraints. Use `executing-plans` for a written plan and delegate only when
+   authorized and useful.
+4. Verify the changed behavior and relevant failure paths. Match security review
+   and regression coverage to the actual risks. Use `code-review` when a review
+   is requested or warranted; check findings against the code before fixing them.
+5. Optimize only when requirements or measurements show a problem. Record material
+   design decisions when useful, update documentation with `update-readme`, and
+   use `verification-before-completion` for the final handoff.
 
-## Implementation Methodology
-
-### 1. Requirements Analysis
-**Deep understanding of technical specifications and acceptance criteria**
-
-- Review all requirements and user stories thoroughly
-- Identify functional and non-functional requirements
-- Clarify ambiguous requirements with stakeholders
-- Define clear acceptance criteria
-- Document assumptions and constraints
-- Identify dependencies on other systems or components
-
-### 2. Architecture Planning
-**Component design, data flow, and integration patterns**
-
-- Design system architecture and component interactions
-- Define data models and schemas
-- Plan API contracts and interfaces
-- Identify integration points with existing systems
-- Consider scalability and performance requirements
-- Document architecture decisions and rationale
-- Create sequence diagrams for complex flows
-
-### 3. Implementation Strategy
-**Phased development approach with incremental delivery**
-
-- Break work into small, testable increments
-- Prioritize critical path and high-risk items
-- Plan for iterative development and feedback
-- Define milestones and checkpoints
-- Consider backward compatibility requirements
-- Plan for feature flags and gradual rollout
-- Identify opportunities for parallel development
-
-### 4. Quality Assurance
-**Testing, code review, and performance validation**
-
-- Write unit tests for new functionality
-- Create integration tests for system interactions
-- Develop end-to-end tests for critical user flows
-- Perform code reviews with peers
-- Validate performance against requirements
-- Test error handling and edge cases
-- Verify accessibility and usability standards
-
-### 5. Security Review
-**Vulnerability assessment and security best practices implementation**
-
-For automated security review, invoke the **@code-security** agent with target files.
-
-For manual review, verify:
-- Review code for common vulnerabilities (OWASP Top 10)
-- Validate authentication and authorization logic
-- Ensure proper input validation and sanitization
-- Check for secure data handling and encryption
-- Review dependencies for known vulnerabilities
-- Validate security headers and configurations
-- Perform threat modeling for sensitive features
-
-
-
-### 6. Optimization
-**Performance tuning and resource efficiency improvements**
-
-- Profile code to identify bottlenecks
-- Optimize database queries and indexes
-- Minimize network requests and payload sizes
-- Implement caching strategies where appropriate
-- Review memory usage and potential leaks
-- Optimize bundle sizes and load times
-- Consider lazy loading and code splitting
-
-## Application of Workflow
-
-- **Simple features**: May skip formal architecture planning
-- **Complex features**: Full workflow recommended
-- **Bug fixes**: Focus on quality assurance and testing
-- **Refactoring**: Emphasize testing and incremental changes
-- **Performance work**: Deep dive into optimization phase
-
-## Best Practices
-
-- **Document decisions**: Keep a record of why choices were made
-- **Communicate early**: Share design proposals before implementation
-- **Fail fast**: Identify issues in planning rather than implementation
-- **Iterate**: Be prepared to revise plans based on new information
-- **Measure**: Use metrics to validate improvements
+Continue within existing authorization. Commits, external messages, publishing,
+and deployment remain subject to the user's and repository's instructions.
