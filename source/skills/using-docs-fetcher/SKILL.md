@@ -19,3 +19,26 @@ agent or needed web capability is unavailable, fetch the relevant primary
 documentation directly when permitted and state any limitation. Prefer local
 code and types for internal implementation questions; use `explore` for a
 separate codebase investigation when appropriate.
+
+## Example Requests
+
+
+
+```
+@docs-fetcher: Fetch the Stripe Payment Intents API documentation,
+specifically how to create a payment intent with metadata.
+```
+
+### Version-Specific Queries
+
+```
+@docs-fetcher: Get the Next.js 13 App Router documentation about
+server components and data fetching patterns.
+```
+
+## When NOT to Use @docs-fetcher
+
+- For well-known, stable APIs you're confident about
+- When you just need a quick syntax reminder for common operations
+- For internal project documentation (use code exploration instead)
+- When the information is readily available in code comments or type definitions
