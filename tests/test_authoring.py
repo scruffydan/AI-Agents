@@ -85,7 +85,7 @@ class AuthoringTests(unittest.TestCase):
         self.cli("new.py", "agent", "missing-profile", "--profile", "missing", success=False)
         self.assertFalse((self.root / "source/agents/missing-profile.md").exists())
         self.cli("new.py", "agent", "brainstorm", success=False)
-        self.cli("new.py", "skill", "brainstorm-with-agent", success=False)
+        self.cli("new.py", "skill", "brainstorming", success=False)
 
     def test_failed_build_preserves_previous_output(self):
         self.cli("build.py")
