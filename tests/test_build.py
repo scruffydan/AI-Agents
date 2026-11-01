@@ -173,8 +173,9 @@ class BuildTests(unittest.TestCase):
     def test_opencode_v2_build_has_native_directories_and_no_legacy_agent_fields(self):
         self.build("opencode", "--work")
         output = self.root / "build/opencode"
-        for name in ("agents", "commands", "skills"):
+        for name in ("agents", "skills"):
             self.assertTrue((output / name).is_dir())
+        self.assertFalse((output / "commands/code-full-review.md").exists())
         for name in ("agent", "command", "skill"):
             self.assertFalse((output / name).exists())
         for agent in (output / "agents").glob("*.md"):

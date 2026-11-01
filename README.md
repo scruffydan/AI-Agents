@@ -53,7 +53,8 @@ is replaced. Finder's `.DS_Store` files are ignored when scanning templates and
 overrides. YAML templates remain directly editable; the build does not validate
 their harness-specific fields.
 
-OpenCode output uses V2's `agents/`, `commands/`, and `skills/` directories.
+OpenCode output uses V2's `agents/` and `skills/` directories, plus `commands/`
+when command templates are present.
 Agent permissions use ordered `permissions` rules, and reasoning effort is
 selected with a model variant such as `openai/gpt-6.1-sol#high`.
 
@@ -88,10 +89,12 @@ from this repository normally does not remove its installed copy.
 
 The installer explicitly migrates the retired review skills (`using-code-review`,
 `command-code-full-review`, and `code-full-review`) to `code-review`, and
-`mode-brainstorm` to `brainstorm-with-agent`. Once a replacement is installed,
-each old skill folder is moved to the backup directory after confirmation, or
-with `--force`. Local modifications are preserved in that backup. If replacement
-is skipped, its old skills remain installed. Other retired prompts still need
+`mode-brainstorm` to `brainstorm-with-agent`. OpenCode's retired
+`commands/code-full-review.md` shortcut also migrates to the shared `code-review`
+skill. Once a replacement is installed, each old entry is moved to the backup
+directory after confirmation, or with `--force`. Local modifications are preserved
+in that backup. If replacement is skipped, its old entries remain installed.
+Other retired prompts still need
 manual removal; unrelated skills are left alone.
 
 OpenCode entries install into `~/.config/opencode/agents`, `commands`, and
@@ -191,8 +194,8 @@ skills are copied without changing their instructions.
 - Codex: use `$brainstorm-with-agent`, `$mode-thorough-plan`, or `$code-review`.
 - Claude Code: use `/brainstorm-with-agent`, `/mode-thorough-plan`, or `/code-review`.
 - OpenCode: load `@brainstorm-with-agent`, `@mode-thorough-plan`, or `@code-review`.
-  The `brainstorm` and `thorough-plan` primary agents remain available. The
-  `/code-full-review` command invokes the same `code-review` skill for a full review.
+  The `brainstorm` and `thorough-plan` primary agents remain available. Request a
+  full review through `code-review`; the `/code-full-review` shortcut is retired.
 
 `code-review` handles targeted reviews and explicit full reviews. Ordinary reviews
 use relevant perspectives; full reviews cover all five specialists. Findings are
