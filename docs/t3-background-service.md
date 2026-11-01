@@ -5,7 +5,8 @@ service owns the backend, and the desktop connects as a client with Local off.
 
 ## Install the configuration
 
-From this checkout, in an ordinary terminal with `gh` on PATH:
+From this checkout, in a terminal in this Mac user's logged-in desktop session,
+with `gh` on PATH:
 
 ```sh
 ./t3-service-env.sh
@@ -23,10 +24,15 @@ remote URLs and global Git/SSH configuration are unchanged. These settings reach
 the service and children that inherit its environment; separately launched
 terminals keep their existing SSH behavior.
 
-This deliberately installs a fixed four-entry Git configuration. If the service
-manager inherits other indexed `GIT_CONFIG_*` settings, this file supersedes
-that indexed configuration; include any settings you still need manually before
-starting the service. The official app's Git driver appends its own settings.
+The script reads only `GIT_CONFIG_COUNT` from the user's GUI launchd context.
+It leaves existing inherited key/value entries untouched, adds the four settings
+at the next available indices, and increases the count by four. It checks the
+bootstrap manager name and user first, requiring the current user's Aqua GUI
+context used by T3's LaunchAgent. Query failures or invalid
+counts stop installation rather than silently resetting the count. It does not
+read inherited values, which may contain credentials. The official app's Git
+driver appends its own settings too. If launchd's base configuration changes,
+rerun the script before restarting T3; the env file records the count at setup time.
 
 ## Activate separately
 
@@ -86,5 +92,6 @@ References: [background service](https://github.com/pingdotgg/t3code/blob/v0.1.6
 [remote access](https://github.com/pingdotgg/t3code/blob/v0.1.6/docs/user/remote-access.md),
 [service env loading](https://github.com/pingdotgg/t3code/blob/v0.1.6/apps/server/src/serviceLauncher.ts),
 [state paths](https://github.com/pingdotgg/t3code/blob/v0.1.6/apps/server/src/config.ts),
+[launchctl commands](https://github.com/apple-oss-distributions/launchd/blob/main/man/launchctl.1),
 [Git config](https://git-scm.com/docs/git-config),
 [credential helpers](https://git-scm.com/docs/gitcredentials).
