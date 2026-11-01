@@ -136,7 +136,7 @@ class BuildTests(unittest.TestCase):
                     self.assertNotIn("{{prompt:", content)
             for retired in ("mode-brainstorm", "using-code-review", "code-full-review",
                             "command-code-full-review", "executing-plans",
-                            "subagent-driven-development"):
+                            "subagent-driven-development", "writing-skills"):
                 with self.subTest(harness=harness, retired=retired):
                     self.assertFalse((output / retired).exists())
 
