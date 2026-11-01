@@ -210,6 +210,12 @@ editing files and asks only questions that materially affect the outcome.
 these checks and reuse valid results when relevant inputs are unchanged. Commit
 messages follow the repository's conventions, including free-form subjects.
 
+Shared workflows scale planning, testing, and review to the task's stakes. They
+reuse established decisions and authorization rather than adding fixed approval
+or review loops. Specialist reviewers share one report format and keep their
+instructions focused on their own area. The commit helper returns its proposal
+to the main agent, which handles user interaction and the actual commit.
+
 Claude's brainstorming skill selects its configured model for the current turn.
 Codex's brainstorming skill uses the `brainstorm` custom agent to select its
 configured model. OpenCode retains an existing session's selected model when
