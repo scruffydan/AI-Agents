@@ -19,3 +19,16 @@ Complete this check before committing or handing off user-facing changes. Reuse 
 valid check from this session while its relevant inputs are unchanged. Use
 `verification-before-completion` for test and build evidence instead of repeating
 that workflow here.
+
+## Common Changes Requiring README Updates
+
+| Change Type | README Section to Update |
+|-------------|-------------------------|
+| New feature | Features, Usage, Examples |
+| New command/flag | Usage, CLI Reference |
+| Breaking change | Migration, Breaking Changes |
+| New dependency | Installation, Requirements |
+| Changed config | Configuration, Setup |
+| API change | API Reference, Examples |
+| New environment variable | Configuration |
+| Removed feature | Remove from Features |
