@@ -134,7 +134,8 @@ class BuildTests(unittest.TestCase):
                     self.assertNotIn("{{prompt:", content)
             for retired in ("brainstorm-with-agent", "mode-brainstorm", "using-code-review", "code-full-review",
                             "command-code-full-review", "executing-plans",
-                            "subagent-driven-development", "writing-skills", "using-docs-fetcher"):
+                            "subagent-driven-development", "writing-skills", "receiving-code-review",
+                            "using-docs-fetcher"):
                 with self.subTest(harness=harness, retired=retired):
                     self.assertFalse((output / retired).exists())
 
@@ -158,16 +159,22 @@ class BuildTests(unittest.TestCase):
 
     def test_referenced_shared_skill_support_files_exist(self):
         references = {
+            "code-review": ("feedback.md",),
             "systematic-debugging": (
                 "root-cause-tracing.md", "defense-in-depth.md", "condition-based-waiting.md",
+                "five-whys.md",
             ),
+            "five-whys": ("../systematic-debugging/five-whys.md",),
         }
-        for skill, filenames in references.items():
-            for filename in filenames:
-                with self.subTest(skill=skill, resource=filename):
-                    path = self.root / "source/skills" / skill / filename
-                    self.assertTrue(path.is_file())
-                    self.assertTrue(path.read_text().strip())
+        self.build()
+        for directory in ("source/skills", "build/codex/.agents/skills",
+                          "build/claude/skills", "build/opencode/skills"):
+            for skill, filenames in references.items():
+                for filename in filenames:
+                    with self.subTest(directory=directory, skill=skill, resource=filename):
+                        path = self.root / directory / skill / filename
+                        self.assertTrue(path.is_file())
+                        self.assertTrue(path.read_text().strip())
 
     def test_opencode_v2_build_has_native_directories_and_no_legacy_agent_fields(self):
         self.build("opencode", "--work")
