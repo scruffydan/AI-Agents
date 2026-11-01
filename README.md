@@ -179,14 +179,14 @@ finish those before installing. `--description` is optional for either command.
 ## Skills and modes
 
 All three harnesses receive every shared skill under `source/skills/`, including
-`mode-thorough-plan`, plus native templates for `brainstorm-with-agent`. The
-shared skills are copied without changing their instructions. OpenCode's
+`brainstorming` and `mode-thorough-plan`. Shared skills are copied without changing
+their instructions. OpenCode's
 `thorough-plan` primary agent loads the shared planning skill while retaining
 its edit and shell restrictions.
 
-- Codex: use `$brainstorm-with-agent`, `$mode-thorough-plan`, or `$code-review`.
-- Claude Code: use `/brainstorm-with-agent`, `/mode-thorough-plan`, or `/code-review`.
-- OpenCode: load `@brainstorm-with-agent`, `@mode-thorough-plan`, or `@code-review`.
+- Codex: use `$brainstorming`, `$mode-thorough-plan`, or `$code-review`.
+- Claude Code: use `/brainstorming`, `/mode-thorough-plan`, or `/code-review`.
+- OpenCode: load `@brainstorming`, `@mode-thorough-plan`, or `@code-review`.
   The `brainstorm` and `thorough-plan` primary agents remain available. Request a
   full review through `code-review`; the `/code-full-review` shortcut is retired.
 
@@ -197,9 +197,17 @@ from the current harness rather than assumptions in a shared skill.
 
 `brainstorming` supports design decisions in the current conversation when
 requirements or approaches need exploration. Routine edits and fully specified
-small changes do not need that workflow. `brainstorm-with-agent` uses the
-configured brainstorming model; `mode-thorough-plan` produces a plan without
-editing files and asks only questions that materially affect the outcome.
+small changes do not need that workflow. When explicitly asked to use the
+configured brainstorming model or agent, the same skill routes to read-only
+creative exploration. `mode-thorough-plan` produces a plan without editing files
+and asks only questions that materially affect the outcome.
+
+`brainstorm-with-agent` has been merged into `brainstorming`. After reinstalling,
+explicitly remove its obsolete installed folder from each harness you use:
+`~/.agents/skills/brainstorm-with-agent`,
+`~/.claude/skills/brainstorm-with-agent`, or
+`~/.config/opencode/skills/brainstorm-with-agent`. The installer preserves retired
+entries, so they otherwise remain visible alongside the merged skill.
 
 External documentation research uses the `docs-fetcher` subagent through
 `using-docs-fetcher`. Searches and page contents stay in the child's context;
@@ -220,11 +228,11 @@ retains its detailed testing and investigation techniques. The
 commit helper returns its proposal to the main agent, which handles user
 interaction and the actual commit.
 
-Claude's brainstorming skill selects its configured model for the current turn.
-Codex's brainstorming skill uses the `brainstorm` custom agent to select its
-configured model. OpenCode retains an existing session's selected model when
-changing agents, so select the brainstorm model in `/models` as well as the
-`brainstorm` agent.
+The brainstorming skill keeps the current conversation and model by default.
+Explicit configured-agent requests use the `brainstorm` agent in Codex and
+Claude Code, with model selection in the native agent templates. OpenCode retains
+an existing session's selected model when changing agents, so select the
+configured brainstorm model in `/models` as well as the `brainstorm` primary agent.
 
 ## Customize an agent for one harness
 
