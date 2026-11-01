@@ -90,40 +90,28 @@ class InstallTests(unittest.TestCase):
         for entry in ("agents/mine.md", "commands/mine.md", "skills/mine/SKILL.md", "agent/legacy.md"):
             self.assertEqual((opencode / entry).read_text(), "keep me")
 
-    def test_retired_opencode_command_is_removed_only_when_opencode_is_selected(self):
+    def test_existing_commands_are_preserved_and_repeat_install_is_unchanged(self):
         command = self.home / ".config/opencode/commands/code-full-review.md"
         command.parent.mkdir(parents=True)
         command.write_text("locally edited review command")
 
-        self.install("codex")
-        self.assertEqual(command.read_text(), "locally edited review command")
-
         self.install("opencode")
-        self.assertFalse(command.exists())
+
+        self.assertEqual(command.read_text(), "locally edited review command")
         self.assertFalse((self.home / ".ai-agents-backups").exists())
         self.assertTrue((command.parent.parent / "skills/code-review/SKILL.md").is_file())
 
         result = self.install("opencode")
         self.assertNotIn("Backed up:", result.stdout)
         self.assertNotIn("Installed:", result.stdout)
+        self.assertEqual(command.read_text(), "locally edited review command")
 
-    def test_retired_opencode_command_is_removed_without_confirmation_or_backup(self):
-        self.install("opencode")
-        command = self.home / ".config/opencode/commands/code-full-review.md"
-        command.parent.mkdir(exist_ok=True)
-        command.write_text("obsolete command")
-
-        result = self.run_install("opencode", force=False)
-        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-        self.assertFalse(command.exists())
-        self.assertFalse((self.home / ".ai-agents-backups").exists())
-
-    def test_skipped_review_skill_preserves_retired_opencode_command(self):
+    def test_skipped_skill_and_unrelated_command_are_preserved(self):
         self.install("opencode")
         root = self.home / ".config/opencode"
         replacement = root / "skills/code-review/SKILL.md"
         replacement.write_text("keep my review skill")
-        command = root / "commands/code-full-review.md"
+        command = root / "commands/mine.md"
         command.parent.mkdir(exist_ok=True)
         command.write_text("keep my review command")
 
