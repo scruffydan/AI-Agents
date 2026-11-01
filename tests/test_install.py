@@ -71,14 +71,16 @@ class InstallTests(unittest.TestCase):
                 for directory in (".config/opencode/skills", ".claude/skills", ".agents/skills"):
                     for skill in (self.root / "source/skills").glob("*/SKILL.md"):
                         self.assertTrue((self.home / directory / skill.parent.name / "SKILL.md").is_file())
-                    for mode in ("brainstorm-with-agent", "mode-thorough-plan"):
+                    for mode in ("brainstorming", "mode-thorough-plan"):
                         self.assertTrue((self.home / directory / mode / "SKILL.md").is_file())
+                    self.assertFalse((self.home / directory / "brainstorm-with-agent").exists())
                 opencode = self.home / ".config/opencode"
                 self.assertTrue((opencode / "agents/brainstorm.md").is_file())
                 self.assertFalse((opencode / "commands/code-full-review.md").exists())
                 for legacy in ("agent", "command", "skill"):
                     self.assertFalse((opencode / legacy).exists())
                 self.assertTrue((self.home / ".codex/agents/brainstorm.toml").is_file())
+                self.assertTrue((self.home / ".claude/agents/brainstorm.md").is_file())
 
     def test_opencode_v2_install_preserves_unrelated_entries(self):
         opencode = self.home / ".config/opencode"

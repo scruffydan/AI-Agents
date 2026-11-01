@@ -86,8 +86,6 @@ class BuildTests(unittest.TestCase):
             with self.subTest(args=args):
                 self.build("opencode", *args)
                 self.assertIn(f"model: {model}\n", brainstorm.read_text())
-                skill = self.root / "build/opencode/skills/brainstorm-with-agent/SKILL.md"
-                self.assertIn(f"select `{model}`", skill.read_text())
 
     def test_github_copilot_is_rejected_without_replacing_build(self):
         self.build("opencode")
@@ -129,12 +127,12 @@ class BuildTests(unittest.TestCase):
                             (output / source.parent.name / resource.name).read_bytes(),
                             resource.read_bytes(),
                         )
-            for name in ("brainstorm-with-agent", "mode-thorough-plan", "code-review"):
+            for name in ("brainstorming", "mode-thorough-plan", "code-review"):
                 with self.subTest(harness=harness, skill=name):
                     content = (output / name / "SKILL.md").read_text()
                     self.assertIn(f"name: {name}\n", content)
                     self.assertNotIn("{{prompt:", content)
-            for retired in ("mode-brainstorm", "using-code-review", "code-full-review",
+            for retired in ("brainstorm-with-agent", "mode-brainstorm", "using-code-review", "code-full-review",
                             "command-code-full-review", "executing-plans",
                             "subagent-driven-development", "writing-skills"):
                 with self.subTest(harness=harness, retired=retired):
@@ -144,16 +142,19 @@ class BuildTests(unittest.TestCase):
         for args in ((), ("--work",)):
             with self.subTest(args=args):
                 self.build(*args)
-                claude = self.root / "build/claude/skills/brainstorm-with-agent/SKILL.md"
+                claude = self.root / "build/claude/agents/brainstorm.md"
                 self.assertIn("model: claude-opus-5-5\n", claude.read_text())
                 self.assertIn("effort: high\n", claude.read_text())
+                self.assertIn("tools: Read, Glob, Grep\n", claude.read_text())
+                for path in ("claude/skills/brainstorming/SKILL.md",
+                             "codex/.agents/skills/brainstorming/SKILL.md"):
+                    header = (self.root / "build" / path).read_text().split("---", 2)[1]
+                    self.assertNotIn("\nmodel:", header)
                 agent = self.root / "build/codex/.codex/agents/brainstorm.toml"
                 parsed = tomllib.loads(agent.read_text())
                 self.assertEqual(parsed["model"], "gpt-6-astra")
                 self.assertEqual(parsed["model_reasoning_effort"], "medium")
                 self.assertFalse(parsed["features"]["shell_tool"])
-                skill = self.root / "build/codex/.agents/skills/brainstorm-with-agent/SKILL.md"
-                self.assertIn("`brainstorm` custom agent", skill.read_text())
 
     def test_referenced_shared_skill_support_files_exist(self):
         references = {
