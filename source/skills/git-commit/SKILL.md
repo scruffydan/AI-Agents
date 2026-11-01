@@ -1,110 +1,83 @@
 ---
 name: git-commit
-description: Git commit workflow that analyzes recent history to match repo-specific message conventions. Use when you don't have recent commit history in context and need to determine the repository's commit message style, or when crafting commit messages that need to match existing conventions.
+description: Prepare commit messages and create authorized commits using repository conventions. Use when preparing a commit or drafting its message; the current conversation owns the workflow and the configured drafting agent handles history analysis.
 ---
 
-# Git Commit Skill
+# Git Commit
 
-Inspect the working tree and preserve unrelated edits and untracked files. Follow
-the user's and repository's authorization for commits. Use the history below
-only when the relevant conventions are not already established in this session.
+The parent owns the commit workflow in the current conversation. Follow the
+user's and repository's authorization, preserve unrelated changes and untracked
+files, and keep each commit focused. A message-only request does not authorize
+staging or committing. Loading this skill only for message conventions does not
+request a new commit.
 
-## Pre-Commit Workflow
+## Prepare the changes
 
-### 1. Analyze Recent Commit History
+- Inspect the working tree and intended diff. For an authorized commit, stage
+  only the intended changes and inspect `git diff --cached`. Do not silently
+  include or unstage unrelated staged changes; resolve conflicting scope first.
+- Use `verification-before-completion` for relevant checks and `update-readme`
+  for README and existing AGENTS.md accuracy. Reuse valid session evidence.
+- For a message-only request, leave the index untouched and identify the diff or
+  changes the message should describe.
 
-**Run this when you don't have recent commit history in context**
+## Route message drafting
+
+Automatically use the configured `git-commit` drafting agent when available and
+delegation is permitted. Use its configured model profile so history analysis
+runs on the cheaper drafting model and older messages stay out of the parent's
+context. A separate user request to check conventions is unnecessary.
+
+Give the child the repository location, intended scope, and any conventions
+already established in the session. Let it inspect history itself; do not load
+older messages into the parent first. Request the proposed message, reviewed
+files, a brief summary of changes and conventions, and concerns, without raw Git
+logs.
+
+If delegation is unavailable or prohibited, report that limitation. The parent
+may draft using reliable conventions already in context. Otherwise, ask how to
+proceed before loading history into the parent or substituting another model.
+
+## Message analysis and drafting
+
+When acting as the drafting child, use only this section. Do not delegate again,
+edit or stage files, run verification commands, commit, push, or ask the user for
+approval. Report missing context or tools to the parent.
+
+Read applicable repository instructions and inspect the staged diff, or the
+parent-specified scope for a message-only request. If neither is available,
+report the missing scope instead of staging changes or inventing a message.
+
+Reuse established conventions when reliable. Otherwise inspect recent history:
 
 ```sh
 git log -10 --oneline --no-decorate
 ```
 
-**Analyze for patterns:**
-- Commit message format (conventional commits, custom format, free-form)
-- Prefix/type usage (feat:, fix:, chore:, etc.)
-- Capitalization style (sentence case, lowercase, title case)
-- Length preferences (short, detailed)
-- Scope usage (e.g., `feat(api):` vs `feat:`)
-- Special conventions (emoji, ticket numbers, etc.)
-
-### 2. Review Full Recent Messages
-
-For deeper pattern analysis:
+Read full messages only when body or footer conventions need clarification:
 
 ```sh
 git log -10 --format="%h %s%n%b%n"
 ```
 
-**Look for:**
-- Multi-line message style
-- Body content patterns
-- Footer conventions (Closes #, Co-authored-by:, etc.)
-- Breaking change indicators (BREAKING CHANGE:, !)
-- Reference formats (issue numbers, PR links)
+Follow repository instructions and match its conventions: conventional commits,
+free-form subjects, or custom formats. Match relevant prefixes, scopes,
+capitalization, subject length, body style, and issue references. Do not impose
+conventional prefixes on a repository that uses free-form messages. With little
+or no history, follow explicit guidance or propose a concise descriptive subject
+and mention the limited evidence.
 
-### 3. Match the Repository Style
+Describe the actual change and its purpose. Include a body or footer when useful
+or required by the repository, and do not invent issue references or claims.
+Return the proposal and concise supporting findings to the parent; keep raw
+history in the child's context.
 
-**Use the EXACT same conventions as recent commits:**
+## Validate and commit
 
-```
-<type>(<scope>): <description>
-```
-
-If commits are free-form, use the same free-form style without prefixes.
-
-### 4. Craft the Commit Message
-
-**Follow repository conventions discovered in steps 1-3:**
-
-```sh
-git commit -m "type(scope): description"
-
-# Or with body
-git commit -m "type(scope): description" -m "
-Detailed explanation of changes and reasoning.
-
-Closes #123"
-```
-
-## Commit Message Best Practices
-
-### Content Guidelines
-
-**Focus on WHY, not WHAT:**
-- ❌ "Changed login function"
-- ✅ "Fix race condition in login flow"
-
-**Be specific and actionable:**
-- ❌ "Update code"
-- ✅ "Optimize database query performance by 40%"
-
-**Keep subject line concise:**
-- Aim for 50-72 characters
-- Match the length style of recent commits
-
-**Use imperative mood (if repository does):**
-- "Add feature" not "Added feature"
-- "Fix bug" not "Fixes bug"
-- Unless recent commits use past tense consistently
-
-### Multi-line Messages
-
-When changes are complex:
-
-```sh
-git commit -m "feat: add payment processing" -m "
-Explain why, impact, and any references."
-```
-
-## Verification and Commit
-
-Before committing:
-
-- Use `verification-before-completion` for relevant checks and `update-readme`
-  for README and existing AGENTS.md accuracy. Reuse valid session evidence.
-- Inspect the diff for unintended edits, debugging leftovers, and sensitive data.
-- Stage only the intended paths and inspect `git diff --cached` before committing.
-- Keep each commit focused and report its hash and verification results.
+The parent checks the proposal against the final staged diff for accuracy,
+unintended edits, and sensitive data. If the intended changes have changed since
+drafting, update the proposal or request a new draft. Commit only within existing
+authorization, then report the hash and verification results.
 
 Do not add an approval step when the commit is already authorized. Amend or
 rewrite history only within authorization. Pushing requires separate permission;
