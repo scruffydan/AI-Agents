@@ -145,36 +145,6 @@ install_entries() {
     done
 }
 
-# Retire only known renamed skills after their replacement was installed. Keep
-# local edits recoverable, and leave old entries alone if replacement was skipped.
-retire_skill() {
-    local old="$1" replacement="$2" generated="$3"
-    [ -e "$old" ] || [ -L "$old" ] || return 0
-    diff -rq "$generated" "$replacement" >/dev/null 2>&1 || return 0
-    if [ "$FORCE" = false ]; then
-        printf "Back up retired skill %s (replaced by %s)? [y/N]: " "$old" "$replacement"
-        local answer
-        read -r answer || answer=n
-        case "$answer" in
-            y|Y|yes|YES) ;;
-            *) echo "Skipped: $old"; return ;;
-        esac
-    fi
-    local backup="$BACKUP_DIR/${old#"$HOME"/}"
-    mkdir -p "$(dirname "$backup")"
-    mv -- "$old" "$backup"
-    echo "Backed up: $old -> $backup"
-}
-
-retire_skills() {
-    local generated="$1" installed="$2" legacy_review="$3" old
-    for old in using-code-review "$legacy_review"; do
-        retire_skill "$installed/$old" "$installed/code-review" "$generated/code-review"
-    done
-    retire_skill "$installed/mode-brainstorm" "$installed/brainstorm-with-agent" \
-        "$generated/brainstorm-with-agent"
-}
-
 for harness in "${HARNESSES[@]}"; do
     case "$harness" in
         codex)
@@ -182,7 +152,6 @@ for harness in "${HARNESSES[@]}"; do
             install_entries "$ROOT/build/codex/.codex/agents" "$HOME/.codex/agents"
             skills_source="$ROOT/build/codex/.agents/skills"
             skills_target="$HOME/.agents/skills"
-            legacy_review=command-code-full-review
             ;;
         claude)
             target="$HOME/.claude"
@@ -190,7 +159,6 @@ for harness in "${HARNESSES[@]}"; do
             install_entries "$ROOT/build/claude/agents" "$target/agents"
             skills_source="$ROOT/build/claude/skills"
             skills_target="$target/skills"
-            legacy_review=code-full-review
             ;;
         opencode)
             target="$HOME/.config/opencode"
@@ -199,11 +167,9 @@ for harness in "${HARNESSES[@]}"; do
             install_entries "$ROOT/build/opencode/commands" "$target/commands"
             skills_source="$ROOT/build/opencode/skills"
             skills_target="$target/skills"
-            legacy_review=command-code-full-review
             ;;
     esac
     install_entries "$skills_source" "$skills_target"
-    retire_skills "$skills_source" "$skills_target" "$legacy_review"
     if [ "$harness" = opencode ] &&
         diff -rq "$skills_source/code-review" "$skills_target/code-review" >/dev/null 2>&1; then
         rm -f -- "$HOME/.config/opencode/commands/code-full-review.md"
