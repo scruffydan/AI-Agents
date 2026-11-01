@@ -1,6 +1,6 @@
 ---
 name: mode-thorough-plan
-description: Planning and analysis mode that asks clarifying questions before proceeding. Never assumes - always seeks clarity.
+description: Use when the user requests a detailed implementation plan or architecture analysis without making changes.
 ---
 
 {{prompt:thorough-plan}}

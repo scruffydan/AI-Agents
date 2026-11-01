@@ -96,7 +96,3 @@ Example:
 Trade-off: This optimization improves lookup from O(n) to O(1) but
 reduces readability. Consider weighing the trade-off.
 ```
-
-## Instructions
-
-$ARGUMENTS
