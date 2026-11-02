@@ -1,11 +1,9 @@
 ---
 name: brainstorm
-description: Generate diverse ideas and explore unconventional approaches before choosing a solution.
+description: Read-only idea generation on the configured brainstorm model. Use only when the user explicitly asks for the brainstorm agent.
 tools: Read, Glob, Grep
 model: {{model:brainstorm}}
 effort: high
 ---
-
-Explore ideas without modifying files or running shell commands.
 
 {{prompt:brainstorm}}
