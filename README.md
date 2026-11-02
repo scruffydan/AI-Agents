@@ -218,9 +218,10 @@ If delegation or web access is unavailable, report the limitation and continue
 independent work.
 
 For configured brainstorming in Codex and Claude Code, the `brainstorm` agent
-selects its model through native templates. OpenCode retains an existing session's
-model when changing agents; select the configured model in `/models` as well as
-the `brainstorm` primary agent.
+selects its model through native templates. In OpenCode, confirm the active
+model in `/models` after selecting the `brainstorm` primary agent. Selecting a
+primary agent by ID leaves the session model unchanged; desktop agent switching
+can restore that agent's remembered or configured model.
 
 ## Customize an agent for one harness
 
