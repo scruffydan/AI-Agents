@@ -243,6 +243,7 @@ class BuildTests(unittest.TestCase):
                 self.assertNotIn("\nreasoningEffort:", header)
                 self.assertNotIn("\ntemperature:", header)
                 self.assertNotIn("google-vertex-anthropic/", header)
+                self.assertIn('action: "*"\n    resource: "*"\n    effect: deny', header)
         reviewer = (output / "agents/code-security.md").read_text()
         self.assertIn("model: google-vertex/claude-opus-5-5#high\n", reviewer)
         self.assertIn("action: shell\n    resource: \"*\"\n    effect: ask", reviewer)
@@ -250,6 +251,11 @@ class BuildTests(unittest.TestCase):
         self.assertIn("model: google-vertex/claude-sonnet-5-5#high\n", commit)
         docs = (output / "agents/docs-fetcher.md").read_text()
         self.assertIn("model: google-vertex/claude-sonnet-5-5#high\n", docs)
+        docs_header = docs.split("---", 2)[1]
+        for action in ("websearch", "webfetch", "execute"):
+            self.assertIn(f'action: {action}\n    resource: "*"\n    effect: allow', docs_header)
+        self.assertNotIn("action: shell", docs_header)
+        self.assertNotIn("action: subagent", docs_header)
         explore = (output / "agents/explore.md").read_text()
         self.assertIn("model: google-vertex/gemini-4-argon#high\n", explore)
 

@@ -15,13 +15,24 @@ BASE_RULES = [
     {"action": "read", "resource": "*.env.example", "effect": "allow"},
 ]
 EFFECTS = ("allow", "deny", "ask")
+ANALYSIS_TEMPLATES = [
+    "templates/defaults/opencode/agent.md",
+    "templates/opencode/agents/brainstorm.md",
+    "templates/opencode/agents/thorough-plan.md",
+]
+READ_TEMPLATES = [
+    *ANALYSIS_TEMPLATES,
+    "templates/overrides/opencode/git-commit.md",
+]
+DOCS_TEMPLATE = "templates/overrides/opencode/docs-fetcher.md"
 
 
 def frontmatter_permissions(text):
     """Parse the simple V2 rule lists used by the OpenCode templates."""
     header = text.split("---", 2)[1]
     rules = [
-        {"action": action, "resource": resource, "effect": effect}
+        {"action": json.loads(action) if action.startswith('"') else action,
+         "resource": resource, "effect": effect}
         for action, resource, effect in re.findall(
             r'- action: (\S+)\n\s+resource: "([^"]*)"\n\s+effect: (\S+)', header
         )
@@ -54,6 +65,11 @@ class OpenCodeSecurityTests(unittest.TestCase):
         self.global_rules = self.config["permissions"]
         self.rules = BASE_RULES + self.global_rules
 
+    def agent_rules(self, template):
+        _, agent_rules = frontmatter_permissions((REPO / template).read_text())
+        self.assertTrue(agent_rules)
+        return self.rules + agent_rules
+
     def test_config_keeps_v2_rules_and_sharing_disabled(self):
         self.assertEqual(self.config["share"], "disabled")
         self.assertNotIn("permission", self.config)
@@ -76,17 +92,19 @@ class OpenCodeSecurityTests(unittest.TestCase):
                     with self.subTest(command=command):
                         self.assertEqual(decision(rules, "shell", command), "ask")
                 self.assertEqual(decision(rules, "read", "src/app.py"), "allow")
+                for action, resource in (("glob", "**/*.py"), ("grep", "timeout"),
+                                         ("execute", "*")):
+                    self.assertEqual(decision(rules, action, resource), "allow")
+                self.assertEqual(
+                    decision(rules, "external_directory", "/other/*"), "ask"
+                )
                 if path == templates[0]:
                     self.assertEqual(decision(rules, "question", "*"), "deny")
 
     def test_global_and_agent_rules_preserve_native_env_prompts(self):
-        templates = [REPO / "templates/defaults/opencode/agent.md",
-                     *sorted((REPO / "templates/opencode/agents").glob("*.md")),
-                     *sorted((REPO / "templates/overrides/opencode").glob("*.md"))]
         policies = [("global", self.rules)]
-        for path in templates:
-            _, agent_rules = frontmatter_permissions(path.read_text())
-            policies.append((str(path.relative_to(REPO)), self.rules + agent_rules))
+        for template in READ_TEMPLATES:
+            policies.append((template, self.agent_rules(template)))
         for policy, rules in policies:
             for resource, effect in (
                 (".env", "ask"), (".env.local", "ask"),
@@ -96,6 +114,61 @@ class OpenCodeSecurityTests(unittest.TestCase):
             ):
                 with self.subTest(policy=policy, resource=resource):
                     self.assertEqual(decision(rules, "read", resource), effect)
+
+    def test_custom_agents_deny_unapproved_tools_and_mcp_actions(self):
+        for template in [*READ_TEMPLATES, DOCS_TEMPLATE]:
+            rules = self.agent_rules(template)
+            for action, resource in (
+                ("edit", "src/app.py"), ("future_tool", "*"),
+                ("github_create_issue", "*"), ("documents_update_page", "*"),
+                ("documentation_read_page", "*"),
+                ("opencode_list_mcp_resources", "documentation"),
+                ("opencode_read_mcp_resource", "documentation:docs://api"),
+            ):
+                with self.subTest(template=template, action=action):
+                    self.assertEqual(decision(rules, action, resource), "deny")
+
+    def test_only_documentation_delegation_is_approved_for_analysis_agents(self):
+        for template in [*READ_TEMPLATES, DOCS_TEMPLATE]:
+            rules = self.agent_rules(template)
+            expected_docs = "allow" if template in ANALYSIS_TEMPLATES else "deny"
+            with self.subTest(template=template):
+                self.assertEqual(decision(rules, "subagent", "docs-fetcher"), expected_docs)
+                for child in ("general", "explore", "code-security", "docs-fetcher-extra"):
+                    self.assertEqual(decision(rules, "subagent", child), "deny")
+
+    def test_only_interactive_primaries_can_ask_questions(self):
+        for template in [*READ_TEMPLATES, DOCS_TEMPLATE]:
+            expected = "allow" if template.startswith("templates/opencode/agents/") else "deny"
+            with self.subTest(template=template):
+                self.assertEqual(decision(self.agent_rules(template), "question", "*"), expected)
+
+    def test_only_thorough_plan_can_load_its_required_skill(self):
+        for template in [*READ_TEMPLATES, DOCS_TEMPLATE]:
+            rules = self.agent_rules(template)
+            expected = "allow" if template.endswith("/thorough-plan.md") else "deny"
+            with self.subTest(template=template):
+                self.assertEqual(decision(rules, "skill", "mode-thorough-plan"), expected)
+                self.assertEqual(decision(rules, "skill", "git-push"), "deny")
+
+    def test_docs_fetcher_has_web_access_without_local_tools_or_delegation(self):
+        rules = self.agent_rules(DOCS_TEMPLATE)
+        for action, resource in (("websearch", "OpenCode V2 permissions"),
+                                 ("webfetch", "https://opencode.ai/v2/docs/permissions/"),
+                                 ("execute", "*")):
+            with self.subTest(action=action):
+                self.assertEqual(decision(rules, action, resource), "allow")
+        for action, resource in (("read", "src/app.py"), ("read", ".env"),
+                                 ("glob", "**/*.py"), ("grep", "timeout"),
+                                 ("shell", "git status"),
+                                 ("external_directory", "/other/*")):
+            with self.subTest(action=action):
+                self.assertEqual(decision(rules, action, resource), "deny")
+        for template in READ_TEMPLATES:
+            for action, resource in (("websearch", "OpenCode V2 permissions"),
+                                     ("webfetch", "https://opencode.ai/v2/docs/permissions/")):
+                with self.subTest(template=template, action=action):
+                    self.assertEqual(decision(self.agent_rules(template), action, resource), "deny")
 
     def test_routine_coding_and_file_reads_do_not_require_approval(self):
         for action, resource in (

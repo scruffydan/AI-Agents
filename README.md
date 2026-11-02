@@ -62,12 +62,34 @@ when command templates are present. Agent permissions use ordered V2
 effort is selected with a model variant such as `openai/gpt-6.1-sol#high`.
 See the [V2 permissions documentation](https://opencode.ai/v2/docs/permissions/).
 
-Default subagents and the `brainstorm` and `thorough-plan` primary agents deny
-file edits and ask before running shell commands. The global config asks before
-access outside the project and leaves read and shell permissions at OpenCode's
-native defaults unless an agent overrides them. Native reads ask for `.env` and
-`.env.*`, with `.env.example` allowed. Any agent-specific `read "*"` allowance
-must be followed by sensitive-file `ask` rules and then the example-file allowance.
+OpenCode's report-only agents deny actions by default. Default subagents and the
+`brainstorm` and `thorough-plan` primary agents allow file reading, glob and grep
+searches, Code Mode, and delegation only to `docs-fetcher`. Shell commands and
+access outside the project require approval. Both primary agents can ask the
+user questions; `thorough-plan` can load its `mode-thorough-plan` skill. Other
+skills and subagents, including `general`, remain denied.
+
+The `docs-fetcher` override allows only web search, web fetch, and Code Mode. It
+cannot read local files, run shell commands, ask questions, or delegate again;
+the parent must supply the documentation question and relevant context. The
+`git-commit` override allows local inspection and its exact Git commands below,
+with approval for other shell commands and no delegation or web access.
+
+MCP actions and resource access remain denied in these agents until specifically
+allowed. Add only the required named `<server>_<tool>` actions, rather than a
+server-wide wildcard, and scope MCP resource listing/reading separately when
+needed. Allowing `execute` does not bypass permissions: Code Mode checks each
+nested built-in or MCP call. See the [execute documentation](https://opencode.ai/v2/docs/tools/#execute).
+Children use their own permissions, so every allowed child needs an appropriate
+policy; the parent's restrictions do not carry over.
+
+The global config asks before access outside the project and leaves read and
+shell permissions at OpenCode's native defaults unless an agent overrides them.
+Native reads ask for `.env` and `.env.*`, with `.env.example` allowed. Each local
+inspection policy restores those exceptions after its `read "*"` allowance.
+Shell approval remains an escape hatch: these policies do not classify approved
+commands as read-only. Permission tests model the documented rules locally;
+they do not exercise OpenCode's runtime or shell scanner.
 
 ## Install
 
