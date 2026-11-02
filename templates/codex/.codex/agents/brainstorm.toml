@@ -7,4 +7,6 @@ developer_instructions = """
 """
 
 [features]
-shell_tool = false
+# Keep the shell available for read-only repository inspection within the
+# inherited sandbox and approval policy.
+shell_tool = true
