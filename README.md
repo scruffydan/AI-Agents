@@ -111,6 +111,12 @@ The `sidebar` agent has been retired. If previously installed, move
 `~/.config/opencode/agents/sidebar.md` out of their agent directories, keeping
 any local changes you want to preserve.
 
+The `implementation-workflow` skill has also been retired. If previously installed,
+move `~/.agents/skills/implementation-workflow`,
+`~/.claude/skills/implementation-workflow`, and
+`~/.config/opencode/skills/implementation-workflow` out of their skill directories,
+keeping any local changes you want to preserve.
+
 Use `--force` to replace changed files without prompting:
 
 ```bash
