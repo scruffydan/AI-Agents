@@ -85,6 +85,33 @@ class OpenCodeSecurityTests(unittest.TestCase):
         self.assertEqual(decision(general, "subagent", "general"), "deny")
         self.assertEqual(decision(general, "question", "*"), "deny")
 
+    def test_git_commit_agent_only_runs_read_only_git(self):
+        header = (REPO / "templates/overrides/opencode/git-commit.md").read_text().split("---", 2)[1]
+        agent_rules = [
+            {"action": action, "resource": resource, "effect": effect}
+            for action, resource, effect in re.findall(
+                r'- action: (\S+)\n\s+resource: "([^"]*)"\n\s+effect: (\S+)', header
+            )
+        ]
+        self.assertTrue(agent_rules)
+        rules = self.rules + agent_rules
+        for command in (
+            "git log", "git log -20 --oneline", "git diff --cached", "git diff",
+            "git status", "git status --short", "git show HEAD --stat",
+            "git -C repo log -5", "git -C repo diff --staged",
+        ):
+            with self.subTest(command=command):
+                self.assertEqual(decision(rules, "shell", command), "allow")
+        for command in (
+            "git add src/app.py", "git commit -m fix", "git push",
+            "git -C repo push origin log", "rm -rf build", "python3 -m unittest",
+        ):
+            with self.subTest(command=command):
+                self.assertEqual(decision(rules, "shell", command), "ask")
+        for resource in ("src/app.py", "README.md"):
+            self.assertEqual(decision(rules, "edit", resource), "deny")
+        self.assertEqual(decision(rules, "question", "*"), "deny")
+
 
 if __name__ == "__main__":
     unittest.main()
