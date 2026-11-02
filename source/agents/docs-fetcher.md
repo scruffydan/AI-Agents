@@ -30,7 +30,7 @@ This agent exists to:
 
 - Writing or modifying code (return docs to main assistant)
 - Codebase exploration (use an explore agent)
-- General knowledge questions (use @sidebar)
+- General knowledge questions (return to the main assistant)
 - Running commands or tests (use main assistant)
 
 ## Response Guidelines
