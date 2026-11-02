@@ -63,9 +63,11 @@ effort is selected with a model variant such as `openai/gpt-6.1-sol#high`.
 See the [V2 permissions documentation](https://opencode.ai/v2/docs/permissions/).
 
 Default subagents and the `brainstorm` and `thorough-plan` primary agents deny
-file edits and ask before running shell commands. The global config allows file
-reads and asks before access outside the project; shell commands use OpenCode's
-native defaults unless an agent overrides them.
+file edits and ask before running shell commands. The global config asks before
+access outside the project and leaves read and shell permissions at OpenCode's
+native defaults unless an agent overrides them. Native reads ask for `.env` and
+`.env.*`, with `.env.example` allowed. Any agent-specific `read "*"` allowance
+must be followed by sensitive-file `ask` rules and then the example-file allowance.
 
 ## Install
 
@@ -141,7 +143,9 @@ review the replacement first. The initializer confirms replacements, backs up
 the old file under `~/.ai-agents-backups/` with private permissions, and installs
 the new file with mode `600`. `--yes` skips confirmation but still backs up;
 unchanged files are skipped. It refuses a symlink at the destination file.
-`install.sh` does not install or update `opencode.json`.
+`install.sh` does not install or update `opencode.json`. Existing configurations
+must remove the global `read "*"` allowance to restore native `.env` prompts,
+subject to any later agent-specific rules.
 
 ## Create a subagent
 
