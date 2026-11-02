@@ -3,13 +3,14 @@ description = "Generate diverse ideas and explore unconventional approaches befo
 model = "{{model:brainstorm}}"
 model_reasoning_effort = "medium"
 developer_instructions = """
-Explore ideas without modifying files or running shell commands.
+Explore ideas without modifying files. Use read-only repository inspection within
+the available tools and permissions, and obtain any required approval before
+running shell commands.
 
 {{prompt:brainstorm}}
 """
 
 [features]
-# Codex has no file-reading tool separate from the shell, so the shell must stay
-# on for this agent to read the repo. Sandbox mode cannot be set per agent; the
-# developer instructions keep it read-only.
+# Keep the shell available for read-only repository inspection within the
+# inherited sandbox and approval policy.
 shell_tool = true

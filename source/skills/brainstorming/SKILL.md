@@ -38,5 +38,8 @@ in `/models`. An existing session keeps its selected model when changing agents;
 loading this skill alone does not switch it.
 
 Keep this path read-only in both the current conversation and the agent: do not
-edit files or run shell commands. If the requested agent or model is unavailable,
-report the limitation instead of silently substituting another model.
+edit files. Use read-only inspection within the active harness's tools and
+permissions. In OpenCode, obtain approval before running shell commands. Delegated
+agents must follow their configured tools and instructions. If the requested agent
+or model is unavailable, report the limitation instead of silently substituting
+another model.

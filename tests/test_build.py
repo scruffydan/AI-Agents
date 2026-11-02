@@ -48,7 +48,9 @@ class BuildTests(unittest.TestCase):
         rendered = self.root / "build/codex/.codex/agents/brainstorm.toml"
         instructions = tomllib.loads(rendered.read_text())["developer_instructions"]
         self.assertEqual(instructions.strip(),
-                         "Explore ideas without modifying files or running shell commands.\n\n" + body)
+                         "Explore ideas without modifying files. Use read-only repository inspection within\n"
+                         "the available tools and permissions, and obtain any required approval before\n"
+                         "running shell commands.\n\n" + body)
 
     def test_default_build_renders_all_harnesses_with_bare_codex_models(self):
         self.build()
