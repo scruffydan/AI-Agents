@@ -175,7 +175,7 @@ class BuildTests(unittest.TestCase):
             for retired in ("brainstorm-with-agent", "mode-brainstorm", "using-code-review", "code-full-review",
                             "command-code-full-review", "executing-plans",
                             "subagent-driven-development", "writing-skills", "receiving-code-review",
-                            "using-docs-fetcher"):
+                            "using-docs-fetcher", "implementation-workflow"):
                 with self.subTest(harness=harness, retired=retired):
                     self.assertFalse((output / retired).exists())
 
