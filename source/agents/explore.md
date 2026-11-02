@@ -1,7 +1,7 @@
 +++
 description = "Explore and answer questions about the codebase. Use this agent to find files, search code, understand implementations, and trace dependencies without consuming main conversation context."
 model_profile = "mini_reasoning"
-harnesses = ["opencode", "claude", "codex"]
+harnesses = ["opencode", "codex"]
 +++
 
 # Codebase Explorer Agent
@@ -29,7 +29,7 @@ This agent exists to:
 
 - Writing or modifying code (use main assistant)
 - Running tests or builds (use main assistant)
-- General knowledge questions unrelated to this codebase (use @sidebar)
+- General knowledge questions unrelated to this codebase (return to the main assistant)
 
 ## Response Guidelines
 

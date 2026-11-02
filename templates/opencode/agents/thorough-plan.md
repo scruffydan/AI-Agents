@@ -7,7 +7,7 @@ permissions:
     effect: deny
   - action: shell
     resource: "*"
-    effect: deny
+    effect: ask
 ---
 
 Load the `mode-thorough-plan` skill and follow its planning instructions.

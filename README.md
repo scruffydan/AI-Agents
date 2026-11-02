@@ -47,15 +47,25 @@ Override OpenCode's provider prefix with `openai` or `opencode`:
 ./build.py opencode --opencode-provider opencode
 ```
 
+`--work` cannot be combined with `--opencode-provider`: work models use Google
+Vertex, and changing only their provider prefix would produce unsupported model
+references such as `openai/claude-opus-5-5#high`.
+
 Each build replaces `build/` with output for the selected harnesses. Agent
 metadata, references, includes, TOML, and output paths are checked before the
 previous build is replaced. YAML templates and shared skill metadata are not
 validated for harness-specific requirements.
 
 OpenCode output uses V2's `agents/` and `skills/` directories, plus `commands/`
-when command templates are present.
-Agent permissions use ordered `permissions` rules, and reasoning effort is
-selected with a model variant such as `openai/gpt-6.1-sol#high`.
+when command templates are present. Agent permissions use ordered V2
+`permissions` rules with `action`, `resource`, and `effect` fields. Reasoning
+effort is selected with a model variant such as `openai/gpt-6.1-sol#high`.
+See the [V2 permissions documentation](https://opencode.ai/v2/docs/permissions/).
+
+Default subagents and the `brainstorm` and `thorough-plan` primary agents deny
+file edits and ask before running shell commands. The global config allows file
+reads and asks before access outside the project; shell commands use OpenCode's
+native defaults unless an agent overrides them.
 
 ## Install
 
@@ -84,7 +94,9 @@ else in those directories is left alone. Unchanged files are skipped. Changed
 files require confirmation, and the replaced version is moved to
 `~/.ai-agents-backups/<timestamp>/` instead of being deleted. Removing a prompt
 from this repository does not remove its installed copy; clean up obsolete
-entries explicitly.
+entries explicitly. For example, `explore` is built only for OpenCode and Codex
+because Claude Code has a built-in `Explore` agent; delete an older
+`~/.claude/agents/explore.md` by hand.
 
 Installation destinations:
 
@@ -93,6 +105,11 @@ Installation destinations:
 | Codex | `~/.codex/AGENTS.md` | `~/.codex/agents/` | `~/.agents/skills/` |
 | Claude Code | `~/.claude/CLAUDE.md` | `~/.claude/agents/` | `~/.claude/skills/` |
 | OpenCode | `~/.config/opencode/AGENTS.md` | `~/.config/opencode/agents/`, `commands/` | `~/.config/opencode/skills/` |
+
+The `sidebar` agent has been retired. If previously installed, move
+`~/.codex/agents/sidebar.toml`, `~/.claude/agents/sidebar.md`, and
+`~/.config/opencode/agents/sidebar.md` out of their agent directories, keeping
+any local changes you want to preserve.
 
 Use `--force` to replace changed files without prompting:
 
@@ -192,19 +209,21 @@ Choose a workflow for the task:
   conversation. Explicit requests for the configured brainstorming agent use
   read-only creative exploration.
 - `mode-thorough-plan` produces an implementation plan without editing files.
-  OpenCode's `thorough-plan` agent loads this skill with edit and shell access
-  denied.
+  OpenCode's `thorough-plan` agent loads this skill with file edits denied and
+  shell commands requiring approval.
 - `code-review` reviews code or evaluates supplied feedback. Targeted reviews use
   relevant perspectives; explicit full reviews cover all five specialists.
   Feedback evaluation checks the supplied claims and proposed fixes. Both routes
   are report-only unless fixes are authorized.
 - `systematic-debugging` guides bug investigation. `five-whys` supports explicit
-  causal analysis for coding and noncoding problems. Its shared technique lives
-  in `systematic-debugging/five-whys.md`, so keep both skill folders installed.
+  causal analysis for coding and noncoding problems and is self-contained;
+  `systematic-debugging` refers to it by name for recurring or unclear failures.
 - `git-commit` handles verification, staging, and committing in the current
   conversation, using the configured drafting agent when available. `git-push`
-  checks readiness for a separately authorized push.
-- `update-readme` checks README and existing AGENTS.md accuracy;
+  checks readiness for a separately authorized push. Implementation tasks authorize
+  local commits; pushes require separate authorization. Review and planning tasks
+  remain read-only.
+- `update-readme` checks README and existing AGENTS.md or CLAUDE.md accuracy;
   `verification-before-completion` checks the evidence behind completion claims.
 
 External documentation research uses the `docs-fetcher` subagent under the shared
@@ -214,9 +233,14 @@ If delegation or web access is unavailable, report the limitation and continue
 independent work.
 
 For configured brainstorming in Codex and Claude Code, the `brainstorm` agent
-selects its model through native templates. OpenCode retains an existing session's
-model when changing agents; select the configured model in `/models` as well as
-the `brainstorm` primary agent.
+selects its model through native templates. In OpenCode, confirm the active
+model in `/models` after selecting the `brainstorm` primary agent. Selecting a
+primary agent by ID leaves the session model unchanged; desktop agent switching
+can restore that agent's remembered or configured model.
+
+Codex's `brainstorm` agent uses the shell for read-only repository inspection
+within the parent session's sandbox and approval policy. Its prompt forbids
+file edits.
 
 ## Customize an agent for one harness
 
@@ -248,11 +272,27 @@ string, as shown in the default template. The renderer escapes inserted values
 for those positions.
 
 Tool lists and reasoning settings stay in native templates. Claude's review
-agents use file reading and search tools; its documentation and sidebar agents
-can search the web and fetch pages. OpenCode permissions also live in templates.
+agents use file reading and search tools; its documentation agent can search the
+web and fetch pages. OpenCode permissions also live in templates.
 Codex custom agents inherit the parent session's sandbox and approval policy;
 their agent files do not establish a separate permission boundary. Report-only
-instructions still apply. An override for a missing agent or a disabled target
+instructions still apply. Codex agent TOML has no field for a narrower sandbox
+or approval policy, and disabling the shell tool would stop agents such as
+`git-commit` from reading history.
+
+The `git-commit` drafting agent is limited per harness as far as each allows.
+OpenCode denies edits and automatically allows only exact common Git commands:
+`git log`, `git log -10 --oneline --no-decorate`, `git status`, `git status --short`,
+`git diff --no-ext-diff --no-textconv` (also with `--cached` or `--staged`), and
+`git show --no-ext-diff --no-textconv HEAD --stat`. Other forms, including `git -C`,
+additional flags, and commands that can write through `--output`, require approval.
+The diff/show forms disable external diff and text conversion helpers. Wildcard
+prefix rules cannot guarantee read-only arguments. Claude Code
+omits Edit and Write from its tools, but Bash is not restricted by command,
+because subagent frontmatter cannot scope Bash patterns. Codex relies on the
+parent's sandbox and the agent's read-only instructions.
+
+An override for a missing agent or a disabled target
 is an error: remove or rename it when changing the agent's name or targets.
 
 ## Edit shared instructions
