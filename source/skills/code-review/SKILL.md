@@ -39,11 +39,11 @@ Inspect the requested files or diff and relevant callers.
 
 Available specialists:
 
-- `code-security`: input handling, authentication, authorization, and data exposure.
-- `code-readability`: naming, structure, documentation, and maintainability.
-- `code-performance`: algorithms, queries, I/O, memory, and concurrency.
-- `code-redundancy`: duplication, unused code, and shared business rules.
-- `code-simplifier`: nesting, unnecessary complexity, and simpler control flow.
+- `code-security`: attack surface, trust boundaries, and data exposure.
+- `code-readability`: naming, documentation, and formatting.
+- `code-performance`: algorithms, I/O, memory, and concurrency.
+- `code-redundancy`: duplication and dead code.
+- `code-simplifier`: control flow and complexity.
 
 Use the environment's supported agent tools and configured models. For a full
 review, run specialists concurrently within available capacity; queue remaining
