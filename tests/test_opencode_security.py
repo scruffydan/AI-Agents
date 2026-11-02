@@ -83,7 +83,7 @@ class OpenCodeSecurityTests(unittest.TestCase):
             # V2-only action names are not recognized by OpenCode 1.x.
             self.assertNotIn(rule["action"], ("shell", "subagent"))
 
-    def test_read_only_agents_deny_edits_and_shell(self):
+    def test_read_only_agents_deny_edits_and_ask_for_shell(self):
         templates = [REPO / "templates/defaults/opencode/agent.md",
                      *sorted((REPO / "templates/opencode/agents").glob("*.md"))]
         for path in templates:
@@ -91,10 +91,12 @@ class OpenCodeSecurityTests(unittest.TestCase):
                 header, permission = frontmatter_permission(path.read_text())
                 self.assertNotIn("\npermissions:", header)
                 self.assertEqual(permission["edit"], "deny")
-                self.assertEqual(permission["bash"], "deny")
+                self.assertEqual(permission["bash"], "ask")
                 rules = BASE_RULES + self.global_rules + flatten(permission)
                 self.assertEqual(decision(rules, "edit", "src/app.py"), "deny")
-                self.assertEqual(decision(rules, "bash", "git push"), "deny")
+                for command in ("git diff --cached", "python3 -m unittest", "git push"):
+                    with self.subTest(command=command):
+                        self.assertEqual(decision(rules, "bash", command), "ask")
                 self.assertEqual(decision(rules, "read", "src/app.py"), "allow")
 
     def test_routine_coding_and_file_reads_do_not_require_approval(self):
@@ -109,14 +111,16 @@ class OpenCodeSecurityTests(unittest.TestCase):
             with self.subTest(action=action, resource=resource):
                 self.assertEqual(decision(self.rules, action, resource), "allow")
 
-    def test_external_access_and_common_push_commands_ask(self):
+    def test_external_access_requires_approval(self):
         self.assertEqual(decision(self.rules, "external_directory", "/other/*"), "ask")
+
+    def test_global_config_leaves_push_commands_at_native_default(self):
         for command in (
             "git push", "git push origin main", "git push --force-with-lease",
             "git -C repo push origin main", "git -c push.default=current push",
         ):
             with self.subTest(command=command):
-                self.assertEqual(decision(self.rules, "bash", command), "ask")
+                self.assertEqual(decision(self.rules, "bash", command), "allow")
 
     def test_global_rules_preserve_native_plan_and_general_restrictions(self):
         plan_defaults = [

@@ -4,7 +4,7 @@ mode: subagent
 model: {{agent:model}}
 permission:
   edit: deny
-  bash: deny
+  bash: ask
   question: deny
 ---
 

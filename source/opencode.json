@@ -10,10 +10,6 @@
   },
   "permission": {
     "read": "allow",
-    "external_directory": "ask",
-    "bash": {
-      "git push *": "ask",
-      "git * push *": "ask"
-    }
+    "external_directory": "ask"
   }
 }
