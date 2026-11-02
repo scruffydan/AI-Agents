@@ -10,32 +10,29 @@ permissions:
     resource: "*"
     effect: ask
   - action: shell
-    resource: "git log *"
+    resource: "git log"
     effect: allow
   - action: shell
-    resource: "git diff *"
+    resource: "git log -10 --oneline --no-decorate"
     effect: allow
   - action: shell
-    resource: "git status *"
+    resource: "git status"
     effect: allow
   - action: shell
-    resource: "git show *"
+    resource: "git status --short"
     effect: allow
   - action: shell
-    resource: "git -C * log *"
+    resource: "git diff --no-ext-diff --no-textconv"
     effect: allow
   - action: shell
-    resource: "git -C * diff *"
+    resource: "git diff --no-ext-diff --no-textconv --cached"
     effect: allow
   - action: shell
-    resource: "git -C * status *"
+    resource: "git diff --no-ext-diff --no-textconv --staged"
     effect: allow
   - action: shell
-    resource: "git -C * show *"
+    resource: "git show --no-ext-diff --no-textconv HEAD --stat"
     effect: allow
-  - action: shell
-    resource: "git * push *"
-    effect: ask
   - action: question
     resource: "*"
     effect: deny
