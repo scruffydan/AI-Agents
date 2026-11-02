@@ -1,10 +1,4 @@
-"""Config regressions using OpenCode V1 `permission` rules (verified on 1.19.5).
-
-OpenCode 1.x rejects the V2 `permissions` list in opencode.json and passes it
-through as model options in agent frontmatter, so it would silently drop every
-restriction. OpenCode 2.x still reads and normalizes the V1 map. These tests
-model the rules; they do not run the shell scanner.
-"""
+"""Config regressions using documented V2 rules; these do not run the shell scanner."""
 
 import json
 from pathlib import Path
@@ -16,9 +10,6 @@ REPO = Path(__file__).resolve().parents[1]
 # OpenCode's native base policy, applied before global and agent-specific rules.
 BASE_RULES = [
     {"action": "*", "resource": "*", "effect": "allow"},
-    {"action": "doom_loop", "resource": "*", "effect": "ask"},
-    {"action": "external_directory", "resource": "*", "effect": "ask"},
-    {"action": "read", "resource": "*", "effect": "allow"},
     {"action": "read", "resource": "*.env", "effect": "ask"},
     {"action": "read", "resource": "*.env.*", "effect": "ask"},
     {"action": "read", "resource": "*.env.example", "effect": "allow"},
@@ -26,28 +17,16 @@ BASE_RULES = [
 EFFECTS = ("allow", "deny", "ask")
 
 
-def flatten(permission):
-    """Expand a V1 `permission` map into ordered rules, as OpenCode does."""
-    rules = []
-    for action, value in permission.items():
-        patterns = {"*": value} if isinstance(value, str) else value
-        for resource, effect in patterns.items():
-            rules.append({"action": action, "resource": resource, "effect": effect})
-    return rules
-
-
-def frontmatter_permission(text):
-    """Parse the simple `permission:` block used by the OpenCode templates."""
+def frontmatter_permissions(text):
+    """Parse the simple V2 rule lists used by the OpenCode templates."""
     header = text.split("---", 2)[1]
-    lines = header.splitlines()
-    start = lines.index("permission:")
-    permission = {}
-    for line in lines[start + 1:]:
-        if not line.startswith("  "):
-            break
-        key, _, value = line.strip().partition(": ")
-        permission[key] = value
-    return header, permission
+    rules = [
+        {"action": action, "resource": resource, "effect": effect}
+        for action, resource, effect in re.findall(
+            r'- action: (\S+)\n\s+resource: "([^"]*)"\n\s+effect: (\S+)', header
+        )
+    ]
+    return header, rules
 
 
 def matches(pattern, value):
@@ -72,41 +51,43 @@ def decision(rules, action, resource):
 class OpenCodeSecurityTests(unittest.TestCase):
     def setUp(self):
         self.config = json.loads((REPO / "source/opencode.json").read_text())
-        self.global_rules = flatten(self.config["permission"])
+        self.global_rules = self.config["permissions"]
         self.rules = BASE_RULES + self.global_rules
 
-    def test_config_uses_v1_permission_map_and_sharing_disabled(self):
+    def test_config_keeps_v2_rules_and_sharing_disabled(self):
         self.assertEqual(self.config["share"], "disabled")
-        self.assertNotIn("permissions", self.config)
+        self.assertNotIn("permission", self.config)
         for rule in self.global_rules:
+            self.assertEqual(set(rule), {"action", "resource", "effect"})
             self.assertIn(rule["effect"], EFFECTS)
-            # V2-only action names are not recognized by OpenCode 1.x.
-            self.assertNotIn(rule["action"], ("shell", "subagent"))
+            self.assertNotIn(rule["action"], ("bash", "task", "doom_loop", "lsp"))
 
     def test_read_only_agents_deny_edits_and_ask_for_shell(self):
         templates = [REPO / "templates/defaults/opencode/agent.md",
                      *sorted((REPO / "templates/opencode/agents").glob("*.md"))]
         for path in templates:
             with self.subTest(template=path.name):
-                header, permission = frontmatter_permission(path.read_text())
-                self.assertNotIn("\npermissions:", header)
-                self.assertEqual(permission["edit"], "deny")
-                self.assertEqual(permission["bash"], "ask")
-                rules = BASE_RULES + self.global_rules + flatten(permission)
+                header, agent_rules = frontmatter_permissions(path.read_text())
+                self.assertNotIn("\npermission:", header)
+                self.assertTrue(agent_rules)
+                rules = self.rules + agent_rules
                 self.assertEqual(decision(rules, "edit", "src/app.py"), "deny")
                 for command in ("git diff --cached", "python3 -m unittest", "git push"):
                     with self.subTest(command=command):
-                        self.assertEqual(decision(rules, "bash", command), "ask")
+                        self.assertEqual(decision(rules, "shell", command), "ask")
                 self.assertEqual(decision(rules, "read", "src/app.py"), "allow")
+                if path == templates[0]:
+                    self.assertEqual(decision(rules, "question", "*"), "deny")
 
     def test_routine_coding_and_file_reads_do_not_require_approval(self):
         for action, resource in (
             ("read", ".env"), ("read", "app/.env.local"), ("read", "secrets.json"),
             ("read", "certs/server.key"), ("read", ".env.example"),
             ("edit", "src/app.py"), ("grep", "timeout"), ("glob", "**/*.py"),
-            ("bash", "git diff --cached"), ("bash", "git add src/app.py"),
-            ("bash", "git commit -m fix"), ("bash", "python3 -m unittest"),
-            ("bash", "npm run build"), ("task", "explore"), ("webfetch", "*"),
+            ("shell", "git diff --cached"), ("shell", "git add src/app.py"),
+            ("shell", "git commit -m fix"), ("shell", "python3 -m unittest"),
+            ("shell", "npm run build"), ("subagent", "explore"),
+            ("webfetch", "https://example.com/docs"), ("execute", "*"),
         ):
             with self.subTest(action=action, resource=resource):
                 self.assertEqual(decision(self.rules, action, resource), "allow")
@@ -120,7 +101,7 @@ class OpenCodeSecurityTests(unittest.TestCase):
             "git -C repo push origin main", "git -c push.default=current push",
         ):
             with self.subTest(command=command):
-                self.assertEqual(decision(self.rules, "bash", command), "allow")
+                self.assertEqual(decision(self.rules, "shell", command), "allow")
 
     def test_global_rules_preserve_native_plan_and_general_restrictions(self):
         plan_defaults = [
@@ -129,13 +110,13 @@ class OpenCodeSecurityTests(unittest.TestCase):
         ]
         general_defaults = [
             {"action": "question", "resource": "*", "effect": "deny"},
-            {"action": "task", "resource": "*", "effect": "deny"},
+            {"action": "subagent", "resource": "*", "effect": "deny"},
         ]
         plan = BASE_RULES + plan_defaults + self.global_rules
         general = BASE_RULES + general_defaults + self.global_rules
         self.assertEqual(decision(plan, "edit", "src/app.py"), "deny")
         self.assertEqual(decision(plan, "edit", "/home/test/.opencode/plan/task.md"), "allow")
-        self.assertEqual(decision(general, "task", "general"), "deny")
+        self.assertEqual(decision(general, "subagent", "general"), "deny")
         self.assertEqual(decision(general, "question", "*"), "deny")
 
 

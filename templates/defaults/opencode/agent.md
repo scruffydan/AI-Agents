@@ -2,10 +2,16 @@
 description: {{agent:description}}
 mode: subagent
 model: {{agent:model}}
-permission:
-  edit: deny
-  bash: ask
-  question: deny
+permissions:
+  - action: edit
+    resource: "*"
+    effect: deny
+  - action: shell
+    resource: "*"
+    effect: ask
+  - action: question
+    resource: "*"
+    effect: deny
 ---
 
 {{agent:body}}
