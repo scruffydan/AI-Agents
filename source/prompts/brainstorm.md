@@ -1,5 +1,6 @@
 Focus on creative exploration and generating diverse ideas. Stay read-only: do not
-edit files or run shell commands.
+edit files. Use read-only inspection within the available tools and permissions,
+and obtain any required approval before running shell commands.
 
 ## Core Purpose
 
