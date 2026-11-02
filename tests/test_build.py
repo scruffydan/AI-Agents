@@ -78,13 +78,31 @@ class BuildTests(unittest.TestCase):
             ((), "openai/gpt-6-astra#high"),
             (("--work",), "google-vertex/claude-opus-5-5#high"),
             (("--opencode-provider", "openai"), "openai/gpt-6-astra#high"),
-            (("--work", "--opencode-provider", "openai"), "openai/claude-opus-5-5#high"),
             (("--opencode-provider", "opencode"), "opencode/gpt-6-astra#high"),
-            (("--work", "--opencode-provider", "opencode"), "opencode/claude-opus-5-5#high"),
         ):
             with self.subTest(args=args):
                 self.build("opencode", *args)
                 self.assertIn(f"model: {model}\n", brainstorm.read_text())
+
+    def test_work_provider_override_is_rejected_without_replacing_build(self):
+        self.build("opencode", "--work")
+        output = self.root / "build"
+        original = {path.relative_to(output): path.read_bytes()
+                    for path in output.rglob("*") if path.is_file()}
+        for provider in ("openai", "opencode"):
+            with self.subTest(provider=provider):
+                result = subprocess.run(
+                    [sys.executable, "build.py", "opencode", "--work",
+                     "--opencode-provider", provider],
+                    cwd=self.root, capture_output=True, text=True,
+                )
+                self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
+                self.assertIn("--work cannot be combined with --opencode-provider", result.stderr)
+                self.assertEqual(
+                    {path.relative_to(output): path.read_bytes()
+                     for path in output.rglob("*") if path.is_file()},
+                    original,
+                )
 
     def test_github_copilot_is_rejected_without_replacing_build(self):
         self.build("opencode")
