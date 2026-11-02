@@ -4,7 +4,7 @@ mode: primary
 model: {{model:brainstorm}}
 permission:
   edit: deny
-  bash: deny
+  bash: ask
 ---
 
 {{prompt:brainstorm}}

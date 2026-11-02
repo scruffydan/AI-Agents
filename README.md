@@ -10,7 +10,7 @@ templates.
 ## Requirements
 
 - Python 3.11 or newer
-- OpenCode 1.x or 2.x for the OpenCode configuration (permissions verified on 1.19.5)
+- OpenCode V2 for the generated model configuration (permission maps verified on 1.19.5)
 - Bash for the optional installer
 
 There are no third-party Python dependencies.
@@ -56,7 +56,7 @@ OpenCode output uses the `agents/` and `skills/` directories, plus `commands/`
 when command templates are present. Reasoning effort is selected with a V2
 model variant such as `openai/gpt-6.1-sol#high`.
 
-Permissions use the V1 `permission` map (`edit: deny`, `bash: {...}`), not the
+Permissions use the V1 `permission` map (`edit: deny`, `bash: ask`), not the
 V2 `permissions` rule list. OpenCode 1.x rejects `permissions` in
 `opencode.json` and passes it through as model options in agent frontmatter,
 so read-only agents would silently keep edit and shell access. OpenCode 2.x
@@ -64,6 +64,13 @@ still reads and normalizes the V1 map. Check the resolved rules with
 `opencode debug agent <name>`. Sources:
 [V1 permissions](https://opencode.ai/docs/permissions),
 [V2 migration](https://opencode.ai/v2/docs/migrate-v1/).
+
+Default subagents and the `brainstorm` and `thorough-plan` primary agents deny
+file edits and ask before running shell commands. The global config allows file
+reads and asks before access outside the project; shell commands use OpenCode's
+native defaults unless an agent overrides them. Generated model IDs still use
+V2's variant syntax, so the permission-map compatibility does not establish
+full OpenCode 1.x support.
 
 ## Install
 
@@ -200,8 +207,8 @@ Choose a workflow for the task:
   conversation. Explicit requests for the configured brainstorming agent use
   read-only creative exploration.
 - `mode-thorough-plan` produces an implementation plan without editing files.
-  OpenCode's `thorough-plan` agent loads this skill with edit and shell access
-  denied.
+  OpenCode's `thorough-plan` agent loads this skill with file edits denied and
+  shell commands requiring approval.
 - `code-review` reviews code or evaluates supplied feedback. Targeted reviews use
   relevant perspectives; explicit full reviews cover all five specialists.
   Feedback evaluation checks the supplied claims and proposed fixes. Both routes

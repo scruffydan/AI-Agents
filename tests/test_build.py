@@ -193,7 +193,7 @@ class BuildTests(unittest.TestCase):
                 self.assertNotIn("google-vertex-anthropic/", header)
         reviewer = (output / "agents/code-security.md").read_text()
         self.assertIn("model: google-vertex/claude-opus-5-5#high\n", reviewer)
-        self.assertIn("\npermission:\n  edit: deny\n  bash: deny\n", reviewer)
+        self.assertIn("\npermission:\n  edit: deny\n  bash: ask\n", reviewer)
         commit = (output / "agents/git-commit.md").read_text()
         self.assertIn("model: google-vertex/claude-sonnet-5-5#high\n", commit)
         docs = (output / "agents/docs-fetcher.md").read_text()
