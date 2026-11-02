@@ -7,7 +7,6 @@ developer_instructions = """
 """
 
 [features]
-# Codex has no file-reading tool separate from the shell, so the shell must stay
-# on for this agent to read the repo. Sandbox mode cannot be set per agent; the
-# developer instructions keep it read-only.
+# Keep the shell available for read-only repository inspection within the
+# inherited sandbox and approval policy.
 shell_tool = true
