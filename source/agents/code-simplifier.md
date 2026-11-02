@@ -1,5 +1,5 @@
 +++
-description = "Simplifies and refines code for clarity, consistency, and maintainability while preserving all functionality. Focuses on recently modified code unless instructed otherwise."
+description = "Reports simplification opportunities (nesting, control flow, unnecessary abstraction) in recently changed code unless instructed otherwise. Report-only; does not edit files."
 model_profile = "deep_review"
 harnesses = ["opencode", "claude", "codex"]
 +++

@@ -1,5 +1,5 @@
 +++
-description = "Performance optimization specialist. Invoke for identifying bottlenecks, optimizing algorithms, memory usage, I/O operations, and concurrency patterns."
+description = "Reports performance issues in algorithms, I/O, memory usage, and concurrency. Report-only; does not edit files."
 model_profile = "deep_review"
 harnesses = ["opencode", "claude", "codex"]
 +++
