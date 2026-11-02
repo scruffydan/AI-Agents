@@ -59,6 +59,13 @@ class BuildTests(unittest.TestCase):
             with self.subTest(agent=agent.name):
                 self.assertNotIn("/", tomllib.loads(agent.read_text())["model"])
 
+    def test_explore_is_not_built_for_claude(self):
+        self.build()
+
+        self.assertFalse((self.root / "build/claude/agents/explore.md").exists())
+        self.assertTrue((self.root / "build/opencode/agents/explore.md").is_file())
+        self.assertTrue((self.root / "build/codex/.codex/agents/explore.toml").is_file())
+
     def test_shared_base_instructions_propagate_to_all_harnesses(self):
         body = (self.root / "source/prompts/AGENTS.md").read_bytes()
         self.build()
