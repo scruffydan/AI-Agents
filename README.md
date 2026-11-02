@@ -47,6 +47,10 @@ Override OpenCode's provider prefix with `openai` or `opencode`:
 ./build.py opencode --opencode-provider opencode
 ```
 
+`--work` cannot be combined with `--opencode-provider`: work models use Google
+Vertex, and changing only their provider prefix would produce unsupported model
+references such as `openai/claude-opus-5-5#high`.
+
 Each build replaces `build/` with output for the selected harnesses. Agent
 metadata, references, includes, TOML, and output paths are checked before the
 previous build is replaced. YAML templates and shared skill metadata are not
@@ -205,8 +209,8 @@ Choose a workflow for the task:
   Feedback evaluation checks the supplied claims and proposed fixes. Both routes
   are report-only unless fixes are authorized.
 - `systematic-debugging` guides bug investigation. `five-whys` supports explicit
-  causal analysis for coding and noncoding problems. Its shared technique lives
-  in `systematic-debugging/five-whys.md`, so keep both skill folders installed.
+  causal analysis for coding and noncoding problems and is self-contained;
+  `systematic-debugging` refers to it by name for recurring or unclear failures.
 - `git-commit` handles verification, staging, and committing in the current
   conversation, using the configured drafting agent when available. `git-push`
   checks readiness for a separately authorized push.
@@ -259,7 +263,23 @@ agents use file reading and search tools; its documentation and sidebar agents
 can search the web and fetch pages. OpenCode permissions also live in templates.
 Codex custom agents inherit the parent session's sandbox and approval policy;
 their agent files do not establish a separate permission boundary. Report-only
-instructions still apply. An override for a missing agent or a disabled target
+instructions still apply. Codex agent TOML has no field for a narrower sandbox
+or approval policy, and disabling the shell tool would stop agents such as
+`git-commit` from reading history.
+
+The `git-commit` drafting agent is limited per harness as far as each allows.
+OpenCode denies edits and automatically allows only exact common Git commands:
+`git log`, `git log -10 --oneline --no-decorate`, `git status`, `git status --short`,
+`git diff --no-ext-diff --no-textconv` (also with `--cached` or `--staged`), and
+`git show --no-ext-diff --no-textconv HEAD --stat`. Other forms, including `git -C`,
+additional flags, and commands that can write through `--output`, require approval.
+The diff/show forms disable external diff and text conversion helpers. Wildcard
+prefix rules cannot guarantee read-only arguments. Claude Code
+omits Edit and Write from its tools, but Bash is not restricted by command,
+because subagent frontmatter cannot scope Bash patterns. Codex relies on the
+parent's sandbox and the agent's read-only instructions.
+
+An override for a missing agent or a disabled target
 is an error: remove or rename it when changing the agent's name or targets.
 
 ## Edit shared instructions
