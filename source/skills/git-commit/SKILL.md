@@ -1,6 +1,6 @@
 ---
 name: git-commit
-description: Prepare commit messages and create authorized commits using repository conventions. Use when preparing a commit or drafting its message; the current conversation owns the workflow and the configured drafting agent handles history analysis.
+description: Drafts commit messages that match repository conventions and creates authorized commits. Use when committing or drafting a commit message.
 ---
 
 # Git Commit
