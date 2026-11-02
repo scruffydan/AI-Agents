@@ -71,7 +71,7 @@ implementation is out of scope.
    - Fix at source, not at symptom
 
 For recurring failures, unclear causal links, or an explicit Five Whys request,
-optionally use [five-whys.md](five-whys.md). Follow the evidence across multiple
+optionally use the `five-whys` skill. Follow the evidence across multiple
 causal paths when needed; do not force a question chain for a clear local bug.
 
 ### Phase 2: Pattern Analysis
@@ -148,10 +148,10 @@ If systematic investigation reveals issue is truly environmental, timing-depende
 
 These techniques are part of systematic debugging and available in this directory:
 
-- **[five-whys.md](five-whys.md)** - Optional evidence-backed causal questioning for recurring or unclear failures
 - **`root-cause-tracing.md`** - Trace bugs backward through call stack to find original trigger
 - **`defense-in-depth.md`** - Add validation at multiple layers after finding root cause
 - **`condition-based-waiting.md`** - Replace arbitrary timeouts with condition polling
 
 **Related skills:**
+- **`five-whys`** - Optional evidence-backed causal questioning for recurring or unclear failures
 - **`verification-before-completion`** - Verify fix worked before claiming success

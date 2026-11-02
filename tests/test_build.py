@@ -162,9 +162,7 @@ class BuildTests(unittest.TestCase):
             "code-review": ("feedback.md",),
             "systematic-debugging": (
                 "root-cause-tracing.md", "defense-in-depth.md", "condition-based-waiting.md",
-                "five-whys.md",
             ),
-            "five-whys": ("../systematic-debugging/five-whys.md",),
         }
         self.build()
         for directory in ("source/skills", "build/codex/.agents/skills",
@@ -175,6 +173,14 @@ class BuildTests(unittest.TestCase):
                         path = self.root / directory / skill / filename
                         self.assertTrue(path.is_file())
                         self.assertTrue(path.read_text().strip())
+
+    def test_skills_do_not_reference_files_outside_their_folder(self):
+        self.build()
+        for directory in ("source/skills", "build/codex/.agents/skills",
+                          "build/claude/skills", "build/opencode/skills"):
+            for path in (self.root / directory).rglob("*.md"):
+                with self.subTest(path=str(path.relative_to(self.root))):
+                    self.assertNotIn("../", path.read_text())
 
     def test_opencode_v2_build_has_native_directories_and_no_legacy_agent_fields(self):
         self.build("opencode", "--work")
