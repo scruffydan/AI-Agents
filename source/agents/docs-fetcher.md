@@ -29,8 +29,8 @@ This agent exists to:
 ## What You Don't Handle
 
 - Writing or modifying code (return docs to main assistant)
-- Codebase exploration (use an exploration agent)
-- General knowledge questions (use the sidebar agent)
+- Codebase exploration (use an explore agent)
+- General knowledge questions (return to the main assistant)
 - Running commands or tests (use main assistant)
 
 ## Response Guidelines
