@@ -106,6 +106,11 @@ Installation destinations:
 | Claude Code | `~/.claude/CLAUDE.md` | `~/.claude/agents/` | `~/.claude/skills/` |
 | OpenCode | `~/.config/opencode/AGENTS.md` | `~/.config/opencode/agents/`, `commands/` | `~/.config/opencode/skills/` |
 
+The `sidebar` agent has been retired. If previously installed, move
+`~/.codex/agents/sidebar.toml`, `~/.claude/agents/sidebar.md`, and
+`~/.config/opencode/agents/sidebar.md` out of their agent directories, keeping
+any local changes you want to preserve.
+
 Use `--force` to replace changed files without prompting:
 
 ```bash
@@ -267,8 +272,8 @@ string, as shown in the default template. The renderer escapes inserted values
 for those positions.
 
 Tool lists and reasoning settings stay in native templates. Claude's review
-agents use file reading and search tools; its documentation and sidebar agents
-can search the web and fetch pages. OpenCode permissions also live in templates.
+agents use file reading and search tools; its documentation agent can search the
+web and fetch pages. OpenCode permissions also live in templates.
 Codex custom agents inherit the parent session's sandbox and approval policy;
 their agent files do not establish a separate permission boundary. Report-only
 instructions still apply. Codex agent TOML has no field for a narrower sandbox
