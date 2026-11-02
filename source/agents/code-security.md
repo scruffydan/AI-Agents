@@ -1,5 +1,5 @@
 +++
-description = "Security review specialist for identifying vulnerabilities and ensuring secure coding practices. Invoke for security audits, vulnerability assessments, and OWASP compliance checks."
+description = "Reports security vulnerabilities involving attack surface, trust boundaries, and data exposure. Report-only; does not edit files."
 model_profile = "deep_review"
 harnesses = ["opencode", "claude", "codex"]
 +++

@@ -8,7 +8,7 @@ permissions:
     effect: deny
   - action: shell
     resource: "*"
-    effect: deny
+    effect: ask
 ---
 
 {{prompt:brainstorm}}

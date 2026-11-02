@@ -1,5 +1,5 @@
 +++
-description = "Code redundancy and duplication specialist. Invoke for identifying duplicate code, repeated patterns, unused code, and opportunities for abstraction and DRY improvements."
+description = "Reports duplication, dead code, and opportunities to consolidate shared logic. Report-only; does not edit files."
 model_profile = "deep_review"
 harnesses = ["opencode", "claude", "codex"]
 +++
