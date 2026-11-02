@@ -199,8 +199,8 @@ Choose a workflow for the task:
   Feedback evaluation checks the supplied claims and proposed fixes. Both routes
   are report-only unless fixes are authorized.
 - `systematic-debugging` guides bug investigation. `five-whys` supports explicit
-  causal analysis for coding and noncoding problems. Its shared technique lives
-  in `systematic-debugging/five-whys.md`, so keep both skill folders installed.
+  causal analysis for coding and noncoding problems and is self-contained;
+  `systematic-debugging` refers to it by name for recurring or unclear failures.
 - `git-commit` handles verification, staging, and committing in the current
   conversation, using the configured drafting agent when available. `git-push`
   checks readiness for a separately authorized push.
