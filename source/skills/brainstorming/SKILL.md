@@ -33,9 +33,10 @@ creative exploration instructions and model selection. Pass the user's request,
 relevant conversation context, constraints, and established decisions so it can
 work independently. Return its ideas to the user and incorporate follow-up feedback.
 
-In OpenCode, use the `brainstorm` primary agent and select its configured model
-in `/models`. An existing session keeps its selected model when changing agents;
-loading this skill alone does not switch it.
+In OpenCode, use the `brainstorm` primary agent and confirm its active model in
+`/models`. Selecting an agent by ID leaves the session model unchanged; desktop
+agent switching can restore that agent's remembered or configured model. Loading
+this skill alone does not select a model.
 
 Keep this path read-only in both the current conversation and the agent: do not
 edit files. Use read-only inspection within the active harness's tools and
