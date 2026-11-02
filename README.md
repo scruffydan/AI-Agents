@@ -57,9 +57,15 @@ previous build is replaced. YAML templates and shared skill metadata are not
 validated for harness-specific requirements.
 
 OpenCode output uses V2's `agents/` and `skills/` directories, plus `commands/`
-when command templates are present.
-Agent permissions use ordered `permissions` rules, and reasoning effort is
-selected with a model variant such as `openai/gpt-6.1-sol#high`.
+when command templates are present. Agent permissions use ordered V2
+`permissions` rules with `action`, `resource`, and `effect` fields. Reasoning
+effort is selected with a model variant such as `openai/gpt-6.1-sol#high`.
+See the [V2 permissions documentation](https://opencode.ai/v2/docs/permissions/).
+
+Default subagents and the `brainstorm` and `thorough-plan` primary agents deny
+file edits and ask before running shell commands. The global config allows file
+reads and asks before access outside the project; shell commands use OpenCode's
+native defaults unless an agent overrides them.
 
 ## Install
 
@@ -198,8 +204,8 @@ Choose a workflow for the task:
   conversation. Explicit requests for the configured brainstorming agent use
   read-only creative exploration.
 - `mode-thorough-plan` produces an implementation plan without editing files.
-  OpenCode's `thorough-plan` agent loads this skill with edit and shell access
-  denied.
+  OpenCode's `thorough-plan` agent loads this skill with file edits denied and
+  shell commands requiring approval.
 - `code-review` reviews code or evaluates supplied feedback. Targeted reviews use
   relevant perspectives; explicit full reviews cover all five specialists.
   Feedback evaluation checks the supplied claims and proposed fixes. Both routes
@@ -209,7 +215,9 @@ Choose a workflow for the task:
   `systematic-debugging` refers to it by name for recurring or unclear failures.
 - `git-commit` handles verification, staging, and committing in the current
   conversation, using the configured drafting agent when available. `git-push`
-  checks readiness for a separately authorized push.
+  checks readiness for a separately authorized push. Implementation tasks authorize
+  local commits; pushes require separate authorization. Review and planning tasks
+  remain read-only.
 - `update-readme` checks README and existing AGENTS.md accuracy;
   `verification-before-completion` checks the evidence behind completion claims.
 
@@ -224,6 +232,10 @@ selects its model through native templates. In OpenCode, confirm the active
 model in `/models` after selecting the `brainstorm` primary agent. Selecting a
 primary agent by ID leaves the session model unchanged; desktop agent switching
 can restore that agent's remembered or configured model.
+
+Codex's `brainstorm` agent uses the shell for read-only repository inspection
+within the parent session's sandbox and approval policy. Its prompt forbids
+file edits.
 
 ## Customize an agent for one harness
 
