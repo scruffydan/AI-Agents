@@ -58,6 +58,13 @@ class BuildTests(unittest.TestCase):
             with self.subTest(agent=agent.name):
                 self.assertNotIn("/", tomllib.loads(agent.read_text())["model"])
 
+    def test_explore_is_not_built_for_claude(self):
+        self.build()
+
+        self.assertFalse((self.root / "build/claude/agents/explore.md").exists())
+        self.assertTrue((self.root / "build/opencode/agents/explore.md").is_file())
+        self.assertTrue((self.root / "build/codex/.codex/agents/explore.toml").is_file())
+
     def test_shared_base_instructions_propagate_to_all_harnesses(self):
         body = (self.root / "source/prompts/AGENTS.md").read_bytes()
         self.build()
@@ -188,7 +195,8 @@ class BuildTests(unittest.TestCase):
                 parsed = tomllib.loads(agent.read_text())
                 self.assertEqual(parsed["model"], "gpt-6-astra")
                 self.assertEqual(parsed["model_reasoning_effort"], "high")
-                self.assertFalse(parsed["features"]["shell_tool"])
+                self.assertTrue(parsed["features"]["shell_tool"])
+                self.assertNotIn("or running shell commands", parsed["developer_instructions"])
                 for text in (claude.read_text(), parsed["description"] + parsed["developer_instructions"]):
                     self.assertIn("Use only when the user explicitly asks for the brainstorm agent.", text)
                     self.assertNotIn("build mode", text)
@@ -237,7 +245,7 @@ class BuildTests(unittest.TestCase):
                 self.assertNotIn("google-vertex-anthropic/", header)
         reviewer = (output / "agents/code-security.md").read_text()
         self.assertIn("model: google-vertex/claude-opus-5-5#high\n", reviewer)
-        self.assertIn("action: shell\n    resource: \"*\"\n    effect: deny", reviewer)
+        self.assertIn("action: shell\n    resource: \"*\"\n    effect: ask", reviewer)
         commit = (output / "agents/git-commit.md").read_text()
         self.assertIn("model: google-vertex/claude-sonnet-5-5#high\n", commit)
         docs = (output / "agents/docs-fetcher.md").read_text()

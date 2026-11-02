@@ -1,5 +1,5 @@
 +++
-description = "Code readability and maintainability specialist. Invoke for reviewing naming conventions, code structure, formatting, and documentation quality."
+description = "Reports readability issues in naming, documentation, and formatting. Report-only; does not edit files."
 model_profile = "deep_review"
 harnesses = ["opencode", "claude", "codex"]
 +++

@@ -1,6 +1,6 @@
 ---
 name: git-commit
-description: Prepare commit messages and create authorized commits using repository conventions. Use when preparing a commit or drafting its message; the current conversation owns the workflow and the configured drafting agent handles history analysis.
+description: Drafts commit messages that match repository conventions and creates authorized commits. Use when committing or drafting a commit message.
 ---
 
 # Git Commit
@@ -16,8 +16,7 @@ request a new commit.
 - Inspect the working tree and intended diff. For an authorized commit, stage
   only the intended changes and inspect `git diff --cached`. Do not silently
   include or unstage unrelated staged changes; resolve conflicting scope first.
-- Use `verification-before-completion` for relevant checks and `update-readme`
-  for README and existing AGENTS.md accuracy. Reuse valid session evidence.
+- Use `verification-before-completion` and `update-readme`.
 - For a message-only request, leave the index untouched and identify the diff or
   changes the message should describe.
 
