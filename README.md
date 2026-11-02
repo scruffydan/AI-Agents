@@ -47,6 +47,10 @@ Override OpenCode's provider prefix with `openai` or `opencode`:
 ./build.py opencode --opencode-provider opencode
 ```
 
+`--work` cannot be combined with `--opencode-provider`: work models use Google
+Vertex, and changing only their provider prefix would produce unsupported model
+references such as `openai/claude-opus-5-5#high`.
+
 Each build replaces `build/` with output for the selected harnesses. Agent
 metadata, references, includes, TOML, and output paths are checked before the
 previous build is replaced. YAML templates and shared skill metadata are not
