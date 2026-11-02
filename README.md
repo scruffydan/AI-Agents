@@ -213,7 +213,9 @@ Choose a workflow for the task:
   `systematic-debugging` refers to it by name for recurring or unclear failures.
 - `git-commit` handles verification, staging, and committing in the current
   conversation, using the configured drafting agent when available. `git-push`
-  checks readiness for a separately authorized push.
+  checks readiness for a separately authorized push. Implementation tasks authorize
+  local commits; pushes require separate authorization. Review and planning tasks
+  remain read-only.
 - `update-readme` checks README and existing AGENTS.md accuracy;
   `verification-before-completion` checks the evidence behind completion claims.
 
@@ -228,6 +230,10 @@ selects its model through native templates. In OpenCode, confirm the active
 model in `/models` after selecting the `brainstorm` primary agent. Selecting a
 primary agent by ID leaves the session model unchanged; desktop agent switching
 can restore that agent's remembered or configured model.
+
+Codex's `brainstorm` agent uses the shell for read-only repository inspection
+within the parent session's sandbox and approval policy. Its prompt forbids
+file edits.
 
 ## Customize an agent for one harness
 

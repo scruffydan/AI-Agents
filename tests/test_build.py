@@ -188,7 +188,8 @@ class BuildTests(unittest.TestCase):
                 parsed = tomllib.loads(agent.read_text())
                 self.assertEqual(parsed["model"], "gpt-6-astra")
                 self.assertEqual(parsed["model_reasoning_effort"], "high")
-                self.assertFalse(parsed["features"]["shell_tool"])
+                self.assertTrue(parsed["features"]["shell_tool"])
+                self.assertNotIn("or running shell commands", parsed["developer_instructions"])
                 for text in (claude.read_text(), parsed["description"] + parsed["developer_instructions"]):
                     self.assertIn("Use only when the user explicitly asks for the brainstorm agent.", text)
                     self.assertNotIn("build mode", text)
