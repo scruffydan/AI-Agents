@@ -155,7 +155,7 @@ class BuildTests(unittest.TestCase):
                 parsed = tomllib.loads(agent.read_text())
                 self.assertEqual(parsed["model"], "gpt-6-astra")
                 self.assertEqual(parsed["model_reasoning_effort"], "medium")
-                self.assertFalse(parsed["features"]["shell_tool"])
+                self.assertTrue(parsed["features"]["shell_tool"])
 
     def test_referenced_shared_skill_support_files_exist(self):
         references = {
