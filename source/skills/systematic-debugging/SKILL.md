@@ -85,9 +85,10 @@ causal paths when needed; do not force a question chain for a clear local bug.
    - Understand the dependencies and assumptions before applying the pattern
 
 3. **Identify Differences**
-   - What's different between working and broken?
-   - List every difference, however small
-   - Don't assume "that can't matter"
+   - Compare working and failing cases. Prioritize differences that could explain
+     the observed failure, including small differences.
+   - Test those explanations and broaden the investigation when the evidence
+     does not support them.
 
 4. **Understand Dependencies**
    - What other components does this need?
