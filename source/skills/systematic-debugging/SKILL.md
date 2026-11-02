@@ -39,9 +39,7 @@ implementation is out of scope.
 
 4. **Gather Evidence in Multi-Component Systems**
 
-   **WHEN system has multiple components (CI -> build -> signing, API -> service -> database):**
-
-   **When existing evidence does not locate the failure, add targeted diagnostics:**
+   **WHEN a system has multiple components (CI -> build -> signing, API -> service -> database) and existing evidence does not locate the failure, add targeted diagnostics:**
    ```
    For EACH component boundary:
      - Log what data enters component
@@ -62,7 +60,7 @@ implementation is out of scope.
 
    **WHEN error is deep in call stack:**
 
-   See `root-cause-tracing.md` in this directory for the complete backward tracing technique.
+   See [root-cause-tracing.md](root-cause-tracing.md) in this directory for the complete backward tracing technique.
 
    **Quick version:**
    - Where does bad value originate?
@@ -71,7 +69,7 @@ implementation is out of scope.
    - Fix at source, not at symptom
 
 For recurring failures, unclear causal links, or an explicit Five Whys request,
-optionally use [five-whys.md](five-whys.md). Follow the evidence across multiple
+optionally use the `five-whys` skill. Follow the evidence across multiple
 causal paths when needed; do not force a question chain for a clear local bug.
 
 ### Phase 2: Pattern Analysis
@@ -141,17 +139,17 @@ If systematic investigation reveals issue is truly environmental, timing-depende
 
 1. You've completed the process
 2. Document what you investigated
-3. Implement appropriate handling (retry, timeout, error message)
-4. Add monitoring/logging for future investigation
+3. Within the authorized task, recommend appropriate handling (retry, timeout,
+   error message) and any diagnostics that would help future investigation
 
 ## Supporting Techniques
 
 These techniques are part of systematic debugging and available in this directory:
 
-- **[five-whys.md](five-whys.md)** - Optional evidence-backed causal questioning for recurring or unclear failures
-- **`root-cause-tracing.md`** - Trace bugs backward through call stack to find original trigger
-- **`defense-in-depth.md`** - Add validation at multiple layers after finding root cause
-- **`condition-based-waiting.md`** - Replace arbitrary timeouts with condition polling
+- **[root-cause-tracing.md](root-cause-tracing.md)** - Trace bugs backward through call stack to find original trigger
+- **[defense-in-depth.md](defense-in-depth.md)** - Add validation at multiple layers after finding root cause
+- **[condition-based-waiting.md](condition-based-waiting.md)** - Replace arbitrary timeouts with condition polling
 
 **Related skills:**
+- **`five-whys`** - Optional evidence-backed causal questioning for recurring or unclear failures
 - **`verification-before-completion`** - Verify fix worked before claiming success

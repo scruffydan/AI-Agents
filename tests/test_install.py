@@ -52,14 +52,14 @@ class InstallTests(unittest.TestCase):
 
     def test_changed_files_are_backed_up_and_unchanged_files_are_skipped(self):
         self.install("claude")
-        agent = self.home / ".claude/agents/explore.md"
+        agent = self.home / ".claude/agents/docs-fetcher.md"
         generated = agent.read_text()
         agent.write_text("local edit")
 
         result = self.install("claude")
 
         self.assertEqual(agent.read_text(), generated)
-        backups = list((self.home / ".ai-agents-backups").glob("*/.claude/agents/explore.md"))
+        backups = list((self.home / ".ai-agents-backups").glob("*/.claude/agents/docs-fetcher.md"))
         self.assertEqual([path.read_text() for path in backups], ["local edit"])
         self.assertEqual(result.stdout.count("Backed up:"), 1)
         self.assertEqual(result.stdout.count("Installed:"), 1)
