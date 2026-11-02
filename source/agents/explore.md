@@ -1,7 +1,7 @@
 +++
 description = "Explore and answer questions about the codebase. Use this agent to find files, search code, understand implementations, and trace dependencies without consuming main conversation context."
 model_profile = "mini_reasoning"
-harnesses = ["opencode", "claude", "codex"]
+harnesses = ["opencode", "codex"]
 +++
 
 # Codebase Explorer Agent

@@ -15,7 +15,4 @@ Review the rendered text or Markdown structure for broken links, stale reference
 and confusing wording. Documentation-only edits do not need tests that restate
 prose.
 
-Complete this check before committing or handing off user-facing changes. Reuse a
-valid check from this session while its relevant inputs are unchanged. Use
-`verification-before-completion` for test and build evidence instead of repeating
-that workflow here.
+Complete this check before committing or handing off user-facing changes.
