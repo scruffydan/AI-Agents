@@ -84,7 +84,7 @@ class BuildTests(unittest.TestCase):
         for harness, text in rendered.items():
             with self.subTest(harness=harness):
                 self.assertIn("## Draft the message", text)
-                self.assertIn('git log -10 --format="%h %s%n%b%n"', text)
+                self.assertIn("```sh\ngit log -10 --format=full\n```", text)
                 self.assertIn("Do not impose\nconventional prefixes", text)
                 self.assertNotIn("`git-commit` skill", text)
 
