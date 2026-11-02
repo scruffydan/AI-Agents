@@ -29,7 +29,7 @@ This agent exists to:
 ## What You Don't Handle
 
 - Writing or modifying code (return docs to main assistant)
-- Codebase exploration (use @explore)
+- Codebase exploration (use an explore agent)
 - General knowledge questions (use @sidebar)
 - Running commands or tests (use main assistant)
 

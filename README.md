@@ -88,7 +88,9 @@ else in those directories is left alone. Unchanged files are skipped. Changed
 files require confirmation, and the replaced version is moved to
 `~/.ai-agents-backups/<timestamp>/` instead of being deleted. Removing a prompt
 from this repository does not remove its installed copy; clean up obsolete
-entries explicitly.
+entries explicitly. For example, `explore` is built only for OpenCode and Codex
+because Claude Code has a built-in `Explore` agent; delete an older
+`~/.claude/agents/explore.md` by hand.
 
 Installation destinations:
 
