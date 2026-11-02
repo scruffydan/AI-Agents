@@ -10,7 +10,7 @@ templates.
 ## Requirements
 
 - Python 3.11 or newer
-- OpenCode V2 for the OpenCode configuration
+- OpenCode 1.x or 2.x for the OpenCode configuration (permissions verified on 1.19.5)
 - Bash for the optional installer
 
 There are no third-party Python dependencies.
@@ -52,10 +52,18 @@ metadata, references, includes, TOML, and output paths are checked before the
 previous build is replaced. YAML templates and shared skill metadata are not
 validated for harness-specific requirements.
 
-OpenCode output uses V2's `agents/` and `skills/` directories, plus `commands/`
-when command templates are present.
-Agent permissions use ordered `permissions` rules, and reasoning effort is
-selected with a model variant such as `openai/gpt-6.1-sol#high`.
+OpenCode output uses the `agents/` and `skills/` directories, plus `commands/`
+when command templates are present. Reasoning effort is selected with a V2
+model variant such as `openai/gpt-6.1-sol#high`.
+
+Permissions use the V1 `permission` map (`edit: deny`, `bash: {...}`), not the
+V2 `permissions` rule list. OpenCode 1.x rejects `permissions` in
+`opencode.json` and passes it through as model options in agent frontmatter,
+so read-only agents would silently keep edit and shell access. OpenCode 2.x
+still reads and normalizes the V1 map. Check the resolved rules with
+`opencode debug agent <name>`. Sources:
+[V1 permissions](https://opencode.ai/docs/permissions),
+[V2 migration](https://opencode.ai/v2/docs/migrate-v1/).
 
 ## Install
 

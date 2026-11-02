@@ -8,10 +8,12 @@
       }
     }
   },
-  "permissions": [
-    {"action": "read", "resource": "*", "effect": "allow"},
-    {"action": "external_directory", "resource": "*", "effect": "ask"},
-    {"action": "shell", "resource": "git push *", "effect": "ask"},
-    {"action": "shell", "resource": "git * push *", "effect": "ask"}
-  ]
+  "permission": {
+    "read": "allow",
+    "external_directory": "ask",
+    "bash": {
+      "git push *": "ask",
+      "git * push *": "ask"
+    }
+  }
 }

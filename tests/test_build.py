@@ -187,13 +187,13 @@ class BuildTests(unittest.TestCase):
         for agent in (output / "agents").glob("*.md"):
             with self.subTest(agent=agent.name):
                 header = agent.read_text().split("---", 2)[1]
-                self.assertNotIn("\npermission:", header)
+                self.assertNotIn("\npermissions:", header)
                 self.assertNotIn("\nreasoningEffort:", header)
                 self.assertNotIn("\ntemperature:", header)
                 self.assertNotIn("google-vertex-anthropic/", header)
         reviewer = (output / "agents/code-security.md").read_text()
         self.assertIn("model: google-vertex/claude-opus-5-5#high\n", reviewer)
-        self.assertIn("action: shell\n    resource: \"*\"\n    effect: deny", reviewer)
+        self.assertIn("\npermission:\n  edit: deny\n  bash: deny\n", reviewer)
         commit = (output / "agents/git-commit.md").read_text()
         self.assertIn("model: google-vertex/claude-sonnet-5-5#high\n", commit)
         docs = (output / "agents/docs-fetcher.md").read_text()
