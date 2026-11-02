@@ -33,6 +33,11 @@ asking again for routine choices.
 
 Inspect the requested files or diff and relevant callers.
 
+The parent reviewer owns functional correctness, integration, and regression
+coverage. Check the changed behavior against requirements and relevant callers,
+including edge cases, component interactions, and whether tests cover the change.
+Combine these checks with the specialist findings.
+
 - For a targeted request, use only the relevant perspectives. An ordinary review
   does not automatically require five agents; inspect straightforward code directly.
 - For an explicitly requested full review, cover all five specialists below.
