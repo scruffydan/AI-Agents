@@ -8,8 +8,8 @@
       }
     }
   },
-  "permission": {
-    "read": "allow",
-    "external_directory": "ask"
-  }
+  "permissions": [
+    {"action": "read", "resource": "*", "effect": "allow"},
+    {"action": "external_directory", "resource": "*", "effect": "ask"}
+  ]
 }

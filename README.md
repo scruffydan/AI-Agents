@@ -10,7 +10,7 @@ templates.
 ## Requirements
 
 - Python 3.11 or newer
-- OpenCode V2 for the generated model configuration (permission maps verified on 1.19.5)
+- OpenCode V2 for the OpenCode configuration
 - Bash for the optional installer
 
 There are no third-party Python dependencies.
@@ -52,25 +52,16 @@ metadata, references, includes, TOML, and output paths are checked before the
 previous build is replaced. YAML templates and shared skill metadata are not
 validated for harness-specific requirements.
 
-OpenCode output uses the `agents/` and `skills/` directories, plus `commands/`
-when command templates are present. Reasoning effort is selected with a V2
-model variant such as `openai/gpt-6.1-sol#high`.
-
-Permissions use the V1 `permission` map (`edit: deny`, `bash: ask`), not the
-V2 `permissions` rule list. OpenCode 1.x rejects `permissions` in
-`opencode.json` and passes it through as model options in agent frontmatter,
-so read-only agents would silently keep edit and shell access. OpenCode 2.x
-still reads and normalizes the V1 map. Check the resolved rules with
-`opencode debug agent <name>`. Sources:
-[V1 permissions](https://opencode.ai/docs/permissions),
-[V2 migration](https://opencode.ai/v2/docs/migrate-v1/).
+OpenCode output uses V2's `agents/` and `skills/` directories, plus `commands/`
+when command templates are present. Agent permissions use ordered V2
+`permissions` rules with `action`, `resource`, and `effect` fields. Reasoning
+effort is selected with a model variant such as `openai/gpt-6.1-sol#high`.
+See the [V2 permissions documentation](https://opencode.ai/v2/docs/permissions/).
 
 Default subagents and the `brainstorm` and `thorough-plan` primary agents deny
 file edits and ask before running shell commands. The global config allows file
 reads and asks before access outside the project; shell commands use OpenCode's
-native defaults unless an agent overrides them. Generated model IDs still use
-V2's variant syntax, so the permission-map compatibility does not establish
-full OpenCode 1.x support.
+native defaults unless an agent overrides them.
 
 ## Install
 
