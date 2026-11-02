@@ -257,8 +257,13 @@ or approval policy, and disabling the shell tool would stop agents such as
 `git-commit` from reading history.
 
 The `git-commit` drafting agent is limited per harness as far as each allows.
-OpenCode denies edits, allows `git log`, `git diff`, `git status`, and `git show`
-(also with `git -C <path>`), and asks before other shell commands. Claude Code
+OpenCode denies edits and automatically allows only exact common Git commands:
+`git log`, `git log -10 --oneline --no-decorate`, `git status`, `git status --short`,
+`git diff --no-ext-diff --no-textconv` (also with `--cached` or `--staged`), and
+`git show --no-ext-diff --no-textconv HEAD --stat`. Other forms, including `git -C`,
+additional flags, and commands that can write through `--output`, require approval.
+The diff/show forms disable external diff and text conversion helpers. Wildcard
+prefix rules cannot guarantee read-only arguments. Claude Code
 omits Edit and Write from its tools, but Bash is not restricted by command,
 because subagent frontmatter cannot scope Bash patterns. Codex relies on the
 parent's sandbox and the agent's read-only instructions.

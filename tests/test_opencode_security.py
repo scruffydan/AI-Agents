@@ -96,15 +96,25 @@ class OpenCodeSecurityTests(unittest.TestCase):
         self.assertTrue(agent_rules)
         rules = self.rules + agent_rules
         for command in (
-            "git log", "git log -20 --oneline", "git diff --cached", "git diff",
-            "git status", "git status --short", "git show HEAD --stat",
-            "git -C repo log -5", "git -C repo diff --staged",
+            "git log", "git log -10 --oneline --no-decorate",
+            "git status", "git status --short",
+            "git diff --no-ext-diff --no-textconv",
+            "git diff --no-ext-diff --no-textconv --cached",
+            "git diff --no-ext-diff --no-textconv --staged",
+            "git show --no-ext-diff --no-textconv HEAD --stat",
         ):
             with self.subTest(command=command):
                 self.assertEqual(decision(rules, "shell", command), "allow")
         for command in (
             "git add src/app.py", "git commit -m fix", "git push",
             "git -C repo push origin log", "rm -rf build", "python3 -m unittest",
+            "git -C repo add log README.md", "git -C repo reset --hard log HEAD",
+            "git -C repo log -5", "git -C repo diff --staged",
+            "git log -1 --output=README.md", "git diff --output=README.md",
+            "git show HEAD --output README.md",
+            "git diff --no-ext-diff --no-textconv --output=README.md",
+            "git log -10 --oneline --no-decorate --output=README.md",
+            "git diff --ext-diff", "git diff --textconv", "git diff", "git show",
         ):
             with self.subTest(command=command):
                 self.assertEqual(decision(rules, "shell", command), "ask")
