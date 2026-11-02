@@ -23,8 +23,7 @@ Honor authorization already given for implementation.
 
 Record substantial agreed decisions in a design document when useful to the task
 or required by the repository. Do not create documents, branches, or commits just
-because brainstorming occurred. Use `implementation-workflow` for complex
-implementation, reusing the design rather than restarting requirements analysis.
+because brainstorming occurred. Reuse the agreed design during implementation.
 
 ## Configured Brainstorming Agent
 
