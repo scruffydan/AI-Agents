@@ -3,7 +3,7 @@
 # A missing *_work value falls back to the normal harness value.
 
 [brainstorm]
-opencode = "openai/gpt-6-astra#medium"
+opencode = "openai/gpt-6-astra#high"
 opencode_work = "google-vertex/claude-opus-5-5#high"
 claude = "claude-opus-5-5"
 codex = "gpt-6-astra"
@@ -31,9 +31,3 @@ opencode = "openai/gpt-6-luna#high"
 opencode_work = "google-vertex/claude-sonnet-5-5#high"
 claude = "claude-sonnet-5-5"
 codex = "gpt-6-luna"
-
-[sidebar]
-opencode = "openai/gpt-6.1-sol#high"
-opencode_work = "google-vertex/claude-opus-5-5#high"
-claude = "claude-opus-5-5"
-codex = "gpt-6.1-sol"

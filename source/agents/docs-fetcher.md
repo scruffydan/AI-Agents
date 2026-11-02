@@ -1,5 +1,5 @@
 +++
-description = "Fetch and extract relevant documentation from URLs. Use this agent when you need specific information from external documentation without flooding the main context with entire pages."
+description = "Researches external library, API, and tool documentation (search and fetch) and returns focused excerpts with source links. Use for any external docs lookup."
 model_profile = "docs_fetcher"
 harnesses = ["opencode", "claude", "codex"]
 +++
@@ -29,8 +29,8 @@ This agent exists to:
 ## What You Don't Handle
 
 - Writing or modifying code (return docs to main assistant)
-- Codebase exploration (use @explore)
-- General knowledge questions (use @sidebar)
+- Codebase exploration (use an explore agent)
+- General knowledge questions (return to the main assistant)
 - Running commands or tests (use main assistant)
 
 ## Response Guidelines
