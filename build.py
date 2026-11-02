@@ -214,6 +214,8 @@ def build(
     opencode_provider: str | None = None,
 ) -> int:
     validate_harnesses(harnesses)
+    if work and opencode_provider:
+        raise ValueError("--work cannot be combined with --opencode-provider; work models use Google Vertex.")
     model_profiles.cache_clear()
     prompt_body.cache_clear()
     agents = load_agents()

@@ -47,6 +47,10 @@ Override OpenCode's provider prefix with `openai` or `opencode`:
 ./build.py opencode --opencode-provider opencode
 ```
 
+`--work` cannot be combined with `--opencode-provider`: work models use Google
+Vertex, and changing only their provider prefix would produce unsupported model
+references such as `openai/claude-opus-5-5#high`.
+
 Each build replaces `build/` with output for the selected harnesses. Agent
 metadata, references, includes, TOML, and output paths are checked before the
 previous build is replaced. YAML templates and shared skill metadata are not
@@ -219,9 +223,10 @@ If delegation or web access is unavailable, report the limitation and continue
 independent work.
 
 For configured brainstorming in Codex and Claude Code, the `brainstorm` agent
-selects its model through native templates. OpenCode retains an existing session's
-model when changing agents; select the configured model in `/models` as well as
-the `brainstorm` primary agent.
+selects its model through native templates. In OpenCode, confirm the active
+model in `/models` after selecting the `brainstorm` primary agent. Selecting a
+primary agent by ID leaves the session model unchanged; desktop agent switching
+can restore that agent's remembered or configured model.
 
 ## Customize an agent for one harness
 
