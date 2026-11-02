@@ -1,4 +1,4 @@
-"""Config regressions using documented V2 rules; these do not run the shell scanner."""
+"""Config regressions using a local model of V2 permissions, not the OpenCode runtime."""
 
 import json
 from pathlib import Path
@@ -79,9 +79,27 @@ class OpenCodeSecurityTests(unittest.TestCase):
                 if path == templates[0]:
                     self.assertEqual(decision(rules, "question", "*"), "deny")
 
+    def test_global_and_agent_rules_preserve_native_env_prompts(self):
+        templates = [REPO / "templates/defaults/opencode/agent.md",
+                     *sorted((REPO / "templates/opencode/agents").glob("*.md")),
+                     *sorted((REPO / "templates/overrides/opencode").glob("*.md"))]
+        policies = [("global", self.rules)]
+        for path in templates:
+            _, agent_rules = frontmatter_permissions(path.read_text())
+            policies.append((str(path.relative_to(REPO)), self.rules + agent_rules))
+        for policy, rules in policies:
+            for resource, effect in (
+                (".env", "ask"), (".env.local", "ask"),
+                ("app/.env", "ask"), ("app/.env.local", "ask"),
+                ("src/app.py", "allow"), (".env.example", "allow"),
+                ("app/.env.example", "allow"),
+            ):
+                with self.subTest(policy=policy, resource=resource):
+                    self.assertEqual(decision(rules, "read", resource), effect)
+
     def test_routine_coding_and_file_reads_do_not_require_approval(self):
         for action, resource in (
-            ("read", ".env"), ("read", "app/.env.local"), ("read", "secrets.json"),
+            ("read", "src/app.py"), ("read", "secrets.json"),
             ("read", "certs/server.key"), ("read", ".env.example"),
             ("edit", "src/app.py"), ("grep", "timeout"), ("glob", "**/*.py"),
             ("shell", "git diff --cached"), ("shell", "git add src/app.py"),
