@@ -145,7 +145,7 @@ class OpenCodeSecurityTests(unittest.TestCase):
         self.assertTrue(agent_rules)
         rules = self.rules + agent_rules
         for command in (
-            "git log", "git log -10 --oneline --no-decorate",
+            "git log", "git log -10 --format=full", "git log -10 --oneline --no-decorate",
             "git status", "git status --short",
             "git diff --no-ext-diff --no-textconv",
             "git diff --no-ext-diff --no-textconv --cached",
@@ -163,6 +163,11 @@ class OpenCodeSecurityTests(unittest.TestCase):
             "git show HEAD --output README.md",
             "git diff --no-ext-diff --no-textconv --output=README.md",
             "git log -10 --oneline --no-decorate --output=README.md",
+            "git log -10 --format=full --output=README.md",
+            "git log -10 --format=full --all",
+            "git log -10 --format=full > README.md",
+            "git log -10 --format=full >> README.md",
+            "git diff --no-ext-diff --no-textconv --cached > README.md",
             "git diff --ext-diff", "git diff --textconv", "git diff", "git show",
         ):
             with self.subTest(command=command):

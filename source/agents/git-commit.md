@@ -14,10 +14,22 @@ limitation to the parent.
 
 ## Gather context
 
-Read applicable repository instructions and inspect the staged diff, or the
-parent-specified scope for a message-only request, using read-only Git commands.
-If neither is available, report the missing scope instead of staging changes or
-inventing a message.
+Read applicable repository instructions and inspect the staged diff:
+
+```sh
+git diff --no-ext-diff --no-textconv --cached
+```
+
+For a message-only request, inspect the parent-specified scope instead. For
+unstaged changes, use:
+
+```sh
+git diff --no-ext-diff --no-textconv
+```
+
+These diff forms disable external diff and text conversion helpers. If neither
+the staged diff nor a parent-specified scope is available, report the missing
+scope instead of staging changes or inventing a message.
 
 Reuse conventions the parent already established when reliable. Otherwise
 inspect recent history:
@@ -29,7 +41,7 @@ git log -10 --oneline --no-decorate
 Read full messages only when body or footer conventions need clarification:
 
 ```sh
-git log -10 --format="%h %s%n%b%n"
+git log -10 --format=full
 ```
 
 ## Draft the message
