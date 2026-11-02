@@ -1,10 +1,8 @@
 name = "brainstorm"
-description = "Generate diverse ideas and explore unconventional approaches before choosing a solution."
+description = "Read-only idea generation on the configured brainstorm model. Use only when the user explicitly asks for the brainstorm agent."
 model = "{{model:brainstorm}}"
-model_reasoning_effort = "medium"
+model_reasoning_effort = "high"
 developer_instructions = """
-Explore ideas without modifying files or running shell commands.
-
 {{prompt:brainstorm}}
 """
 
