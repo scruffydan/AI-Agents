@@ -13,6 +13,9 @@ permissions:
     resource: "git log"
     effect: allow
   - action: shell
+    resource: "git log -10 --format=full"
+    effect: allow
+  - action: shell
     resource: "git log -10 --oneline --no-decorate"
     effect: allow
   - action: shell
