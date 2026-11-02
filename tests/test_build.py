@@ -47,8 +47,7 @@ class BuildTests(unittest.TestCase):
 
         rendered = self.root / "build/codex/.codex/agents/brainstorm.toml"
         instructions = tomllib.loads(rendered.read_text())["developer_instructions"]
-        self.assertEqual(instructions.strip(),
-                         "Explore ideas without modifying files or running shell commands.\n\n" + body)
+        self.assertEqual(instructions.strip(), body)
 
     def test_default_build_renders_all_harnesses_with_bare_codex_models(self):
         self.build()
@@ -76,11 +75,11 @@ class BuildTests(unittest.TestCase):
     def test_brainstorm_follows_work_and_provider_options(self):
         brainstorm = self.root / "build/opencode/agents/brainstorm.md"
         for args, model in (
-            ((), "openai/gpt-6-astra#medium"),
+            ((), "openai/gpt-6-astra#high"),
             (("--work",), "google-vertex/claude-opus-5-5#high"),
-            (("--opencode-provider", "openai"), "openai/gpt-6-astra#medium"),
+            (("--opencode-provider", "openai"), "openai/gpt-6-astra#high"),
             (("--work", "--opencode-provider", "openai"), "openai/claude-opus-5-5#high"),
-            (("--opencode-provider", "opencode"), "opencode/gpt-6-astra#medium"),
+            (("--opencode-provider", "opencode"), "opencode/gpt-6-astra#high"),
             (("--work", "--opencode-provider", "opencode"), "opencode/claude-opus-5-5#high"),
         ):
             with self.subTest(args=args):
@@ -154,8 +153,13 @@ class BuildTests(unittest.TestCase):
                 agent = self.root / "build/codex/.codex/agents/brainstorm.toml"
                 parsed = tomllib.loads(agent.read_text())
                 self.assertEqual(parsed["model"], "gpt-6-astra")
-                self.assertEqual(parsed["model_reasoning_effort"], "medium")
+                self.assertEqual(parsed["model_reasoning_effort"], "high")
                 self.assertFalse(parsed["features"]["shell_tool"])
+                for text in (claude.read_text(), parsed["description"] + parsed["developer_instructions"]):
+                    self.assertIn("Use only when the user explicitly asks for the brainstorm agent.", text)
+                    self.assertNotIn("build mode", text)
+                    self.assertNotIn("plan mode", text)
+                    self.assertNotIn("Ask clarifying questions", text)
 
     def test_referenced_shared_skill_support_files_exist(self):
         references = {
