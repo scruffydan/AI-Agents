@@ -218,7 +218,7 @@ Choose a workflow for the task:
   checks readiness for a separately authorized push. Implementation tasks authorize
   local commits; pushes require separate authorization. Review and planning tasks
   remain read-only.
-- `update-readme` checks README and existing AGENTS.md accuracy;
+- `update-readme` checks README and existing AGENTS.md or CLAUDE.md accuracy;
   `verification-before-completion` checks the evidence behind completion claims.
 
 External documentation research uses the `docs-fetcher` subagent under the shared

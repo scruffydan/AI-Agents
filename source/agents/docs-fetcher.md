@@ -1,5 +1,5 @@
 +++
-description = "Fetch and extract relevant documentation from URLs. Use this agent when you need specific information from external documentation without flooding the main context with entire pages."
+description = "Researches external library, API, and tool documentation (search and fetch) and returns focused excerpts with source links. Use for any external docs lookup."
 model_profile = "docs_fetcher"
 harnesses = ["opencode", "claude", "codex"]
 +++
