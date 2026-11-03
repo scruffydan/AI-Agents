@@ -1,4 +1,4 @@
-# Build output - generated from source/ and templates/
+# Build output - generated from source/ and renderers.py
 /build/
 
 # OS files
