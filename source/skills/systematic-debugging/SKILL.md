@@ -19,8 +19,7 @@ implementation is out of scope.
 
 **BEFORE attempting ANY fix:**
 
-1. **Read Error Messages Carefully**
-   - Don't skip past errors or warnings
+1. **Read Errors and Warnings Carefully**
    - They often contain the exact solution
    - Read stack traces completely
    - Note line numbers, file paths, error codes
@@ -29,7 +28,8 @@ implementation is out of scope.
    - Can you trigger it reliably?
    - What are the exact steps?
    - Does it happen every time?
-   - If not reproducible -> gather more data, don't guess
+   - If reproduction is unreliable, gather observations that distinguish the
+     competing explanations.
 
 3. **Check Recent Changes**
    - What changed that could cause this?
@@ -99,26 +99,20 @@ causal paths when needed; do not force a question chain for a clear local bug.
 
 **Scientific method:**
 
-1. **Form Single Hypothesis**
-   - State clearly: "I think X is the root cause because Y"
-   - Write it down
-   - Be specific, not vague
+1. **Form a Testable Hypothesis**
+   - Record a specific explanation: "I think X is the root cause because Y"
 
-2. **Test Minimally**
-   - Make the SMALLEST possible change to test hypothesis
-   - One variable at a time
-   - Don't fix multiple things at once
+2. **Test One Hypothesis at a Time**
+   - Use the smallest change needed to test the explanation
+   - Change one variable at a time so the result can be attributed to it
 
 3. **Verify Before Continuing**
-   - Did it work? Yes -> Phase 4
-   - Didn't work? Form NEW hypothesis
-   - DON'T add more fixes on top
+   - Read the result and reassess the hypothesis after each test
+   - If supported, proceed to Phase 4; otherwise, use the evidence to choose the next test
 
-4. **When You Don't Know**
-   - Say "I don't understand X"
-   - Don't pretend to know
-   - Ask for help
-   - Research more
+4. **State Remaining Uncertainty**
+   - Explain what remains unknown and what evidence would resolve it
+   - Research further or ask a focused question when more context is needed
 
 ### Phase 4: Implementation
 

@@ -26,7 +26,7 @@ external use you could not rule out. Recommend consolidation only when the
 copies represent the same concept and should change together; coincidental
 similarity is cheaper to keep than the wrong abstraction.
 
-## Out of scope
+## Review scope
 
-Leave naming and comments to `code-readability`, control flow and complexity to
-`code-simplifier`, and runtime cost to `code-performance`.
+Focus on duplication and dead code. Briefly flag material adjacent issues for the
+parent to assess or route to another reviewer.

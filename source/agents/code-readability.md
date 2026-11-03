@@ -22,9 +22,8 @@ not generic style rules.
 - Formatting and organization: layout that departs from the surrounding code or
   the project's formatter, and related code scattered in a way that hides intent.
 
-## Out of scope
+## Review scope
 
-Leave control flow and complexity to `code-simplifier`, duplication and dead code
-(including commented-out code) to `code-redundancy`, and runtime cost to
-`code-performance`. Do not report what an existing formatter or linter already
-enforces unless its configuration is being bypassed.
+Focus on readability. Briefly flag material adjacent issues for the parent to
+assess or route to another reviewer. Prioritize findings beyond automated checks;
+report violations that escape the current checks.

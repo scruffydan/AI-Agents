@@ -24,10 +24,10 @@ rules.
 - Dense or clever code where a more explicit version is easier to read and
   debug.
 
-Prefer clarity over fewer lines. Do not recommend a change that alters behavior,
-error handling, or cleanup; state any behavior risk in the recommendation.
+Prefer clarity over fewer lines. Preserve behavior, error handling, and cleanup.
+State any behavior risk in the recommendation.
 
-## Out of scope
+## Review scope
 
-Leave naming, comments, and formatting to `code-readability`, duplication and
-dead code to `code-redundancy`, and runtime cost to `code-performance`.
+Focus on control flow and complexity. Briefly flag material adjacent issues for
+the parent to assess or route to another reviewer.
