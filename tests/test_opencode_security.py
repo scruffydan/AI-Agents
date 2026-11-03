@@ -104,7 +104,7 @@ class OpenCodeSecurityTests(unittest.TestCase):
             with self.subTest(template=str(path.relative_to(REPO))):
                 _, agent_rules = frontmatter_permissions(path.read_text())
                 rules = self.rules + agent_rules
-                for target in ("general", "explore", "docs-fetcher", "custom-writer"):
+                for target in ("general", "code-security", "docs-fetcher", "custom-writer"):
                     with self.subTest(target=target):
                         self.assertEqual(decision(rules, "subagent", target), "deny")
 
@@ -115,7 +115,7 @@ class OpenCodeSecurityTests(unittest.TestCase):
             ("edit", "src/app.py"), ("grep", "timeout"), ("glob", "**/*.py"),
             ("shell", "git diff --cached"), ("shell", "git add src/app.py"),
             ("shell", "git commit -m fix"), ("shell", "python3 -m unittest"),
-            ("shell", "npm run build"), ("subagent", "explore"),
+            ("shell", "npm run build"), ("subagent", "code-security"),
             ("webfetch", "https://example.com/docs"), ("execute", "*"),
         ):
             with self.subTest(action=action, resource=resource):

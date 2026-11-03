@@ -48,7 +48,7 @@ class InstallTests(unittest.TestCase):
         self.assertEqual(unrelated_skill.read_text(), "keep me")
         self.assertEqual(unrelated_agent.read_text(), "keep me")
         self.assertTrue((self.home / ".claude/skills/git-commit/SKILL.md").is_file())
-        self.assertTrue((self.home / ".codex/agents/explore.toml").is_file())
+        self.assertTrue((self.home / ".codex/agents/code-security.toml").is_file())
 
     def test_changed_files_are_backed_up_and_unchanged_files_are_skipped(self):
         self.install("claude")
@@ -180,7 +180,7 @@ class InstallTests(unittest.TestCase):
                 self.assertIn("1) Codex (default)", result.stdout)
                 self.assertLess(result.stdout.index("2) Claude Code"), result.stdout.index("3) OpenCode"))
                 self.assertTrue((self.home / ".codex/AGENTS.md").is_file())
-                self.assertTrue((self.home / ".codex/agents/explore.toml").is_file())
+                self.assertTrue((self.home / ".codex/agents/code-security.toml").is_file())
                 self.assertTrue((self.home / ".agents/skills/git-commit/SKILL.md").is_file())
                 self.assertFalse((self.home / ".claude").exists())
                 self.assertFalse((self.home / ".config/opencode").exists())
