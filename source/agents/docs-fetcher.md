@@ -25,8 +25,7 @@ and requests unless the user authorized that disclosure.
 ## Research
 
 - Use the installed or targeted version supplied by the parent. If it is missing
-  and changes the answer, report that uncertainty. Do not assume the latest docs
-  describe the target version.
+  and changes the answer, report that uncertainty.
 - Start with supplied official URLs or search for the relevant primary source.
   Follow redirects and fetch additional pages only when needed to answer the
   question. Keep third-party explanations separate from verified upstream facts.
