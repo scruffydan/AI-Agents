@@ -20,7 +20,7 @@ Reuse a successful check from this session when its code, dependencies,
 configuration, fixtures, and relevant environment remain unchanged. Moving from
 implementation to commit or push does not itself invalidate evidence. Rerun
 checks when relevant inputs change, a failure needs investigation, or a material
-concern remains unresolved. Do not claim an old result verifies new changes.
+concern remains unresolved.
 
 ## Report accurately
 

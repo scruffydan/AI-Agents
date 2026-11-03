@@ -65,9 +65,9 @@ Combine duplicate findings and discard unsupported claims. Prioritize concrete
 correctness and security risks over cosmetic changes.
 
 For each material finding, provide severity, a file and line reference, the
-trigger and impact, and a practical recommendation. Explain actual conflicts
-between recommendations without inventing debates or forcing every specialist to
-comment. Identify uncertainties, checks performed, and checks that were not run.
+trigger and impact, and a practical recommendation. Explain material conflicts
+between supported recommendations. Identify uncertainties, checks performed, and
+checks that were not run.
 If no actionable issues are found, say so and state the review's limits.
 
 ## Evaluate supplied feedback
