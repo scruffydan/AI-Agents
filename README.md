@@ -3,7 +3,7 @@
 Personal agents, skills, and instructions for Codex, Claude Code, and OpenCode.
 Edit shared source files, then build and install them for the harnesses you use.
 
-Requires Python 3.11+, Bash for installation, and OpenCode V2 for OpenCode output.
+Requires Python 3.11+ and OpenCode V2 for OpenCode output.
 There are no third-party Python dependencies.
 
 ## Install
@@ -11,18 +11,18 @@ There are no third-party Python dependencies.
 Run the picker, or name the harnesses to install:
 
 ```bash
-./install.sh                 # Interactive; Enter selects Codex
-./install.sh codex claude    # Install selected harnesses
-./install.sh --all           # Install all three
+./install.py                 # Interactive; Enter selects Codex
+./install.py codex claude    # Install selected harnesses
+./install.py --all           # Install all three
 ```
 
 Choose one form; `--all` cannot be combined with harness names. Explicit names
 or `--all` also work unattended. Add `--work` for work models or `--force` to
-replace changed files without confirmation. Set `PYTHON=/path/to/python3.11`
-if your default `python3` is too old.
+replace changed files without confirmation. To use a specific Python interpreter,
+run `/path/to/python3.11 install.py` with the same arguments.
 
 The installer skips unchanged entries, asks before replacing changed entries,
-and saves replacements under `~/.ai-agents-backups/<timestamp>/`. Unrelated
+and saves replacements under `~/.ai-agents-backups/<timestamp>-<suffix>/`. Unrelated
 entries are left alone. Removing an entry from this repository does not remove
 its installed copy.
 
@@ -39,7 +39,8 @@ older installed commands are also left alone.
 
 ### OpenCode settings
 
-`install.sh` leaves `opencode.json` alone. To install the repository's settings:
+`install.py` leaves `opencode.json` alone. To install the repository's settings
+(requires Bash):
 
 ```bash
 ./opencode-init.sh

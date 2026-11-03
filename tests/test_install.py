@@ -20,13 +20,13 @@ class InstallTests(unittest.TestCase):
         self.home = Path(temporary.name) / "home"
         self.home.mkdir()
         shutil.copytree(REPO / "source", self.root / "source")
-        for name in ("build.py", "renderers.py", "install.sh"):
+        for name in ("build.py", "renderers.py", "install.py"):
             shutil.copy2(REPO / name, self.root / name)
 
     def run_install(self, *args, input_text="", force=True):
-        env = {**os.environ, "HOME": str(self.home), "PYTHON": sys.executable}
+        env = {**os.environ, "HOME": str(self.home)}
         return subprocess.run(
-            ["bash", "install.sh", *args, *(["--force"] if force else [])],
+            [sys.executable, "install.py", *args, *(["--force"] if force else [])],
             cwd=self.root, env=env, capture_output=True, text=True, input=input_text,
         )
 
@@ -62,6 +62,104 @@ class InstallTests(unittest.TestCase):
         self.assertEqual([path.read_text() for path in backups], ["local edit"])
         self.assertEqual(result.stdout.count("Backed up:"), 1)
         self.assertEqual(result.stdout.count("Installed:"), 1)
+
+    def test_content_comparison_checks_bytes_and_extra_skill_files(self):
+        self.install("claude")
+        source = self.root / "build/claude/agents/docs-fetcher.md"
+        agent = self.home / ".claude/agents/docs-fetcher.md"
+        changed = b"x" * source.stat().st_size
+        agent.write_bytes(changed)
+        os.utime(agent, ns=(source.stat().st_atime_ns, source.stat().st_mtime_ns))
+        extra = self.home / ".claude/skills/code-review/.local-notes"
+        extra.write_text("keep these notes")
+
+        result = self.install("claude")
+
+        self.assertEqual(agent.read_bytes(), source.read_bytes())
+        self.assertFalse(extra.exists())
+        backups = list((self.home / ".ai-agents-backups").iterdir())
+        self.assertEqual(len(backups), 1)
+        self.assertEqual((backups[0] / ".claude/agents/docs-fetcher.md").read_bytes(), changed)
+        self.assertEqual(
+            (backups[0] / ".claude/skills/code-review/.local-notes").read_text(),
+            "keep these notes",
+        )
+        self.assertEqual(result.stdout.count("Backed up:"), 2)
+
+    def test_repeated_replacements_keep_separate_backups(self):
+        self.install("claude")
+        agent = self.home / ".claude/agents/docs-fetcher.md"
+        for content in ("first edit", "second edit"):
+            agent.write_text(content)
+            self.install("claude")
+
+        backups = list((self.home / ".ai-agents-backups").glob("*/.claude/agents/docs-fetcher.md"))
+        self.assertEqual(sorted(path.read_text() for path in backups), ["first edit", "second edit"])
+
+    def test_replacement_confirmation_and_eof(self):
+        self.install("claude")
+        agent = self.home / ".claude/agents/docs-fetcher.md"
+        generated = agent.read_text()
+        agent.write_text("local edit")
+
+        for answer in ("", "\n", "n\n"):
+            with self.subTest(answer=answer):
+                result = self.run_install("claude", force=False, input_text=answer)
+                self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+                self.assertIn("Skipped:", result.stdout)
+                self.assertEqual(agent.read_text(), "local edit")
+                self.assertFalse((self.home / ".ai-agents-backups").exists())
+
+        result = self.run_install("claude", force=False, input_text="YES\n")
+
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(agent.read_text(), generated)
+        backups = list((self.home / ".ai-agents-backups").glob("*/.claude/agents/docs-fetcher.md"))
+        self.assertEqual([path.read_text() for path in backups], ["local edit"])
+
+    def test_replaced_symlinks_are_backed_up_without_changing_targets(self):
+        destination = self.home / ".claude/CLAUDE.md"
+        destination.parent.mkdir()
+        for existing in (True, False):
+            with self.subTest(existing=existing):
+                target = self.home / f"original-{existing}.md"
+                if existing:
+                    target.write_text("keep target")
+                destination.symlink_to(target)
+
+                self.install("claude")
+
+                self.assertFalse(destination.is_symlink())
+                self.assertEqual(
+                    destination.read_bytes(), (self.root / "source/prompts/AGENTS.md").read_bytes(),
+                )
+                backups = [
+                    directory / ".claude/CLAUDE.md"
+                    for directory in (self.home / ".ai-agents-backups").iterdir()
+                ]
+                self.assertTrue(any(path.is_symlink() and path.readlink() == target for path in backups))
+                if existing:
+                    self.assertEqual(target.read_text(), "keep target")
+                else:
+                    self.assertFalse(target.exists())
+                destination.unlink()
+
+    def test_file_directory_conflicts_are_backed_up(self):
+        base = self.home / ".claude/CLAUDE.md/local.md"
+        base.parent.mkdir(parents=True)
+        base.write_text("local directory")
+        skill = self.home / ".claude/skills/code-review"
+        skill.parent.mkdir()
+        skill.write_text("local file")
+
+        self.install("claude")
+
+        self.assertTrue(base.parent.is_file())
+        self.assertTrue((skill / "SKILL.md").is_file())
+        backups = list((self.home / ".ai-agents-backups").iterdir())
+        self.assertEqual(len(backups), 1)
+        self.assertEqual((backups[0] / ".claude/CLAUDE.md/local.md").read_text(), "local directory")
+        self.assertEqual((backups[0] / ".claude/skills/code-review").read_text(), "local file")
 
     def test_all_harnesses_install_shared_skills_and_prompt_modes(self):
         for args in (("--all",), ("--all", "--work")):
@@ -213,6 +311,30 @@ class InstallTests(unittest.TestCase):
                 targets = (".codex/AGENTS.md", ".claude/CLAUDE.md", ".config/opencode/AGENTS.md")
                 self.assertTrue(all((self.home / target).is_file() for target in targets))
                 self.assertIn("for codex, claude, opencode", result.stdout)
+
+    def test_options_can_be_mixed_with_harnesses_and_provider_is_forwarded(self):
+        result = self.install("claude", "--opencode-provider", "opencode", "opencode")
+
+        self.assertNotIn("Which harnesses", result.stdout)
+        self.assertTrue((self.home / ".claude/CLAUDE.md").is_file())
+        self.assertIn(
+            "model: opencode/",
+            (self.home / ".config/opencode/agents/brainstorm.md").read_text(),
+        )
+        self.assertFalse((self.home / ".codex").exists())
+
+    def test_help_and_invalid_arguments_write_nothing(self):
+        cases = (
+            (("--help",), 0), (("-h",), 0), (("--bogus",), 2), (("unknown",), 2),
+            (("--opencode-provider",), 2), (("codex", "codex"), 1),
+            (("opencode", "--work", "--opencode-provider", "openai"), 1),
+        )
+        for args, code in cases:
+            with self.subTest(args=args):
+                result = self.run_install(*args, force=False)
+                self.assertEqual(result.returncode, code, result.stdout + result.stderr)
+                self.assertFalse((self.root / "build").exists())
+                self.assertEqual(list(self.home.iterdir()), [])
 
     def init_opencode(self, *args):
         shutil.copy2(REPO / "opencode-init.sh", self.root / "opencode-init.sh")
