@@ -19,9 +19,8 @@ class InstallTests(unittest.TestCase):
         self.root = Path(temporary.name) / "repo"
         self.home = Path(temporary.name) / "home"
         self.home.mkdir()
-        for name in ("source", "templates"):
-            shutil.copytree(REPO / name, self.root / name)
-        for name in ("build.py", "install.sh"):
+        shutil.copytree(REPO / "source", self.root / "source")
+        for name in ("build.py", "renderers.py", "install.sh"):
             shutil.copy2(REPO / name, self.root / name)
 
     def run_install(self, *args, input_text="", force=True):
