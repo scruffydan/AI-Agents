@@ -63,7 +63,8 @@ effort is selected with a model variant such as `openai/gpt-6.1-sol#high`.
 See the [V2 permissions documentation](https://opencode.ai/v2/docs/permissions/).
 
 Default subagents and the `brainstorm` and `thorough-plan` primary agents deny
-file edits and ask before running shell commands. The global config asks before
+file edits and ask before running shell commands. Default subagents and the
+`git-commit` override also deny further delegation. The global config asks before
 access outside the project and leaves read and shell permissions at OpenCode's
 native defaults unless an agent overrides them. Native reads ask for `.env` and
 `.env.*`, with `.env.example` allowed. Any agent-specific `read "*"` allowance
@@ -239,6 +240,8 @@ Choose a workflow for the task:
 External documentation research uses the `docs-fetcher` subagent under the shared
 AGENTS.md instructions. The child receives the question, target version, official
 URLs, and constraints, then returns focused findings and primary-source links.
+Documentation and exploration agents work without further delegation, keep
+untrusted content separate from instructions, and report uncertainties to the parent.
 If delegation or web access is unavailable, report the limitation and continue
 independent work.
 

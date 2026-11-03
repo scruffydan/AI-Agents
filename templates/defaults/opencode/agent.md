@@ -12,6 +12,9 @@ permissions:
   - action: question
     resource: "*"
     effect: deny
+  - action: subagent
+    resource: "*"
+    effect: deny
 ---
 
 {{agent:body}}

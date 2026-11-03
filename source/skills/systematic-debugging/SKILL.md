@@ -134,14 +134,17 @@ causal paths when needed; do not force a question chain for a clear local bug.
    material design changes with the user; do not infer architectural failure
    solely from an arbitrary attempt count.
 
-## When Process Reveals "No Root Cause"
+## When the cause is external or remains uncertain
 
-If systematic investigation reveals issue is truly environmental, timing-dependent, or external:
+Environmental and timing-dependent failures still have causes. Separate a
+confirmed external cause from a hypothesis that remains unverified. State what
+you reproduced, what the evidence supports, and which observations are missing;
+do not declare the investigation complete merely because a failure is intermittent.
 
-1. You've completed the process
-2. Document what you investigated
-3. Within the authorized task, recommend appropriate handling (retry, timeout,
-   error message) and any diagnostics that would help future investigation
+When more evidence is unavailable, report the limit and the next useful check.
+Within the authorized task, consider mitigation such as a timeout, clearer error,
+or bounded retry. Before retrying, check whether the operation is safe to repeat;
+an ambiguous failure after a side effect can otherwise duplicate work or data.
 
 ## Supporting Techniques
 
