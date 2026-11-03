@@ -19,8 +19,7 @@ implementation is out of scope.
 
 **BEFORE attempting ANY fix:**
 
-1. **Read Error Messages Carefully**
-   - Don't skip past errors or warnings
+1. **Read Errors and Warnings Carefully**
    - They often contain the exact solution
    - Read stack traces completely
    - Note line numbers, file paths, error codes
