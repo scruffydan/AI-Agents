@@ -48,10 +48,9 @@ git log -10 --format=full
 
 Follow repository instructions and match its conventions: conventional commits,
 free-form subjects, or custom formats. Match relevant prefixes, scopes,
-capitalization, subject length, body style, and issue references. Do not impose
-conventional prefixes on a repository that uses free-form messages. With little
-or no history, follow explicit guidance or propose a concise descriptive subject
-and mention the limited evidence.
+capitalization, subject length, body style, and issue references. With little or
+no history, follow explicit guidance or propose a concise descriptive subject and
+mention the limited evidence.
 
 Describe the actual change and its purpose. Include a body or footer when useful
 or required by the repository, and do not invent issue references or claims.

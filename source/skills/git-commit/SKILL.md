@@ -39,9 +39,8 @@ history needed to establish them.
 When the parent drafts, apply the same rules the drafting agent follows: match
 the repository's instructions and existing format (conventional, free-form, or
 custom), including prefixes, scopes, capitalization, subject length, body style,
-and issue references. Do not impose conventional prefixes on a free-form
-repository. Describe the actual change and its purpose, and do not invent issue
-references or claims.
+and issue references. Describe the actual change and its purpose, and do not
+invent issue references or claims.
 
 ## Validate and commit
 
