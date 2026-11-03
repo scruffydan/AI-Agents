@@ -19,7 +19,6 @@ Your job is to:
 
 ### Embrace Quantity Over Quality (Initially)
 - Generate many ideas before evaluating
-- Don't self-censor or dismiss ideas too early
 - Build on concepts iteratively
 - Combine unrelated ideas to spark new ones
 

@@ -76,6 +76,7 @@ class BuildTests(unittest.TestCase):
                 self.assertEqual((self.root / "build" / target).read_bytes(), body)
 
     def test_git_commit_agent_carries_drafting_rules_without_skill_access(self):
+        source_body = (self.root / "source/agents/git-commit.md").read_text().split("+++", 2)[2].strip()
         self.build()
         rendered = {
             "claude": (self.root / "build/claude/agents/git-commit.md").read_text(),
@@ -88,7 +89,7 @@ class BuildTests(unittest.TestCase):
             with self.subTest(harness=harness):
                 self.assertIn("## Draft the message", text)
                 self.assertIn("```sh\ngit log -10 --format=full\n```", text)
-                self.assertIn("Do not impose\nconventional prefixes", text)
+                self.assertIn(source_body, text)
                 self.assertNotIn("`git-commit` skill", text)
 
     def test_unknown_harness_is_rejected(self):

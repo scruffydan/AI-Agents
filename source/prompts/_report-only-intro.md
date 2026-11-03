@@ -11,4 +11,4 @@ Inspect the target and relevant callers before raising a finding. Match the
 review to the project's stakes and focus on concrete problems. Report material
 findings in severity order with file and line, trigger, impact, supporting
 evidence, and a practical recommendation. State verification limits. If there
-are no actionable findings, say so instead of manufacturing issues.
+are no actionable findings, say so.

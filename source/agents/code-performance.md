@@ -13,7 +13,8 @@ conventions, not generic style rules.
 
 Start with the actual hot paths, expected data sizes and growth, and how often
 I/O runs. Distinguish measured or clearly demonstrable bottlenecks from possible
-future scaling concerns, and do not invent numeric improvements.
+future scaling concerns. Support numeric improvement claims with measurements or
+demonstrable analysis.
 
 ## Focus
 
