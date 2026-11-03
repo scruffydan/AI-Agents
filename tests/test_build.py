@@ -29,13 +29,13 @@ class BuildTests(unittest.TestCase):
 
     def test_codex_agent_text_survives_toml_rendering(self):
         body = 'Match \\bword\\b in C:\\queries, keep the literal """ delimiter.'
-        source = self.root / "source/agents/explore.md"
+        source = self.root / "source/agents/code-security.md"
         _, metadata, _ = source.read_text().split("+++", 2)
         source.write_text(f"+++{metadata}+++\n\n{body}")
 
         self.build("codex")
 
-        rendered = self.root / "build/codex/.codex/agents/explore.toml"
+        rendered = self.root / "build/codex/.codex/agents/code-security.toml"
         instructions = tomllib.loads(rendered.read_text())["developer_instructions"]
         self.assertEqual(instructions.strip(), body)
 
@@ -58,12 +58,13 @@ class BuildTests(unittest.TestCase):
             with self.subTest(agent=agent.name):
                 self.assertNotIn("/", tomllib.loads(agent.read_text())["model"])
 
-    def test_explore_is_not_built_for_claude(self):
-        self.build()
-
-        self.assertFalse((self.root / "build/claude/agents/explore.md").exists())
-        self.assertTrue((self.root / "build/opencode/agents/explore.md").is_file())
-        self.assertTrue((self.root / "build/codex/.codex/agents/explore.toml").is_file())
+    def test_retired_explore_agent_is_not_built(self):
+        for args in ((), ("--work",)):
+            with self.subTest(args=args):
+                self.build(*args)
+                for target in ("claude/agents/explore.md", "opencode/agents/explore.md",
+                               "codex/.codex/agents/explore.toml"):
+                    self.assertFalse((self.root / "build" / target).exists(), target)
 
     def test_shared_base_instructions_propagate_to_all_harnesses(self):
         body = (self.root / "source/prompts/AGENTS.md").read_bytes()
@@ -250,8 +251,6 @@ class BuildTests(unittest.TestCase):
         self.assertIn("model: google-vertex/claude-sonnet-5-5#high\n", commit)
         docs = (output / "agents/docs-fetcher.md").read_text()
         self.assertIn("model: google-vertex/claude-sonnet-5-5#high\n", docs)
-        explore = (output / "agents/explore.md").read_text()
-        self.assertIn("model: google-vertex/gemini-4-argon#high\n", explore)
 
 
 if __name__ == "__main__":
