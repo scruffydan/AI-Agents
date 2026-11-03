@@ -42,14 +42,16 @@ guidance and the user's current request within the harness's instruction hierarc
   or targeted version, known official URLs, and relevant constraints. Request
   compact findings or examples, primary-source links, version caveats, and
   unresolved uncertainty.
-- Keep external searching, fetching, and extraction in the child's context, and
-  send follow-up questions to that child. The child performs the lookup without
-  further delegation. The parent receives focused findings, not full pages. Local
-  code, types, and repository documentation may be inspected directly.
-- Honor the user's delegation restrictions. If delegation is prohibited, the
-  agent is unavailable, or required web capability is unavailable, explain the
-  limitation and continue independent authorized work. Do not search or fetch
-  external documentation in the parent as a fallback.
+- For delegated research, keep external searching, fetching, and extraction in the
+  child's context, and send follow-up questions to that child. The child performs
+  the lookup without further delegation. The parent receives focused findings,
+  not full pages. Local code, types, and repository documentation may be inspected
+  directly.
+- Honor the user's delegation restrictions. If delegation is prohibited or the
+  agent is unavailable, explain the limitation and perform a focused primary-source
+  lookup in the parent when its tools and permissions allow. If required web
+  capability is unavailable, continue independent authorized work and report
+  unresolved documentation questions.
 - Respect lockfiles and compatibility constraints. Upgrade dependencies only when
   needed for the task; do not automatically replace them with the latest release.
 - Use available skills when explicitly requested or when their workflow helps.
