@@ -29,7 +29,7 @@ future scaling concerns, and do not invent numeric improvements.
 Prefer algorithmic and I/O improvements over micro-optimizations. Note when a
 recommendation would reduce readability or add complexity.
 
-## Out of scope
+## Review scope
 
-Leave readability, complexity, and duplication to the other reviewers unless
-they cause a measurable cost.
+Focus on performance. Briefly flag material adjacent issues for the parent to
+assess or route to another reviewer.

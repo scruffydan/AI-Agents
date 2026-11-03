@@ -22,20 +22,19 @@ request a new commit.
 
 ## Route message drafting
 
-Automatically use the configured `git-commit` drafting agent when available and
-delegation is permitted. Use its configured model profile so history analysis
+Prefer the configured `git-commit` drafting agent when available and delegation
+is permitted. Use its configured model profile so history analysis
 runs on the cheaper drafting model and older messages stay out of the parent's
 context. A separate user request to check conventions is unnecessary.
 
 Give the child the repository location, intended scope, and any conventions
-already established in the session. Let it inspect history itself; do not load
-older messages into the parent first. Request the proposed message, reviewed
-files, a brief summary of changes and conventions, and concerns, without raw Git
-logs.
+already established in the session. Let it inspect the history needed to establish
+conventions. Request the proposed message, reviewed files, a brief summary of
+changes and conventions, and concerns, without raw Git logs.
 
-If delegation is unavailable or prohibited, report that limitation. The parent
-may draft using reliable conventions already in context. Otherwise, ask how to
-proceed before loading history into the parent or substituting another model.
+If delegation is unavailable or prohibited, report that limitation and draft
+locally. Reuse reliable conventions already in context, or inspect the minimum
+history needed to establish them.
 
 When the parent drafts, apply the same rules the drafting agent follows: match
 the repository's instructions and existing format (conventional, free-form, or
