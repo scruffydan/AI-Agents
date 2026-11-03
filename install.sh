@@ -164,7 +164,6 @@ for harness in "${HARNESSES[@]}"; do
             target="$HOME/.config/opencode"
             install_item "$ROOT/build/opencode/AGENTS.md" "$target/AGENTS.md"
             install_entries "$ROOT/build/opencode/agents" "$target/agents"
-            install_entries "$ROOT/build/opencode/commands" "$target/commands"
             skills_source="$ROOT/build/opencode/skills"
             skills_target="$target/skills"
             ;;

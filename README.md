@@ -1,339 +1,169 @@
 # AI harness configs
 
-Personal prompt and skill configuration for Codex, Claude Code, and OpenCode.
+Personal agents, skills, and instructions for Codex, Claude Code, and OpenCode.
+Edit shared source files, then build and install them for the harnesses you use.
 
-Define subagents and skills once, then build and install them for each harness.
-Agent instructions live in `source/agents/`; three small functions in
-`renderers.py` handle native formats, defaults, and harness-specific settings.
-Skills are copied as complete folders. There is no template or override layer.
-
-## Requirements
-
-- Python 3.11 or newer
-- OpenCode V2 for the OpenCode configuration
-- Bash for the optional installer
-
+Requires Python 3.11+, Bash for installation, and OpenCode V2 for OpenCode output.
 There are no third-party Python dependencies.
-
-The executable scripts use `python3`. If yours is older than 3.11, invoke them
-with a newer interpreter, for example `python3.11 new.py agent database-review`
-and `python3.11 build.py`.
-
-## Build
-
-Build all harnesses:
-
-```bash
-./build.py
-```
-
-Build selected harnesses:
-
-```bash
-./build.py codex
-./build.py codex claude
-./build.py opencode
-```
-
-Use work model mappings:
-
-```bash
-./build.py --work
-```
-
-Override OpenCode's provider prefix with `openai` or `opencode`:
-
-```bash
-./build.py opencode --opencode-provider opencode
-```
-
-`--work` cannot be combined with `--opencode-provider`: work models use Google
-Vertex, and changing only their provider prefix would produce unsupported model
-references such as `openai/claude-opus-5-5#high`.
-
-Each build replaces `build/` with output for the selected harnesses. Agent
-metadata, model references, includes, TOML, and duplicate agent paths are checked
-before the previous build is replaced. Generated YAML and shared skill metadata
-are not validated for harness-specific requirements.
-
-OpenCode output uses V2's `agents/` and `skills/` directories. Agent permissions
-use ordered V2 `permissions` rules with `action`, `resource`, and `effect` fields. Reasoning
-effort is selected with a model variant such as `openai/gpt-6.1-sol#high`.
-See the [V2 permissions documentation](https://opencode.ai/v2/docs/permissions/).
-
-Default subagents and the `brainstorm` and `thorough-plan` primary agents deny
-file edits and ask before running shell commands. Default subagents and the
-`git-commit` drafting agent also deny further delegation. The global config asks
-before access outside the project and leaves read and shell permissions at OpenCode's
-native defaults unless an agent overrides them. Native reads ask for `.env` and
-`.env.*`, with `.env.example` allowed. Any agent-specific `read "*"` allowance
-must be followed by sensitive-file `ask` rules and then the example-file allowance.
 
 ## Install
 
-Choose which harnesses to build and install interactively:
+Run the picker, or name the harnesses to install:
 
 ```bash
-./install.sh
+./install.sh                 # Interactive; Enter selects Codex
+./install.sh codex claude    # Install selected harnesses
+./install.sh --all           # Install all three
 ```
 
-The picker lists Codex first (the default), Claude Code second, and OpenCode last.
-Enter one or more numbers or names separated by spaces, or press Enter for Codex.
+Choose one form; `--all` cannot be combined with harness names. Explicit names
+or `--all` also work unattended. Add `--work` for work models or `--force` to
+replace changed files without confirmation. Set `PYTHON=/path/to/python3.11`
+if your default `python3` is too old.
 
-Skip the picker by naming harnesses, or use `--all` to install all three:
+The installer skips unchanged entries, asks before replacing changed entries,
+and saves replacements under `~/.ai-agents-backups/<timestamp>/`. Unrelated
+entries are left alone. Removing an entry from this repository does not remove
+its installed copy.
 
-```bash
-./install.sh codex
-./install.sh codex claude
-./install.sh --all
-```
-
-`--all` cannot be combined with explicit harness names. For unattended use, pass
-harness names or `--all`.
-
-Agents, commands, and skills are installed one entry at a time, so anything
-else in those directories is left alone. Unchanged files are skipped. Changed
-files require confirmation, and the replaced version is moved to
-`~/.ai-agents-backups/<timestamp>/` instead of being deleted. Removing a prompt
-from this repository does not remove its installed copy; clean up obsolete
-entries explicitly.
-
-Installation destinations:
-
-| Harness | Base instructions | Agents and commands | Skills |
+| Harness | Base instructions | Agents | Skills |
 |---|---|---|---|
 | Codex | `~/.codex/AGENTS.md` | `~/.codex/agents/` | `~/.agents/skills/` |
 | Claude Code | `~/.claude/CLAUDE.md` | `~/.claude/agents/` | `~/.claude/skills/` |
-| OpenCode | `~/.config/opencode/AGENTS.md` | `~/.config/opencode/agents/`, `commands/` | `~/.config/opencode/skills/` |
+| OpenCode | `~/.config/opencode/AGENTS.md` | `~/.config/opencode/agents/` | `~/.config/opencode/skills/` |
 
-The custom `explore` agent has been retired. If previously installed, move
-`~/.codex/agents/explore.toml`, `~/.claude/agents/explore.md`, and
-`~/.config/opencode/agents/explore.md` out of their agent directories, keeping
-any local changes you want to preserve.
+If previously installed, move retired `explore` and `sidebar` agents and the
+`implementation-workflow` skill out of these directories. Preserve any local
+changes you want to keep. The repository no longer generates custom commands;
+older installed commands are also left alone.
 
-The `sidebar` agent has been retired. If previously installed, move
-`~/.codex/agents/sidebar.toml`, `~/.claude/agents/sidebar.md`, and
-`~/.config/opencode/agents/sidebar.md` out of their agent directories, keeping
-any local changes you want to preserve.
+### OpenCode settings
 
-The `implementation-workflow` skill has also been retired. If previously installed,
-move `~/.agents/skills/implementation-workflow`,
-`~/.claude/skills/implementation-workflow`, and
-`~/.config/opencode/skills/implementation-workflow` out of their skill directories,
-keeping any local changes you want to preserve.
-
-Use `--force` to replace changed files without prompting:
-
-```bash
-./install.sh codex --work --force
-```
-
-Set `PYTHON` if `python3` is not Python 3.11 or newer:
-
-```bash
-PYTHON=/path/to/python3.11 ./install.sh
-```
-
-Set up `opencode.json` separately:
+`install.sh` leaves `opencode.json` alone. To install the repository's settings:
 
 ```bash
 ./opencode-init.sh
 ```
 
-This replaces the entire OpenCode config, including local provider settings.
-For an existing setup, merge the rules from `source/opencode.json` manually or
-review the replacement first. The initializer confirms replacements, backs up
-the old file under `~/.ai-agents-backups/` with private permissions, and installs
-the new file with mode `600`. `--yes` skips confirmation but still backs up;
-unchanged files are skipped. It refuses a symlink at the destination file.
-`install.sh` does not install or update `opencode.json`. Existing configurations
-must remove the global `read "*"` allowance to restore native `.env` prompts,
-subject to any later agent-specific rules.
+This replaces the entire config, including provider settings. For an existing
+setup, review the replacement or merge [source/opencode.json](source/opencode.json)
+manually. The initializer asks before replacing a changed file, backs it up with
+private permissions, and installs the config with mode `600`. `--yes` skips
+confirmation and still backs up; unchanged files are skipped, and destination
+symlinks are refused.
 
-## Create a subagent
+Older configs must remove any global `read "*"` allowance to restore native
+`.env` prompts. Later agent-specific rules can still override those prompts.
 
-```bash
-./new.py agent database-review --profile deep_review
-```
-
-Edit the generated `source/agents/database-review.md`, then run `./build.py`.
-No per-harness files are needed. The filename is the agent name; its frontmatter
-contains a description, a model profile from `source/models.toml`, and targets:
-
-```markdown
-+++
-description = "Review database queries and identify performance problems."
-model_profile = "deep_review"
-harnesses = ["codex", "claude", "opencode"]
-+++
-
-Review query plans, indexes, and transaction boundaries.
-Explain each finding and suggest a concrete improvement.
-```
-
-`description` and `model_profile` are required. Omitting `harnesses` selects all
-three. To create an agent for selected harnesses, repeat `--harness`:
+## Build without installing
 
 ```bash
-./new.py agent database-review --harness codex --harness claude \
+./build.py                              # All harnesses
+./build.py codex claude                  # Selected harnesses
+./build.py --work                        # Work model mappings
+./build.py opencode --opencode-provider opencode
+```
+
+Each build replaces `build/` with output for the selected harnesses.
+`--opencode-provider` accepts `openai` or `opencode` and cannot be combined with
+`--work`, whose OpenCode models use Google Vertex. Configure Vertex credentials,
+project, location, and model access separately on the work machine.
+
+## Customize
+
+| What to change | Where to edit |
+|---|---|
+| Agent instructions and model profile | `source/agents/<name>.md` |
+| Shared skills and supporting files | `source/skills/<name>/` |
+| Base instructions for all harnesses | [source/prompts/AGENTS.md](source/prompts/AGENTS.md) |
+| Shared instruction fragments | `source/prompts/` |
+| Models, including work mappings | [source/models.toml](source/models.toml) |
+| Harness formats, tools, effort, and permissions | [renderers.py](renderers.py) |
+
+Rebuild and reinstall after editing. `build/` is generated.
+
+### Add an agent
+
+```bash
+./new.py agent database-review \
   --description "Review database queries and identify performance problems."
 ```
 
-These are alternative creation examples; rerunning either for the same name
-will refuse to overwrite the file. `--profile` defaults to `deep_review`.
+Edit `source/agents/database-review.md`. Its TOML frontmatter selects the
+`description`, `model_profile`, and `harnesses`; instructions go below it.
+The default profile is `deep_review`. Use `--profile` to choose another, and
+repeat `--harness` to select targets. Omitting targets selects all three.
+New shared agents use each renderer's defaults without Python changes.
 
-## Create a skill
+### Add a skill
 
 ```bash
 ./new.py skill database-debugging \
   --description "Investigate slow database queries and explain their causes."
 ```
 
-Edit `source/skills/database-debugging/SKILL.md`, then run `./build.py`.
-You can also create `source/skills/<name>/SKILL.md` by hand, with YAML frontmatter
-containing `name` and `description`, followed by the instructions.
+Edit `source/skills/database-debugging/SKILL.md`. Keep YAML frontmatter to `name`
+and `description`, and keep instructions portable across harnesses. Supporting
+files can sit beside `SKILL.md` and use relative links. The whole folder is
+copied unchanged, without token expansion.
 
-The whole folder is copied to each selected harness without changing its contents.
-Supporting scripts, examples, and reference files can live beside `SKILL.md`; use
-relative paths to reference them. Keep instructions portable and put model
-selection in `source/models.toml` and native agent settings in `renderers.py`.
+Both creation commands require lowercase names with single hyphens, refuse to
+overwrite existing content, and create TODO instructions to finish before
+installing. `--description` is optional.
 
-Shared skills are copied without token expansion. The build does not validate
-skill metadata or behavior.
+### Models and harness settings
 
-Both creation commands use lowercase names with hyphens and refuse to overwrite
-existing content. They create editable starting files with TODO instructions;
-finish those before installing. `--description` is optional for either command.
+Agent model profiles refer to entries in `source/models.toml`. Each profile has
+`codex`, `claude`, and `opencode` model IDs for its targets. Optional `*_work`
+values apply with `--work`, falling back to the normal value when omitted.
+OpenCode model IDs include their reasoning variant, such as `#high`.
 
-## Skills and modes
+For native settings, edit `render_codex`, `render_claude`, or `render_opencode`
+in `renderers.py`. Each function keeps its defaults and named exceptions together.
+A new primary mode needs a renderer case and, if it has no shared agent definition,
+an output entry in `build.py`. OpenCode reserves `thorough-plan` for its planning
+agent.
 
-All three harnesses receive the shared skills under `source/skills/`.
-
-- Codex: use `$brainstorming`, `$mode-thorough-plan`, or `$code-review`.
-- Claude Code: use `/brainstorming`, `/mode-thorough-plan`, or `/code-review`.
-- OpenCode: load `@brainstorming`, `@mode-thorough-plan`, or `@code-review`.
-  The `brainstorm` and `thorough-plan` primary agents are also available.
-
-Choose a workflow for the task:
-
-- `brainstorming` explores requirements and design alternatives in the current
-  conversation. Explicit requests for the configured brainstorming agent use
-  read-only creative exploration.
-- `mode-thorough-plan` produces an implementation plan without editing files.
-  OpenCode's `thorough-plan` agent loads this skill with file edits denied and
-  shell commands requiring approval.
-- `code-review` reviews code or evaluates supplied feedback. Targeted reviews use
-  relevant perspectives; explicit full reviews cover all five specialists.
-  Feedback evaluation checks the supplied claims and proposed fixes. Both routes
-  are report-only unless fixes are authorized.
-- `systematic-debugging` guides bug investigation. `five-whys` supports explicit
-  causal analysis for coding and noncoding problems and is self-contained;
-  `systematic-debugging` refers to it by name for recurring or unclear failures.
-- `git-commit` handles verification, staging, and committing in the current
-  conversation, using the configured drafting agent when available. `git-push`
-  checks readiness for a separately authorized push. Implementation tasks authorize
-  local commits; pushes require separate authorization. Review and planning tasks
-  remain read-only.
-- `update-readme` checks README and existing AGENTS.md or CLAUDE.md accuracy;
-  `verification-before-completion` checks the evidence behind completion claims.
-
-External documentation research uses the `docs-fetcher` subagent under the shared
-AGENTS.md instructions. The child receives the question, target version, official
-URLs, and constraints, then returns focused findings and primary-source links.
-Documentation agents work without further delegation, keep
-untrusted content separate from instructions, and report uncertainties to the parent.
-If delegation or web access is unavailable, report the limitation and continue
-independent work.
-
-For configured brainstorming in Codex and Claude Code, the `brainstorm` agent
-selects its model through `source/models.toml`. In OpenCode, confirm the active
-model in `/models` after selecting the `brainstorm` primary agent. Selecting a
-primary agent by ID leaves the session model unchanged; desktop agent switching
-can restore that agent's remembered or configured model.
-
-Codex's `brainstorm` agent uses the shell for read-only repository inspection
-within the parent session's sandbox and approval policy. Its prompt forbids
-file edits.
-
-## Customize an agent for one harness
-
-Edit the relevant function in `renderers.py`:
-
-- `render_codex`: TOML fields, reasoning effort, and brainstorm's shell setting.
-- `render_claude`: tool lists and reasoning effort.
-- `render_opencode`: primary/subagent mode, permissions, and interactive brainstorm
-  instructions. `OPENCODE_PLAN` supplies the built-in planning agent's description
-  and skill-loading instruction.
-
-Each function keeps its defaults and named exceptions together. For example, add
-an entry to the tool mapping in `render_claude` to give one agent a different tool
-list. A change to that function affects only Claude output. New shared agents use
-the defaults automatically; creating one does not require editing Python.
-
-Claude's review agents use file reading and search tools; its documentation agent
-can search the web and fetch pages. OpenCode permissions are emitted in order by
-its renderer. These settings remain native to each harness.
-Codex custom agents inherit the parent session's sandbox and approval policy;
-their agent files do not establish a separate permission boundary. Report-only
-instructions still apply. Codex agent TOML has no field for a narrower sandbox
-or approval policy, and disabling the shell tool would stop agents such as
-`git-commit` from reading history.
-
-The `git-commit` drafting agent is limited per harness as far as each allows.
-OpenCode denies edits and automatically allows only exact common Git commands:
-`git log`, `git log -10 --format=full`, `git log -10 --oneline --no-decorate`,
-`git status`, `git status --short`,
-`git diff --no-ext-diff --no-textconv` (also with `--cached` or `--staged`), and
-`git show --no-ext-diff --no-textconv HEAD --stat`. Other forms, including `git -C`,
-additional flags, redirects, and commands that can write through `--output`,
-require approval.
-The diff/show forms disable external diff and text conversion helpers. Wildcard
-prefix rules cannot guarantee read-only arguments. Claude Code
-omits Edit and Write from its tools, but Bash is not restricted by command,
-because subagent frontmatter cannot scope Bash patterns. Codex relies on the
-parent's sandbox and the agent's read-only instructions.
-
-OpenCode reserves the name `thorough-plan` for its built-in primary agent.
-
-## Edit shared instructions
-
-Agent instructions, including brainstorm, live below the frontmatter in
-`source/agents/`. Base instructions and shared fragments live in `source/prompts/`.
-Agent bodies can include a fragment from `source/prompts/`:
+Agent instructions can include shared fragments from `source/prompts/`:
 
 ```text
 {{include:_report-only-intro.md}}
 ```
 
-For example, the referenced `_report-only-intro.md` is shared across review agents.
+## Use skills and modes
 
-`source/prompts/AGENTS.md` is the shared base for all three harnesses: the build
-copies it to OpenCode/Codex `AGENTS.md` and Claude `CLAUDE.md`. Edit the source
-and rebuild and reinstall to update the harnesses.
+Browse [source/skills](source/skills) for the available workflows, including
+brainstorming, planning, code review, debugging, and Git tasks.
 
-## Change models
+| Harness | Example |
+|---|---|
+| Codex | `$code-review` |
+| Claude Code | `/code-review` |
+| OpenCode | Load `@code-review` |
 
-Edit `source/models.toml` to change the models behind each profile. An agent selects
-its profile with `model_profile` in `source/agents/<name>.md`.
+OpenCode also provides `brainstorm` and `thorough-plan` primary agents. After
+selecting `brainstorm`, confirm the active model in `/models`: selecting a primary
+agent by ID can leave the session model unchanged.
 
-Each profile provides model IDs for its target harnesses using `codex`, `claude`,
-and `opencode` keys. Optional `codex_work`, `claude_work`, and `opencode_work` values
-apply with `--work`, falling back to the normal value when omitted.
+## Permission limits
 
-OpenCode model IDs include their reasoning variant. Claude and Codex reasoning
-settings live in `renderers.py`.
+Report-only instructions apply to the agents; enforcement differs by harness:
 
-OpenCode V2 uses the `google-vertex` provider for both Gemini and Claude work
-models. Configure Google Cloud project, location, credentials, and model access
-on the work machine; the repository's build does not verify live provider access.
+- OpenCode agents deny file edits and ask before shell commands. Subagents also
+  deny questions and further delegation. The `git-commit` agent allows only the
+  exact Git commands listed in its renderer without approval; other forms,
+  flags, and redirects require approval.
+- Claude reviewers have read/search tools, and `docs-fetcher` has web tools.
+  `git-commit` also has Bash, which its frontmatter cannot restrict by command.
+- Codex agents inherit the parent's sandbox and approval policy. Their config
+  files do not establish a narrower permission boundary; report-only behavior
+  also relies on their instructions.
 
-## Add a mode
-
-Use `./new.py agent` for ordinary subagents and `./new.py skill` for reusable
-workflows. A harness-specific primary mode needs an explicit case in its renderer
-and, if it has no shared agent definition, an output entry in `build.py`.
-OpenCode's built-in `thorough-plan` agent is the example. There is no generic
-command or mode template system.
+OpenCode's global config asks before access outside the project and preserves
+native read and shell defaults. Native reads ask for `.env` and `.env.*`, with
+`.env.example` allowed. Permissions are ordered: any agent-specific `read "*"`
+allowance must be followed by sensitive-file `ask` rules and then the example-file
+allowance. See the [V2 permissions documentation](https://opencode.ai/v2/docs/permissions/).
 
 ## Checks
 
@@ -341,5 +171,8 @@ command or mode template system.
 python3 -m unittest discover -s tests
 ```
 
-Tests use temporary repositories and isolated home directories, leaving real
-harness configs untouched.
+Tests use temporary repositories and isolated home directories. Build checks cover
+agent metadata, model references, includes, TOML, and duplicate agent paths before
+replacing output. Generated YAML and skill metadata are not validated for harness
+requirements; permission tests model OpenCode rules locally rather than testing
+live enforcement.
