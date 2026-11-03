@@ -3,9 +3,9 @@
 Personal prompt and skill configuration for Codex, Claude Code, and OpenCode.
 
 Define subagents and skills once, then build and install them for each harness.
-Subagents combine shared instructions with native templates and optional overrides.
-Skills are copied as complete folders. Commands and modes use explicit native
-templates.
+Agent instructions live in `source/agents/`; three small functions in
+`renderers.py` handle native formats, defaults, and harness-specific settings.
+Skills are copied as complete folders. There is no template or override layer.
 
 ## Requirements
 
@@ -52,20 +52,19 @@ Vertex, and changing only their provider prefix would produce unsupported model
 references such as `openai/claude-opus-5-5#high`.
 
 Each build replaces `build/` with output for the selected harnesses. Agent
-metadata, references, includes, TOML, and output paths are checked before the
-previous build is replaced. YAML templates and shared skill metadata are not
-validated for harness-specific requirements.
+metadata, model references, includes, TOML, and duplicate agent paths are checked
+before the previous build is replaced. Generated YAML and shared skill metadata
+are not validated for harness-specific requirements.
 
-OpenCode output uses V2's `agents/` and `skills/` directories, plus `commands/`
-when command templates are present. Agent permissions use ordered V2
-`permissions` rules with `action`, `resource`, and `effect` fields. Reasoning
+OpenCode output uses V2's `agents/` and `skills/` directories. Agent permissions
+use ordered V2 `permissions` rules with `action`, `resource`, and `effect` fields. Reasoning
 effort is selected with a model variant such as `openai/gpt-6.1-sol#high`.
 See the [V2 permissions documentation](https://opencode.ai/v2/docs/permissions/).
 
 Default subagents and the `brainstorm` and `thorough-plan` primary agents deny
 file edits and ask before running shell commands. Default subagents and the
-`git-commit` override also deny further delegation. The global config asks before
-access outside the project and leaves read and shell permissions at OpenCode's
+`git-commit` drafting agent also deny further delegation. The global config asks
+before access outside the project and leaves read and shell permissions at OpenCode's
 native defaults unless an agent overrides them. Native reads ask for `.env` and
 `.env.*`, with `.env.example` allowed. Any agent-specific `read "*"` allowance
 must be followed by sensitive-file `ask` rules and then the example-file allowance.
@@ -197,12 +196,10 @@ containing `name` and `description`, followed by the instructions.
 The whole folder is copied to each selected harness without changing its contents.
 Supporting scripts, examples, and reference files can live beside `SKILL.md`; use
 relative paths to reference them. Keep instructions portable and put model
-selection and agent settings in the native templates.
+selection in `source/models.toml` and native agent settings in `renderers.py`.
 
-Shared skills do not need per-harness templates. Tokens such as `{{prompt:...}}`,
-`{{model:...}}`, and `{{include:...}}` are not expanded in shared skills. Avoid names
-that overlap skills under `templates/`; duplicate output paths fail the build.
-The build does not validate skill metadata or behavior.
+Shared skills are copied without token expansion. The build does not validate
+skill metadata or behavior.
 
 Both creation commands use lowercase names with hyphens and refuse to overwrite
 existing content. They create editable starting files with TODO instructions;
@@ -249,7 +246,7 @@ If delegation or web access is unavailable, report the limitation and continue
 independent work.
 
 For configured brainstorming in Codex and Claude Code, the `brainstorm` agent
-selects its model through native templates. In OpenCode, confirm the active
+selects its model through `source/models.toml`. In OpenCode, confirm the active
 model in `/models` after selecting the `brainstorm` primary agent. Selecting a
 primary agent by ID leaves the session model unchanged; desktop agent switching
 can restore that agent's remembered or configured model.
@@ -260,36 +257,22 @@ file edits.
 
 ## Customize an agent for one harness
 
-Default templates live in:
+Edit the relevant function in `renderers.py`:
 
-```text
-templates/defaults/codex/agent.toml
-templates/defaults/claude/agent.md
-templates/defaults/opencode/agent.md
-```
+- `render_codex`: TOML fields, reasoning effort, and brainstorm's shell setting.
+- `render_claude`: tool lists and reasoning effort.
+- `render_opencode`: primary/subagent mode, permissions, and interactive brainstorm
+  instructions. `OPENCODE_PLAN` supplies the built-in planning agent's description
+  and skill-loading instruction.
 
-Changing a default affects every agent using it for that harness. For an exception,
-copy the default to `templates/overrides/<harness>/<agent-name>.<md-or-toml>` and
-edit its native settings. For example, `templates/overrides/claude/database-review.md`
-could specify a different `tools` list. It replaces the entire Claude template
-for that agent; the other harnesses still use their defaults. Keep the placeholder
-tokens when copying so the name, description, model, and instructions stay shared.
+Each function keeps its defaults and named exceptions together. For example, add
+an entry to the tool mapping in `render_claude` to give one agent a different tool
+list. A change to that function affects only Claude output. New shared agents use
+the defaults automatically; creating one does not require editing Python.
 
-| Token | Value |
-|---|---|
-| `{{agent:name}}` | Source filename without `.md` |
-| `{{agent:description}}` | Shared description |
-| `{{agent:model}}` | Profile resolved for this harness and build options |
-| `{{agent:body}}` | Shared instructions, with includes expanded |
-
-Use metadata tokens as whole unquoted YAML values. In TOML, keep them inside
-double-quoted strings and keep the body token inside a multiline double-quoted
-string, as shown in the default template. The renderer escapes inserted values
-for those positions.
-
-Tool lists and reasoning settings stay in native templates. Claude's review
-agents use file reading and search tools; its documentation agent can search the
-web and fetch pages. OpenCode permissions also live in templates.
+Claude's review agents use file reading and search tools; its documentation agent
+can search the web and fetch pages. OpenCode permissions are emitted in order by
+its renderer. These settings remain native to each harness.
 Codex custom agents inherit the parent session's sandbox and approval policy;
 their agent files do not establish a separate permission boundary. Report-only
 instructions still apply. Codex agent TOML has no field for a narrower sandbox
@@ -310,14 +293,13 @@ omits Edit and Write from its tools, but Bash is not restricted by command,
 because subagent frontmatter cannot scope Bash patterns. Codex relies on the
 parent's sandbox and the agent's read-only instructions.
 
-An override for a missing agent or a disabled target
-is an error: remove or rename it when changing the agent's name or targets.
+OpenCode reserves the name `thorough-plan` for its built-in primary agent.
 
 ## Edit shared instructions
 
-Subagent instructions live below the frontmatter in `source/agents/`. Command
-and mode bodies, base instructions, and shared fragments live in `source/prompts/`.
-Agent bodies and explicit prompt bodies can include a fragment from `source/prompts/`:
+Agent instructions, including brainstorm, live below the frontmatter in
+`source/agents/`. Base instructions and shared fragments live in `source/prompts/`.
+Agent bodies can include a fragment from `source/prompts/`:
 
 ```text
 {{include:_report-only-intro.md}}
@@ -332,30 +314,26 @@ and rebuild and reinstall to update the harnesses.
 ## Change models
 
 Edit `source/models.toml` to change the models behind each profile. An agent selects
-its profile with `model_profile` in `source/agents/<name>.md`; explicit templates
-use `{{model:profile}}`.
+its profile with `model_profile` in `source/agents/<name>.md`.
 
 Each profile provides model IDs for its target harnesses using `codex`, `claude`,
 and `opencode` keys. Optional `codex_work`, `claude_work`, and `opencode_work` values
 apply with `--work`, falling back to the normal value when omitted.
 
 OpenCode model IDs include their reasoning variant. Claude and Codex reasoning
-settings live in native defaults, overrides, or explicit templates.
+settings live in `renderers.py`.
 
 OpenCode V2 uses the `google-vertex` provider for both Gemini and Claude work
 models. Configure Google Cloud project, location, credentials, and model access
 on the work machine; the repository's build does not verify live provider access.
 
-## Add a command or mode
+## Add a mode
 
-1. Add the shared body as `source/prompts/<name>.md`.
-2. Add explicit templates under `templates/<harness>/` in the desired output layout.
-3. Reference the body with `{{prompt:<name>}}`.
-4. Run `./build.py`.
-
-These templates can use `{{prompt:name}}` for a shared prompt body and
-`{{model:profile}}` for a model. Command/skill and mode mappings differ by harness,
-so these remain explicit. `new.py agent` creates subagents only.
+Use `./new.py agent` for ordinary subagents and `./new.py skill` for reusable
+workflows. A harness-specific primary mode needs an explicit case in its renderer
+and, if it has no shared agent definition, an output entry in `build.py`.
+OpenCode's built-in `thorough-plan` agent is the example. There is no generic
+command or mode template system.
 
 ## Checks
 

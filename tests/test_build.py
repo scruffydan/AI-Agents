@@ -17,9 +17,9 @@ class BuildTests(unittest.TestCase):
         temporary = tempfile.TemporaryDirectory()
         self.addCleanup(temporary.cleanup)
         self.root = Path(temporary.name)
-        for name in ("source", "templates"):
-            shutil.copytree(REPO / name, self.root / name)
-        shutil.copy2(REPO / "build.py", self.root / "build.py")
+        shutil.copytree(REPO / "source", self.root / "source")
+        for name in ("build.py", "renderers.py"):
+            shutil.copy2(REPO / name, self.root / name)
 
     def build(self, *args):
         result = subprocess.run(
@@ -39,9 +39,11 @@ class BuildTests(unittest.TestCase):
         instructions = tomllib.loads(rendered.read_text())["developer_instructions"]
         self.assertEqual(instructions.strip(), body)
 
-    def test_codex_explicit_prompt_text_survives_toml_rendering(self):
+    def test_codex_brainstorm_text_survives_toml_rendering(self):
         body = 'Match \\bword\\b in C:\\queries, keep the literal """ delimiter.'
-        (self.root / "source/prompts/brainstorm.md").write_text(body)
+        source = self.root / "source/agents/brainstorm.md"
+        _, metadata, _ = source.read_text().split("+++", 2)
+        source.write_text(f"+++{metadata}+++\n\n{body}")
 
         self.build("codex")
 
@@ -203,6 +205,36 @@ class BuildTests(unittest.TestCase):
                     self.assertNotIn("build mode", text)
                     self.assertNotIn("plan mode", text)
                     self.assertNotIn("Ask clarifying questions", text)
+
+    def test_claude_tools_and_effort_match_agent_roles(self):
+        self.build("claude")
+        for name, tools, effort in (
+            ("code-security", "Read, Glob, Grep", True),
+            ("brainstorm", "Read, Glob, Grep", True),
+            ("docs-fetcher", "WebSearch, WebFetch", False),
+            ("git-commit", "Bash, Read, Grep, Glob", False),
+        ):
+            with self.subTest(agent=name):
+                text = (self.root / f"build/claude/agents/{name}.md").read_text()
+                header = text.split("---", 2)[1]
+                self.assertIn(f"tools: {tools}\n", header)
+                self.assertEqual("effort: high\n" in header, effort)
+
+    def test_opencode_primary_modes_keep_interactive_behavior(self):
+        self.build("opencode")
+        agents = self.root / "build/opencode/agents"
+        brainstorm = (agents / "brainstorm.md").read_text()
+        plan = (agents / "thorough-plan.md").read_text()
+        for text in (brainstorm, plan):
+            header = text.split("---", 2)[1]
+            self.assertIn("mode: primary\n", header)
+            self.assertNotIn("action: question\n", header)
+            self.assertNotIn("action: subagent\n", header)
+        self.assertIn("Select it when you want to brainstorm interactively.", brainstorm)
+        self.assertIn("Ask clarifying questions", brainstorm)
+        self.assertIn("suggest switching to build mode", brainstorm)
+        self.assertNotIn("\nmodel:", plan.split("---", 2)[1])
+        self.assertIn("Load the `mode-thorough-plan` skill", plan)
 
     def test_referenced_shared_skill_support_files_exist(self):
         references = {

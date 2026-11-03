@@ -1,4 +1,4 @@
-# Models are the only dynamic part of the provider-native templates.
+# Shared agent definitions select one of these model profiles.
 # OpenCode values include their reasoning variant.
 # A missing *_work value falls back to the normal harness value.
 

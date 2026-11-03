@@ -3,6 +3,10 @@
 import json
 from pathlib import Path
 import re
+import shutil
+import subprocess
+import sys
+import tempfile
 import unittest
 
 
@@ -18,7 +22,7 @@ EFFECTS = ("allow", "deny", "ask")
 
 
 def frontmatter_permissions(text):
-    """Parse the simple V2 rule lists used by the OpenCode templates."""
+    """Parse the simple V2 rule lists in the generated OpenCode agents."""
     header = text.split("---", 2)[1]
     rules = [
         {"action": action, "resource": resource, "effect": effect}
@@ -49,6 +53,21 @@ def decision(rules, action, resource):
 
 
 class OpenCodeSecurityTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        temporary = tempfile.TemporaryDirectory()
+        cls.addClassCleanup(temporary.cleanup)
+        root = Path(temporary.name)
+        shutil.copytree(REPO / "source", root / "source")
+        for name in ("build.py", "renderers.py"):
+            shutil.copy2(REPO / name, root / name)
+        subprocess.run(
+            [sys.executable, "build.py", "opencode"], cwd=root,
+            check=True, capture_output=True, text=True,
+        )
+        cls.agents = {p.stem: p.read_text()
+                      for p in (root / "build/opencode/agents").glob("*.md")}
+
     def setUp(self):
         self.config = json.loads((REPO / "source/opencode.json").read_text())
         self.global_rules = self.config["permissions"]
@@ -63,11 +82,9 @@ class OpenCodeSecurityTests(unittest.TestCase):
             self.assertNotIn(rule["action"], ("bash", "task", "doom_loop", "lsp"))
 
     def test_read_only_agents_deny_edits_and_ask_for_shell(self):
-        templates = [REPO / "templates/defaults/opencode/agent.md",
-                     *sorted((REPO / "templates/opencode/agents").glob("*.md"))]
-        for path in templates:
-            with self.subTest(template=path.name):
-                header, agent_rules = frontmatter_permissions(path.read_text())
+        for name, text in self.agents.items():
+            with self.subTest(agent=name):
+                header, agent_rules = frontmatter_permissions(text)
                 self.assertNotIn("\npermission:", header)
                 self.assertTrue(agent_rules)
                 rules = self.rules + agent_rules
@@ -76,17 +93,14 @@ class OpenCodeSecurityTests(unittest.TestCase):
                     with self.subTest(command=command):
                         self.assertEqual(decision(rules, "shell", command), "ask")
                 self.assertEqual(decision(rules, "read", "src/app.py"), "allow")
-                if path == templates[0]:
+                if "mode: subagent\n" in header:
                     self.assertEqual(decision(rules, "question", "*"), "deny")
 
     def test_global_and_agent_rules_preserve_native_env_prompts(self):
-        templates = [REPO / "templates/defaults/opencode/agent.md",
-                     *sorted((REPO / "templates/opencode/agents").glob("*.md")),
-                     *sorted((REPO / "templates/overrides/opencode").glob("*.md"))]
         policies = [("global", self.rules)]
-        for path in templates:
-            _, agent_rules = frontmatter_permissions(path.read_text())
-            policies.append((str(path.relative_to(REPO)), self.rules + agent_rules))
+        for name, text in self.agents.items():
+            _, agent_rules = frontmatter_permissions(text)
+            policies.append((name, self.rules + agent_rules))
         for policy, rules in policies:
             for resource, effect in (
                 (".env", "ask"), (".env.local", "ask"),
@@ -98,11 +112,11 @@ class OpenCodeSecurityTests(unittest.TestCase):
                     self.assertEqual(decision(rules, "read", resource), effect)
 
     def test_report_only_subagents_cannot_delegate_to_other_agents(self):
-        templates = [REPO / "templates/defaults/opencode/agent.md",
-                     *sorted((REPO / "templates/overrides/opencode").glob("*.md"))]
-        for path in templates:
-            with self.subTest(template=str(path.relative_to(REPO))):
-                _, agent_rules = frontmatter_permissions(path.read_text())
+        for name, text in self.agents.items():
+            header, agent_rules = frontmatter_permissions(text)
+            if "mode: subagent\n" not in header:
+                continue
+            with self.subTest(agent=name):
                 rules = self.rules + agent_rules
                 for target in ("general", "code-security", "docs-fetcher", "custom-writer"):
                     with self.subTest(target=target):
@@ -150,7 +164,7 @@ class OpenCodeSecurityTests(unittest.TestCase):
 
     def test_git_commit_agent_only_runs_read_only_git(self):
         header, agent_rules = frontmatter_permissions(
-            (REPO / "templates/overrides/opencode/git-commit.md").read_text()
+            self.agents["git-commit"]
         )
         self.assertNotIn("\npermission:", header)
         self.assertTrue(agent_rules)
