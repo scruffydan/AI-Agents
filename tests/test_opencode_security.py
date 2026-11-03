@@ -97,6 +97,17 @@ class OpenCodeSecurityTests(unittest.TestCase):
                 with self.subTest(policy=policy, resource=resource):
                     self.assertEqual(decision(rules, "read", resource), effect)
 
+    def test_report_only_subagents_cannot_delegate_to_other_agents(self):
+        templates = [REPO / "templates/defaults/opencode/agent.md",
+                     *sorted((REPO / "templates/overrides/opencode").glob("*.md"))]
+        for path in templates:
+            with self.subTest(template=str(path.relative_to(REPO))):
+                _, agent_rules = frontmatter_permissions(path.read_text())
+                rules = self.rules + agent_rules
+                for target in ("general", "explore", "docs-fetcher", "custom-writer"):
+                    with self.subTest(target=target):
+                        self.assertEqual(decision(rules, "subagent", target), "deny")
+
     def test_routine_coding_and_file_reads_do_not_require_approval(self):
         for action, resource in (
             ("read", "src/app.py"), ("read", "secrets.json"),
