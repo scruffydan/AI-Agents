@@ -28,7 +28,8 @@ implementation is out of scope.
    - Can you trigger it reliably?
    - What are the exact steps?
    - Does it happen every time?
-   - If not reproducible -> gather more data, don't guess
+   - If reproduction is unreliable, gather observations that distinguish the
+     competing explanations.
 
 3. **Check Recent Changes**
    - What changed that could cause this?
