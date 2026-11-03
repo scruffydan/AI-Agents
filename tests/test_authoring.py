@@ -98,11 +98,11 @@ class AuthoringTests(unittest.TestCase):
         original = snapshot()
         cases = (
             ("templates/claude/agents/broken.md", "{{prompt:missing}}", "Unknown prompt"),
-            ("templates/codex/.codex/agents/explore.toml",
-             (output / "codex/.codex/agents/explore.toml").read_text(), "Duplicate output"),
+            ("templates/codex/.codex/agents/code-security.toml",
+             (output / "codex/.codex/agents/code-security.toml").read_text(), "Duplicate output"),
             ("templates/claude/skills/git-commit/SKILL.md", "conflict", "Duplicate output"),
             ("templates/claude/skills/git-commit", "directory conflict", "Duplicate output"),
-            ("templates/codex/.codex/agents/explore.toml/extra.md", "ancestor conflict", "Duplicate output"),
+            ("templates/codex/.codex/agents/code-security.toml/extra.md", "ancestor conflict", "Duplicate output"),
         )
         for relative, content, error in cases:
             with self.subTest(path=relative):

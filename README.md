@@ -97,9 +97,7 @@ else in those directories is left alone. Unchanged files are skipped. Changed
 files require confirmation, and the replaced version is moved to
 `~/.ai-agents-backups/<timestamp>/` instead of being deleted. Removing a prompt
 from this repository does not remove its installed copy; clean up obsolete
-entries explicitly. For example, `explore` is built only for OpenCode and Codex
-because Claude Code has a built-in `Explore` agent; delete an older
-`~/.claude/agents/explore.md` by hand.
+entries explicitly.
 
 Installation destinations:
 
@@ -108,6 +106,11 @@ Installation destinations:
 | Codex | `~/.codex/AGENTS.md` | `~/.codex/agents/` | `~/.agents/skills/` |
 | Claude Code | `~/.claude/CLAUDE.md` | `~/.claude/agents/` | `~/.claude/skills/` |
 | OpenCode | `~/.config/opencode/AGENTS.md` | `~/.config/opencode/agents/`, `commands/` | `~/.config/opencode/skills/` |
+
+The custom `explore` agent has been retired. If previously installed, move
+`~/.codex/agents/explore.toml`, `~/.claude/agents/explore.md`, and
+`~/.config/opencode/agents/explore.md` out of their agent directories, keeping
+any local changes you want to preserve.
 
 The `sidebar` agent has been retired. If previously installed, move
 `~/.codex/agents/sidebar.toml`, `~/.claude/agents/sidebar.md`, and
@@ -240,7 +243,7 @@ Choose a workflow for the task:
 External documentation research uses the `docs-fetcher` subagent under the shared
 AGENTS.md instructions. The child receives the question, target version, official
 URLs, and constraints, then returns focused findings and primary-source links.
-Documentation and exploration agents work without further delegation, keep
+Documentation agents work without further delegation, keep
 untrusted content separate from instructions, and report uncertainties to the parent.
 If delegation or web access is unavailable, report the limitation and continue
 independent work.
