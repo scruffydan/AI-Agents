@@ -60,22 +60,26 @@ class BuildTests(unittest.TestCase):
             with self.subTest(agent=agent.name):
                 self.assertNotIn("/", tomllib.loads(agent.read_text())["model"])
 
-    def test_build_excludes_finder_metadata_and_preserves_hidden_resources(self):
+    def test_build_excludes_os_metadata_and_preserves_hidden_resources(self):
         skills = self.root / "source/skills"
-        for relative in (".DS_Store", "code-review/.DS_Store", "code-review/examples/.DS_Store"):
-            path = skills / relative
-            path.parent.mkdir(parents=True, exist_ok=True)
-            path.write_bytes(b"Finder metadata")
-        (skills / "code-review/.example").write_text("keep this resource")
+        names = (".DS_Store", "Thumbs.db", "ehthumbs.db", "Desktop.ini", "THUMBS.DB", "desktop.ini")
+        for directory in (skills, skills / "code-review", skills / "code-review/examples"):
+            directory.mkdir(parents=True, exist_ok=True)
+            for name in names:
+                (directory / name).write_bytes(b"OS metadata")
+        for name in (".example", ".directory"):
+            (skills / "code-review" / name).write_text("keep this resource")
 
         self.build()
 
-        self.assertEqual(list((self.root / "build").rglob(".DS_Store")), [])
+        for name in names:
+            self.assertEqual(list((self.root / "build").rglob(name)), [])
         for directory in ("codex/.agents/skills", "claude/skills", "opencode/skills"):
-            self.assertEqual(
-                (self.root / "build" / directory / "code-review/.example").read_text(),
-                "keep this resource",
-            )
+            for name in (".example", ".directory"):
+                self.assertEqual(
+                    (self.root / "build" / directory / "code-review" / name).read_text(),
+                    "keep this resource",
+                )
 
     def test_retired_explore_agent_is_not_built(self):
         for args in ((), ("--work",)):

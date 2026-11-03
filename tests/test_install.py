@@ -49,7 +49,7 @@ class InstallTests(unittest.TestCase):
         self.assertTrue((self.home / ".claude/skills/git-commit/SKILL.md").is_file())
         self.assertTrue((self.home / ".codex/agents/code-security.toml").is_file())
 
-    def test_installer_excludes_finder_metadata_added_to_build(self):
+    def test_installer_excludes_os_metadata_added_to_build(self):
         script = """
 from pathlib import Path
 import build
@@ -60,10 +60,11 @@ for harness in build.HARNESSES:
     output = build.BUILD / harness
     skills = output / build.LAYOUT[harness]["skills"]
     agents = output / Path(build.AGENT_PATHS[harness]).parent
-    for path in (agents / ".DS_Store", skills / ".DS_Store",
-                 skills / "code-review/.DS_Store"):
-        path.write_bytes(b"Finder metadata")
-    (skills / "code-review/.example").write_text("keep this resource")
+    for directory in (agents, skills, skills / "code-review"):
+        for name in (".DS_Store", "Thumbs.db", "ehthumbs.db", "Desktop.ini", "THUMBS.DB", "desktop.ini"):
+            (directory / name).write_bytes(b"OS metadata")
+    for name in (".example", ".directory"):
+        (skills / "code-review" / name).write_text("keep this resource")
 install.install(list(build.HARNESSES), Path.home(), force=True)
 """
         result = subprocess.run(
@@ -72,26 +73,32 @@ install.install(list(build.HARNESSES), Path.home(), force=True)
         )
 
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-        self.assertNotIn(".DS_Store", result.stdout)
-        self.assertEqual(list(self.home.rglob(".DS_Store")), [])
+        for name in (".DS_Store", "Thumbs.db", "ehthumbs.db", "Desktop.ini", "THUMBS.DB", "desktop.ini"):
+            self.assertNotIn(name, result.stdout)
+            self.assertEqual(list(self.home.rglob(name)), [])
         for directory in (".agents/skills", ".claude/skills", ".config/opencode/skills"):
-            self.assertEqual(
-                (self.home / directory / "code-review/.example").read_text(),
-                "keep this resource",
-            )
+            for name in (".example", ".directory"):
+                self.assertEqual(
+                    (self.home / directory / "code-review" / name).read_text(),
+                    "keep this resource",
+                )
 
-    def test_finder_metadata_does_not_trigger_reinstallation(self):
+    def test_os_metadata_does_not_trigger_reinstallation(self):
         self.install("--all")
+        names = (".DS_Store", "Thumbs.db", "ehthumbs.db", "Desktop.ini", "THUMBS.DB", "desktop.ini")
         for directory in (".agents/skills", ".claude/skills", ".config/opencode/skills"):
             skills = self.home / directory
-            (skills / ".DS_Store").write_bytes(b"Finder metadata")
-            (skills / "code-review/.DS_Store").write_bytes(b"Finder metadata")
-        for relative in (".DS_Store", "code-review/.DS_Store"):
-            (self.root / "source/skills" / relative).write_bytes(b"Different metadata")
+            for name in names:
+                (skills / name).write_bytes(b"OS metadata")
+                (skills / "code-review" / name).write_bytes(b"OS metadata")
+        for name in names:
+            (self.root / "source/skills" / name).write_bytes(b"Different metadata")
+            (self.root / "source/skills/code-review" / name).write_bytes(b"Different metadata")
 
         result = self.install("--all")
 
-        self.assertNotIn(".DS_Store", result.stdout)
+        for name in names:
+            self.assertNotIn(name, result.stdout)
         self.assertNotIn("Installed:", result.stdout)
         self.assertNotIn("Backed up:", result.stdout)
         self.assertFalse((self.home / ".ai-agents-backups").exists())

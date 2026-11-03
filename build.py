@@ -38,6 +38,15 @@ AGENT_PATHS = {
     "opencode": "agents/{name}.md",
     "codex": ".codex/agents/{name}.toml",
 }
+WINDOWS_METADATA_NAMES = {"thumbs.db", "ehthumbs.db", "desktop.ini"}
+
+
+def is_os_metadata(name: str) -> bool:
+    return name == ".DS_Store" or name.lower() in WINDOWS_METADATA_NAMES
+
+
+def ignore_os_metadata(_directory: str, names: list[str]) -> list[str]:
+    return [name for name in names if is_os_metadata(name)]
 
 
 def validate_name(name: str) -> str:
@@ -173,7 +182,7 @@ def build(
         layout = LAYOUT[harness]
         shutil.copy(PROMPTS / "AGENTS.md", output_dir / layout["base"])
         shutil.copytree(
-            SKILLS, output_dir / layout["skills"], ignore=shutil.ignore_patterns(".DS_Store"),
+            SKILLS, output_dir / layout["skills"], ignore=ignore_os_metadata,
         )
 
     for relative, rendered in outputs.items():
