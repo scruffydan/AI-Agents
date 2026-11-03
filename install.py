@@ -52,8 +52,10 @@ def same_content(source: Path, destination: Path) -> bool:
         return destination.is_file() and filecmp.cmp(source, destination, shallow=False)
     if not destination.is_dir():
         return False
-    entries = {entry.name for entry in source.iterdir()}
-    return entries == {entry.name for entry in destination.iterdir()} and all(
+    entries = {entry.name for entry in source.iterdir() if entry.name != ".DS_Store"}
+    return entries == {
+        entry.name for entry in destination.iterdir() if entry.name != ".DS_Store"
+    } and all(
         same_content(source / name, destination / name) for name in entries
     )
 
@@ -63,6 +65,8 @@ def install(harnesses: list[str], home: Path, force: bool) -> None:
 
     def install_item(source: Path, destination: Path) -> None:
         nonlocal backup_dir
+        if source.name == ".DS_Store":
+            return
         if destination.exists() or destination.is_symlink():
             if same_content(source, destination):
                 return
@@ -87,7 +91,7 @@ def install(harnesses: list[str], home: Path, force: bool) -> None:
 
         destination.parent.mkdir(parents=True, exist_ok=True)
         if source.is_dir():
-            shutil.copytree(source, destination)
+            shutil.copytree(source, destination, ignore=shutil.ignore_patterns(".DS_Store"))
         else:
             shutil.copy2(source, destination)
         print(f"Installed: {destination}")

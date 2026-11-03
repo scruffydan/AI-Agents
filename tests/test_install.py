@@ -49,6 +49,53 @@ class InstallTests(unittest.TestCase):
         self.assertTrue((self.home / ".claude/skills/git-commit/SKILL.md").is_file())
         self.assertTrue((self.home / ".codex/agents/code-security.toml").is_file())
 
+    def test_installer_excludes_finder_metadata_added_to_build(self):
+        script = """
+from pathlib import Path
+import build
+import install
+
+build.build(list(build.HARNESSES))
+for harness in build.HARNESSES:
+    output = build.BUILD / harness
+    skills = output / build.LAYOUT[harness]["skills"]
+    agents = output / Path(build.AGENT_PATHS[harness]).parent
+    for path in (agents / ".DS_Store", skills / ".DS_Store",
+                 skills / "code-review/.DS_Store"):
+        path.write_bytes(b"Finder metadata")
+    (skills / "code-review/.example").write_text("keep this resource")
+install.install(list(build.HARNESSES), Path.home(), force=True)
+"""
+        result = subprocess.run(
+            [sys.executable, "-c", script], cwd=self.root,
+            env={**os.environ, "HOME": str(self.home)}, capture_output=True, text=True,
+        )
+
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertNotIn(".DS_Store", result.stdout)
+        self.assertEqual(list(self.home.rglob(".DS_Store")), [])
+        for directory in (".agents/skills", ".claude/skills", ".config/opencode/skills"):
+            self.assertEqual(
+                (self.home / directory / "code-review/.example").read_text(),
+                "keep this resource",
+            )
+
+    def test_finder_metadata_does_not_trigger_reinstallation(self):
+        self.install("--all")
+        for directory in (".agents/skills", ".claude/skills", ".config/opencode/skills"):
+            skills = self.home / directory
+            (skills / ".DS_Store").write_bytes(b"Finder metadata")
+            (skills / "code-review/.DS_Store").write_bytes(b"Finder metadata")
+        for relative in (".DS_Store", "code-review/.DS_Store"):
+            (self.root / "source/skills" / relative).write_bytes(b"Different metadata")
+
+        result = self.install("--all")
+
+        self.assertNotIn(".DS_Store", result.stdout)
+        self.assertNotIn("Installed:", result.stdout)
+        self.assertNotIn("Backed up:", result.stdout)
+        self.assertFalse((self.home / ".ai-agents-backups").exists())
+
     def test_changed_files_are_backed_up_and_unchanged_files_are_skipped(self):
         self.install("claude")
         agent = self.home / ".claude/agents/docs-fetcher.md"

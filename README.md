@@ -106,7 +106,9 @@ New shared agents use each renderer's defaults without Python changes.
 Edit `source/skills/database-debugging/SKILL.md`. Keep YAML frontmatter to `name`
 and `description`, and keep instructions portable across harnesses. Supporting
 files can sit beside `SKILL.md` and use relative links. The whole folder is
-copied unchanged, without token expansion.
+copied unchanged, without token expansion, except for macOS `.DS_Store` metadata.
+Builds and installs exclude these files; content comparisons ignore them so
+Finder metadata does not trigger unnecessary reinstalls.
 
 Both creation commands require lowercase names with single hyphens, refuse to
 overwrite existing content, and create TODO instructions to finish before

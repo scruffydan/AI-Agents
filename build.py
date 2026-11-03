@@ -172,7 +172,9 @@ def build(
         output_dir.mkdir(parents=True)
         layout = LAYOUT[harness]
         shutil.copy(PROMPTS / "AGENTS.md", output_dir / layout["base"])
-        shutil.copytree(SKILLS, output_dir / layout["skills"])
+        shutil.copytree(
+            SKILLS, output_dir / layout["skills"], ignore=shutil.ignore_patterns(".DS_Store"),
+        )
 
     for relative, rendered in outputs.items():
         destination = BUILD / relative

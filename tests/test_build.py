@@ -60,6 +60,23 @@ class BuildTests(unittest.TestCase):
             with self.subTest(agent=agent.name):
                 self.assertNotIn("/", tomllib.loads(agent.read_text())["model"])
 
+    def test_build_excludes_finder_metadata_and_preserves_hidden_resources(self):
+        skills = self.root / "source/skills"
+        for relative in (".DS_Store", "code-review/.DS_Store", "code-review/examples/.DS_Store"):
+            path = skills / relative
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(b"Finder metadata")
+        (skills / "code-review/.example").write_text("keep this resource")
+
+        self.build()
+
+        self.assertEqual(list((self.root / "build").rglob(".DS_Store")), [])
+        for directory in ("codex/.agents/skills", "claude/skills", "opencode/skills"):
+            self.assertEqual(
+                (self.root / "build" / directory / "code-review/.example").read_text(),
+                "keep this resource",
+            )
+
     def test_retired_explore_agent_is_not_built(self):
         for args in ((), ("--work",)):
             with self.subTest(args=args):
