@@ -1,9 +1,5 @@
 #!/usr/bin/env python3
-"""Render provider-native templates into build/.
-
-Templates define the native output format. Agents share definitions and default
-templates; commands and modes use explicit templates.
-"""
+"""Build native harness configs from shared agents, prompts, and skills."""
 
 from __future__ import annotations
 
@@ -13,15 +9,15 @@ if sys.version_info < (3, 11):
     raise SystemExit("Python 3.11 or newer is required.")
 
 import argparse
-import json
 import re
 import shutil
 import tomllib
 from functools import lru_cache
 from pathlib import Path
 
+import renderers
+
 ROOT = Path(__file__).resolve().parent
-TEMPLATES = ROOT / "templates"
 PROMPTS = ROOT / "source" / "prompts"
 AGENTS = ROOT / "source" / "agents"
 SKILLS = ROOT / "source" / "skills"
@@ -30,7 +26,6 @@ BUILD = ROOT / "build"
 
 HARNESSES = ("codex", "claude", "opencode")
 OPENCODE_PROVIDERS = ("openai", "opencode")
-TOKEN_RE = re.compile(r"\{\{(prompt|model|agent):([a-z0-9_-]+)\}\}")
 INCLUDE_RE = re.compile(r"\{\{include:([A-Za-z0-9_.-]+)\}\}")
 NAME_RE = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*")
 LAYOUT = {
@@ -39,10 +34,19 @@ LAYOUT = {
     "codex": {"base": "AGENTS.md", "skills": ".agents/skills"},
 }
 AGENT_PATHS = {
-    "claude": ("agent.md", "agents/{name}.md"),
-    "opencode": ("agent.md", "agents/{name}.md"),
-    "codex": ("agent.toml", ".codex/agents/{name}.toml"),
+    "claude": "agents/{name}.md",
+    "opencode": "agents/{name}.md",
+    "codex": ".codex/agents/{name}.toml",
 }
+WINDOWS_METADATA_NAMES = {"thumbs.db", "ehthumbs.db", "desktop.ini"}
+
+
+def is_os_metadata(name: str) -> bool:
+    return name == ".DS_Store" or name.lower() in WINDOWS_METADATA_NAMES
+
+
+def ignore_os_metadata(_directory: str, names: list[str]) -> list[str]:
+    return [name for name in names if is_os_metadata(name)]
 
 
 def validate_name(name: str) -> str:
@@ -125,41 +129,6 @@ def load_agents() -> dict[str, dict]:
     return agents
 
 
-def yaml_string(value: str) -> str:
-    """Quote Unicode without JSON surrogate pairs or YAML line normalization."""
-    quoted = json.dumps(value, ensure_ascii=False)
-    return re.sub(r"[\x7f-\x9f\u2028\u2029]", lambda m: f"\\u{ord(m[0]):04x}", quoted)
-
-
-def agent_value(value: str, key: str, toml: bool) -> str:
-    """Escape for the documented template position, preserving simple output."""
-    if toml:
-        if key == "body":
-            # Inside a TOML multiline basic string. Preserve newlines and ordinary quotes.
-            return toml_multiline(value)
-        # Inside a TOML single-line basic string; JSON escapes are compatible here.
-        return json.dumps(value, ensure_ascii=False)[1:-1].replace("\x7f", "\\u007f")
-    if key == "body":
-        return value
-    # Model variants contain a literal '#' without whitespace before it.
-    if key == "model" and re.fullmatch(r"[A-Za-z0-9_][A-Za-z0-9_./@-]*#[A-Za-z0-9_-]+", value):
-        return value
-    # Plain YAML scalars are readable; quote values with YAML syntax or implicit types.
-    if (re.fullmatch(r"[A-Za-z_][A-Za-z0-9_ .,/()@\"'?!-]*", value)
-            and value == value.strip()
-            and value.lower() not in {"null", "true", "false", "yes", "no", "on", "off"}):
-        return value
-    return yaml_string(value)
-
-
-@lru_cache
-def prompt_body(name: str) -> str:
-    path = PROMPTS / f"{name}.md"
-    if not path.is_file():
-        raise ValueError(f"Unknown prompt: {name}")
-    return expand_includes(path.read_text(), (path.name,)).strip()
-
-
 def expand_includes(text: str, stack: tuple[str, ...]) -> str:
     def replace(match: re.Match[str]) -> str:
         name = match.group(1)
@@ -174,104 +143,34 @@ def expand_includes(text: str, stack: tuple[str, ...]) -> str:
     return INCLUDE_RE.sub(replace, text)
 
 
-def toml_multiline(text: str) -> str:
-    """Escape text for a TOML multiline basic string so it parses back unchanged."""
-    text = text.replace("\\", "\\\\").replace('"""', '\\"\\"\\"')
-    return re.sub(r"[\x00-\x08\x0b-\x1f\x7f]", lambda m: f"\\u{ord(m[0]):04x}", text)
-
-
-def render_template(
-    path: Path,
-    harness: str,
-    work: bool,
-    opencode_provider: str | None,
-    agent: dict | None = None,
-) -> str:
-    def replace(match: re.Match[str]) -> str:
-        kind, name = match.groups()
-        if kind == "prompt":
-            body = prompt_body(name)
-            # TOML templates embed prompts inside """ strings.
-            return toml_multiline(body) if path.suffix == ".toml" else body
-        if kind == "agent":
-            if agent is None or name not in {"name", "description", "model", "body"}:
-                raise ValueError(f"Invalid agent token {match[0]} in {path}")
-            value = resolve_model(agent["model_profile"], harness, work, opencode_provider) if name == "model" else agent[name]
-            return agent_value(value, name, path.suffix == ".toml")
-        return resolve_model(name, harness, work, opencode_provider)
-
-    rendered = TOKEN_RE.sub(replace, path.read_text())
-    if TOKEN_RE.search(rendered) or INCLUDE_RE.search(rendered):
-        raise ValueError(f"Unresolved template token in {path}")
-    if path.suffix == ".toml":
-        tomllib.loads(rendered)
-    return rendered
-
-
 def build(
     harnesses: list[str],
     work: bool = False,
     opencode_provider: str | None = None,
 ) -> int:
     validate_harnesses(harnesses)
+    if work and opencode_provider:
+        raise ValueError("--work cannot be combined with --opencode-provider; work models use Google Vertex.")
     model_profiles.cache_clear()
-    prompt_body.cache_clear()
     agents = load_agents()
-    for harness_dir in (TEMPLATES / "overrides").glob("*"):
-        if harness_dir.name == ".DS_Store":
-            continue
-        if not harness_dir.is_dir() or harness_dir.name not in HARNESSES:
-            raise ValueError(f"Unknown override harness: {harness_dir}")
-        suffix = Path(AGENT_PATHS[harness_dir.name][0]).suffix
-        for path in harness_dir.iterdir():
-            if path.name == ".DS_Store":
-                continue
-            if not path.is_file() or path.suffix != suffix or path.stem not in agents:
-                raise ValueError(f"Override has no matching agent: {path}")
-            if harness_dir.name not in agents[path.stem]["harnesses"]:
-                raise ValueError(f"Override targets a disabled harness: {path}")
 
-    # Render and check collisions before replacing an existing successful build.
+    # Finish rendering before replacing the previous successful build.
     outputs = {}
-    output_files = set()
-    output_directories = set()
 
-    def reserve_file(destination: Path) -> None:
-        if (destination in output_files or destination in output_directories
-                or any(parent in output_files for parent in destination.parents)):
+    def add(harness: str, name: str, rendered: str) -> None:
+        destination = Path(harness) / AGENT_PATHS[harness].format(name=name)
+        if destination in outputs:
             raise ValueError(f"Duplicate output: {destination}")
-        output_files.add(destination)
-        output_directories.update(destination.parents)
+        outputs[destination] = rendered
 
     for harness in harnesses:
-        layout = LAYOUT[harness]
-        reserve_file(Path(harness) / layout["base"])
-        shared_root = Path(harness) / layout["skills"]
-        output_directories.add(shared_root)
-        output_directories.update(shared_root.parents)
-        for path in SKILLS.rglob("*"):
-            destination = shared_root / path.relative_to(SKILLS)
-            if path.is_dir():
-                output_directories.add(destination)
-                output_directories.update(destination.parents)
-            elif path.is_file():
-                reserve_file(destination)
-
-        def add(relative: Path, rendered: str) -> None:
-            destination = Path(harness) / relative
-            reserve_file(destination)
-            outputs[destination] = rendered
-
-        for template in sorted(p for p in (TEMPLATES / harness).rglob("*")
-                               if p.is_file() and p.name != ".DS_Store"):
-            add(template.relative_to(TEMPLATES / harness), render_template(template, harness, work, opencode_provider))
-        default_name, output_pattern = AGENT_PATHS[harness]
         for name, agent in agents.items():
-            if harness not in agent["harnesses"]:
-                continue
-            override = TEMPLATES / "overrides" / harness / f"{name}{Path(default_name).suffix}"
-            template = override if override.is_file() else TEMPLATES / "defaults" / harness / default_name
-            add(Path(output_pattern.format(name=name)), render_template(template, harness, work, opencode_provider, agent))
+            if harness in agent["harnesses"]:
+                model = resolve_model(agent["model_profile"], harness, work, opencode_provider)
+                add(harness, name, renderers.RENDERERS[harness](agent, model))
+        if harness == "opencode":
+            plan = renderers.OPENCODE_PLAN
+            add(harness, plan["name"], renderers.render_opencode(plan, None))
 
     if BUILD.exists():
         shutil.rmtree(BUILD)
@@ -282,7 +181,9 @@ def build(
         output_dir.mkdir(parents=True)
         layout = LAYOUT[harness]
         shutil.copy(PROMPTS / "AGENTS.md", output_dir / layout["base"])
-        shutil.copytree(SKILLS, output_dir / layout["skills"])
+        shutil.copytree(
+            SKILLS, output_dir / layout["skills"], ignore=ignore_os_metadata,
+        )
 
     for relative, rendered in outputs.items():
         destination = BUILD / relative
@@ -298,7 +199,7 @@ def build(
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
-        description="Render AI harness configs from provider-native templates."
+        description="Build native AI harness configs from shared source files."
     )
     parser.add_argument(
         "harnesses",

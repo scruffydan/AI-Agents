@@ -17,9 +17,9 @@ class BuildTests(unittest.TestCase):
         temporary = tempfile.TemporaryDirectory()
         self.addCleanup(temporary.cleanup)
         self.root = Path(temporary.name)
-        for name in ("source", "templates"):
-            shutil.copytree(REPO / name, self.root / name)
-        shutil.copy2(REPO / "build.py", self.root / "build.py")
+        shutil.copytree(REPO / "source", self.root / "source")
+        for name in ("build.py", "renderers.py"):
+            shutil.copy2(REPO / name, self.root / name)
 
     def build(self, *args):
         result = subprocess.run(
@@ -29,26 +29,27 @@ class BuildTests(unittest.TestCase):
 
     def test_codex_agent_text_survives_toml_rendering(self):
         body = 'Match \\bword\\b in C:\\queries, keep the literal """ delimiter.'
-        source = self.root / "source/agents/explore.md"
+        source = self.root / "source/agents/code-security.md"
         _, metadata, _ = source.read_text().split("+++", 2)
         source.write_text(f"+++{metadata}+++\n\n{body}")
 
         self.build("codex")
 
-        rendered = self.root / "build/codex/.codex/agents/explore.toml"
+        rendered = self.root / "build/codex/.codex/agents/code-security.toml"
         instructions = tomllib.loads(rendered.read_text())["developer_instructions"]
         self.assertEqual(instructions.strip(), body)
 
-    def test_codex_explicit_prompt_text_survives_toml_rendering(self):
+    def test_codex_brainstorm_text_survives_toml_rendering(self):
         body = 'Match \\bword\\b in C:\\queries, keep the literal """ delimiter.'
-        (self.root / "source/prompts/brainstorm.md").write_text(body)
+        source = self.root / "source/agents/brainstorm.md"
+        _, metadata, _ = source.read_text().split("+++", 2)
+        source.write_text(f"+++{metadata}+++\n\n{body}")
 
         self.build("codex")
 
         rendered = self.root / "build/codex/.codex/agents/brainstorm.toml"
         instructions = tomllib.loads(rendered.read_text())["developer_instructions"]
-        self.assertEqual(instructions.strip(),
-                         "Explore ideas without modifying files or running shell commands.\n\n" + body)
+        self.assertEqual(instructions.strip(), body)
 
     def test_default_build_renders_all_harnesses_with_bare_codex_models(self):
         self.build()
@@ -59,12 +60,58 @@ class BuildTests(unittest.TestCase):
             with self.subTest(agent=agent.name):
                 self.assertNotIn("/", tomllib.loads(agent.read_text())["model"])
 
+    def test_build_excludes_os_metadata_and_preserves_hidden_resources(self):
+        skills = self.root / "source/skills"
+        names = (".DS_Store", "Thumbs.db", "ehthumbs.db", "Desktop.ini", "THUMBS.DB", "desktop.ini")
+        for directory in (skills, skills / "code-review", skills / "code-review/examples"):
+            directory.mkdir(parents=True, exist_ok=True)
+            for name in names:
+                (directory / name).write_bytes(b"OS metadata")
+        for name in (".example", ".directory"):
+            (skills / "code-review" / name).write_text("keep this resource")
+
+        self.build()
+
+        for name in names:
+            self.assertEqual(list((self.root / "build").rglob(name)), [])
+        for directory in ("codex/.agents/skills", "claude/skills", "opencode/skills"):
+            for name in (".example", ".directory"):
+                self.assertEqual(
+                    (self.root / "build" / directory / "code-review" / name).read_text(),
+                    "keep this resource",
+                )
+
+    def test_retired_explore_agent_is_not_built(self):
+        for args in ((), ("--work",)):
+            with self.subTest(args=args):
+                self.build(*args)
+                for target in ("claude/agents/explore.md", "opencode/agents/explore.md",
+                               "codex/.codex/agents/explore.toml"):
+                    self.assertFalse((self.root / "build" / target).exists(), target)
+
     def test_shared_base_instructions_propagate_to_all_harnesses(self):
         body = (self.root / "source/prompts/AGENTS.md").read_bytes()
         self.build()
         for target in ("opencode/AGENTS.md", "claude/CLAUDE.md", "codex/AGENTS.md"):
             with self.subTest(target=target):
                 self.assertEqual((self.root / "build" / target).read_bytes(), body)
+
+    def test_git_commit_agent_carries_drafting_rules_without_skill_access(self):
+        source_body = (self.root / "source/agents/git-commit.md").read_text().split("+++", 2)[2].strip()
+        self.build()
+        rendered = {
+            "claude": (self.root / "build/claude/agents/git-commit.md").read_text(),
+            "codex": tomllib.loads(
+                (self.root / "build/codex/.codex/agents/git-commit.toml").read_text()
+            )["developer_instructions"],
+            "opencode": (self.root / "build/opencode/agents/git-commit.md").read_text(),
+        }
+        for harness, text in rendered.items():
+            with self.subTest(harness=harness):
+                self.assertIn("## Draft the message", text)
+                self.assertIn("```sh\ngit log -10 --format=full\n```", text)
+                self.assertIn(source_body, text)
+                self.assertNotIn("`git-commit` skill", text)
 
     def test_unknown_harness_is_rejected(self):
         result = subprocess.run(
@@ -76,16 +123,34 @@ class BuildTests(unittest.TestCase):
     def test_brainstorm_follows_work_and_provider_options(self):
         brainstorm = self.root / "build/opencode/agents/brainstorm.md"
         for args, model in (
-            ((), "openai/gpt-6-astra#medium"),
+            ((), "openai/gpt-6-astra#high"),
             (("--work",), "google-vertex/claude-opus-5-5#high"),
-            (("--opencode-provider", "openai"), "openai/gpt-6-astra#medium"),
-            (("--work", "--opencode-provider", "openai"), "openai/claude-opus-5-5#high"),
-            (("--opencode-provider", "opencode"), "opencode/gpt-6-astra#medium"),
-            (("--work", "--opencode-provider", "opencode"), "opencode/claude-opus-5-5#high"),
+            (("--opencode-provider", "openai"), "openai/gpt-6-astra#high"),
+            (("--opencode-provider", "opencode"), "opencode/gpt-6-astra#high"),
         ):
             with self.subTest(args=args):
                 self.build("opencode", *args)
                 self.assertIn(f"model: {model}\n", brainstorm.read_text())
+
+    def test_work_provider_override_is_rejected_without_replacing_build(self):
+        self.build("opencode", "--work")
+        output = self.root / "build"
+        original = {path.relative_to(output): path.read_bytes()
+                    for path in output.rglob("*") if path.is_file()}
+        for provider in ("openai", "opencode"):
+            with self.subTest(provider=provider):
+                result = subprocess.run(
+                    [sys.executable, "build.py", "opencode", "--work",
+                     "--opencode-provider", provider],
+                    cwd=self.root, capture_output=True, text=True,
+                )
+                self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
+                self.assertIn("--work cannot be combined with --opencode-provider", result.stderr)
+                self.assertEqual(
+                    {path.relative_to(output): path.read_bytes()
+                     for path in output.rglob("*") if path.is_file()},
+                    original,
+                )
 
     def test_github_copilot_is_rejected_without_replacing_build(self):
         self.build("opencode")
@@ -135,7 +200,7 @@ class BuildTests(unittest.TestCase):
             for retired in ("brainstorm-with-agent", "mode-brainstorm", "using-code-review", "code-full-review",
                             "command-code-full-review", "executing-plans",
                             "subagent-driven-development", "writing-skills", "receiving-code-review",
-                            "using-docs-fetcher"):
+                            "using-docs-fetcher", "implementation-workflow"):
                 with self.subTest(harness=harness, retired=retired):
                     self.assertFalse((output / retired).exists())
 
@@ -154,17 +219,51 @@ class BuildTests(unittest.TestCase):
                 agent = self.root / "build/codex/.codex/agents/brainstorm.toml"
                 parsed = tomllib.loads(agent.read_text())
                 self.assertEqual(parsed["model"], "gpt-6-astra")
-                self.assertEqual(parsed["model_reasoning_effort"], "medium")
-                self.assertFalse(parsed["features"]["shell_tool"])
+                self.assertEqual(parsed["model_reasoning_effort"], "high")
+                self.assertTrue(parsed["features"]["shell_tool"])
+                self.assertNotIn("or running shell commands", parsed["developer_instructions"])
+                for text in (claude.read_text(), parsed["description"] + parsed["developer_instructions"]):
+                    self.assertIn("Use only when the user explicitly asks for the brainstorm agent.", text)
+                    self.assertNotIn("build mode", text)
+                    self.assertNotIn("plan mode", text)
+                    self.assertNotIn("Ask clarifying questions", text)
+
+    def test_claude_tools_and_effort_match_agent_roles(self):
+        self.build("claude")
+        for name, tools, effort in (
+            ("code-security", "Read, Glob, Grep", True),
+            ("brainstorm", "Read, Glob, Grep", True),
+            ("docs-fetcher", "WebSearch, WebFetch", False),
+            ("git-commit", "Bash, Read, Grep, Glob", False),
+        ):
+            with self.subTest(agent=name):
+                text = (self.root / f"build/claude/agents/{name}.md").read_text()
+                header = text.split("---", 2)[1]
+                self.assertIn(f"tools: {tools}\n", header)
+                self.assertEqual("effort: high\n" in header, effort)
+
+    def test_opencode_primary_modes_keep_interactive_behavior(self):
+        self.build("opencode")
+        agents = self.root / "build/opencode/agents"
+        brainstorm = (agents / "brainstorm.md").read_text()
+        plan = (agents / "thorough-plan.md").read_text()
+        for text in (brainstorm, plan):
+            header = text.split("---", 2)[1]
+            self.assertIn("mode: primary\n", header)
+            self.assertNotIn("action: question\n", header)
+            self.assertNotIn("action: subagent\n", header)
+        self.assertIn("Select it when you want to brainstorm interactively.", brainstorm)
+        self.assertIn("Ask clarifying questions", brainstorm)
+        self.assertIn("suggest switching to build mode", brainstorm)
+        self.assertNotIn("\nmodel:", plan.split("---", 2)[1])
+        self.assertIn("Load the `mode-thorough-plan` skill", plan)
 
     def test_referenced_shared_skill_support_files_exist(self):
         references = {
             "code-review": ("feedback.md",),
             "systematic-debugging": (
                 "root-cause-tracing.md", "defense-in-depth.md", "condition-based-waiting.md",
-                "five-whys.md",
             ),
-            "five-whys": ("../systematic-debugging/five-whys.md",),
         }
         self.build()
         for directory in ("source/skills", "build/codex/.agents/skills",
@@ -175,6 +274,14 @@ class BuildTests(unittest.TestCase):
                         path = self.root / directory / skill / filename
                         self.assertTrue(path.is_file())
                         self.assertTrue(path.read_text().strip())
+
+    def test_skills_do_not_reference_files_outside_their_folder(self):
+        self.build()
+        for directory in ("source/skills", "build/codex/.agents/skills",
+                          "build/claude/skills", "build/opencode/skills"):
+            for path in (self.root / directory).rglob("*.md"):
+                with self.subTest(path=str(path.relative_to(self.root))):
+                    self.assertNotIn("../", path.read_text())
 
     def test_opencode_v2_build_has_native_directories_and_no_legacy_agent_fields(self):
         self.build("opencode", "--work")
@@ -193,13 +300,11 @@ class BuildTests(unittest.TestCase):
                 self.assertNotIn("google-vertex-anthropic/", header)
         reviewer = (output / "agents/code-security.md").read_text()
         self.assertIn("model: google-vertex/claude-opus-5-5#high\n", reviewer)
-        self.assertIn("action: shell\n    resource: \"*\"\n    effect: deny", reviewer)
+        self.assertIn("action: shell\n    resource: \"*\"\n    effect: ask", reviewer)
         commit = (output / "agents/git-commit.md").read_text()
         self.assertIn("model: google-vertex/claude-sonnet-5-5#high\n", commit)
         docs = (output / "agents/docs-fetcher.md").read_text()
         self.assertIn("model: google-vertex/claude-sonnet-5-5#high\n", docs)
-        explore = (output / "agents/explore.md").read_text()
-        self.assertIn("model: google-vertex/gemini-4-argon#high\n", explore)
 
 
 if __name__ == "__main__":

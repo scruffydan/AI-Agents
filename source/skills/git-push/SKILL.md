@@ -10,13 +10,10 @@ intended branch and remote without disturbing unrelated changes.
 
 Before pushing:
 
-- Use `update-readme` for README and existing AGENTS.md accuracy.
-- Use `verification-before-completion` for relevant checks and their evidence.
-  Reuse valid checks on unchanged inputs; do not rerun them just because this
-  skill is loaded.
+- Use `verification-before-completion` and `update-readme`.
 - Use `git-commit` for repository-specific message conventions. Free-form subjects
-  are valid when the repository uses them; do not impose conventional commits or
-  rewrite existing commits just to change their style.
+  are valid when the repository uses them. Preserve existing commits when checking
+  message style.
 - Identify the actual destination and base branch; do not assume `origin/main`.
   Inspect the outgoing commits and diff for unintended files and sensitive data.
   Use an available local secret scanner if appropriate, without printing secrets.

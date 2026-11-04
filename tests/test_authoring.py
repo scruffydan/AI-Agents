@@ -18,9 +18,8 @@ class AuthoringTests(unittest.TestCase):
         temporary = tempfile.TemporaryDirectory()
         self.addCleanup(temporary.cleanup)
         self.root = Path(temporary.name)
-        for name in ("source", "templates"):
-            shutil.copytree(REPO / name, self.root / name)
-        for name in ("build.py", "new.py"):
+        shutil.copytree(REPO / "source", self.root / "source")
+        for name in ("build.py", "renderers.py", "new.py"):
             shutil.copy2(REPO / name, self.root / name)
 
     def cli(self, *args, success=True):
@@ -30,7 +29,7 @@ class AuthoringTests(unittest.TestCase):
         self.assertEqual(result.returncode == 0, success, result.stdout + result.stderr)
         return result
 
-    def test_one_agent_builds_for_all_harnesses_and_override_is_local(self):
+    def test_one_agent_builds_for_all_harnesses(self):
         description = 'Review queries: include "slow" queries # database'
         self.cli("new.py", "agent", "database-review", "--description", description)
         source = self.root / "source/agents/database-review.md"
@@ -49,15 +48,7 @@ class AuthoringTests(unittest.TestCase):
         for path in (claude, opencode):
             line = next(line for line in path.read_text().splitlines() if line.startswith("description: "))
             self.assertEqual(json.loads(line.removeprefix("description: ")), description)
-        old_codex, old_opencode = codex.read_bytes(), opencode.read_bytes()
-        template = (self.root / "templates/defaults/claude/agent.md").read_text()
-        (self.root / "templates/overrides/claude/database-review.md").write_text(
-            template.replace("tools: Read, Glob, Grep", "tools: Read")
-        )
-        self.cli("build.py")
-        self.assertIn("tools: Read\n", claude.read_text())
-        self.assertEqual(codex.read_bytes(), old_codex)
-        self.assertEqual(opencode.read_bytes(), old_opencode)
+        self.assertIn("tools: Read, Glob, Grep\n", claude.read_text())
 
     def test_selected_harnesses_and_shared_skill_folder(self):
         self.cli("new.py", "agent", "database-review", "--harness", "claude")
@@ -85,6 +76,11 @@ class AuthoringTests(unittest.TestCase):
         self.cli("new.py", "agent", "missing-profile", "--profile", "missing", success=False)
         self.assertFalse((self.root / "source/agents/missing-profile.md").exists())
         self.cli("new.py", "agent", "brainstorm", success=False)
+        self.cli("new.py", "agent", "thorough-plan", success=False)
+        self.assertFalse((self.root / "source/agents/thorough-plan.md").exists())
+        self.cli("new.py", "agent", "thorough-plan", "--harness", "claude")
+        self.cli("build.py")
+        self.assertTrue((self.root / "build/claude/agents/thorough-plan.md").exists())
         self.cli("new.py", "skill", "brainstorming", success=False)
 
     def test_failed_build_preserves_previous_output(self):
@@ -96,28 +92,23 @@ class AuthoringTests(unittest.TestCase):
                     for p in output.rglob("*") if p.is_file()}
 
         original = snapshot()
+        metadata = '+++\ndescription = "Example"\nmodel_profile = "deep_review"\n+++\n\n'
+        (self.root / "source/prompts/_cycle.md").write_text("{{include:_cycle.md}}")
         cases = (
-            ("templates/claude/agents/broken.md", "{{prompt:missing}}", "Unknown prompt"),
-            ("templates/codex/.codex/agents/explore.toml",
-             (output / "codex/.codex/agents/explore.toml").read_text(), "Duplicate output"),
-            ("templates/claude/skills/git-commit/SKILL.md", "conflict", "Duplicate output"),
-            ("templates/claude/skills/git-commit", "directory conflict", "Duplicate output"),
-            ("templates/codex/.codex/agents/explore.toml/extra.md", "ancestor conflict", "Duplicate output"),
+            ("broken", "no frontmatter", "expected +++ TOML frontmatter"),
+            ("broken", metadata + "{{include:missing.md}}", "Missing prompt include"),
+            ("broken", metadata + "{{include:_cycle.md}}", "Recursive prompt include"),
+            ("broken", metadata.replace('"deep_review"', '"missing"') + "Body", "Unknown model profile"),
+            ("thorough-plan", metadata + "Conflicting agent", "Duplicate output"),
         )
-        for relative, content, error in cases:
-            with self.subTest(path=relative):
-                path = self.root / relative
-                path.parent.mkdir(parents=True, exist_ok=True)
+        for name, content, error in cases:
+            with self.subTest(agent=name, error=error):
+                path = self.root / "source/agents" / f"{name}.md"
                 path.write_text(content)
                 result = self.cli("build.py", success=False)
                 self.assertIn(error, result.stderr)
                 self.assertEqual(snapshot(), original)
                 path.unlink()
-                # Remove temporary directories so later cases can test file conflicts.
-                parent = path.parent
-                while parent != self.root and not any(parent.iterdir()):
-                    parent.rmdir()
-                    parent = parent.parent
 
     def test_unicode_descriptions_are_portable_yaml(self):
         description = "Review queries 🔍\u0085\u2028\u2029"
@@ -139,20 +130,10 @@ class AuthoringTests(unittest.TestCase):
         codex = self.root / "build/codex/.codex/agents/unicode-agent.toml"
         self.assertEqual(tomllib.loads(codex.read_text())["description"], description)
 
-    def test_finder_metadata_is_ignored_without_disabling_override_validation(self):
-        for relative in ("templates/overrides/.DS_Store",
-                         "templates/overrides/claude/.DS_Store",
-                         "templates/claude/agents/.DS_Store"):
-            path = self.root / relative
-            path.parent.mkdir(parents=True, exist_ok=True)
-            path.write_bytes(b"\x00\xffFinder metadata")
-        self.cli("build.py", "codex")
+    def test_finder_metadata_does_not_become_an_agent(self):
+        (self.root / "source/agents/.DS_Store").write_bytes(b"\x00\xffFinder metadata")
         self.cli("build.py")
         self.assertFalse((self.root / "build/claude/agents/.DS_Store").exists())
-
-        (self.root / "templates/overrides/claude/nonexistent.md").write_text("bad override")
-        result = self.cli("build.py", success=False)
-        self.assertIn("Override has no matching agent", result.stderr)
 
 
 if __name__ == "__main__":

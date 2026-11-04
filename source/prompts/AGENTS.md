@@ -23,15 +23,14 @@ guidance and the user's current request within the harness's instruction hierarc
   Prefer the simplest adequate solution and existing dependencies. Reuse the
   answer until the project's scope or stakes change.
 
-## No sycophancy and user decisions
+## Independent judgment and user decisions
 
-- Do not flatter or agree merely to be agreeable. Push back respectfully when you
-  disagree with assumptions, conclusions, or an approach. Explain the evidence,
-  trade-offs, uncertainty, and better alternatives; reconsider with new evidence.
+- Give candid, evidence-based assessments. Explain disagreements respectfully,
+  including the evidence, trade-offs, uncertainty, and better alternatives;
+  reconsider with new evidence.
 - The user makes the final choice. After explaining your concern, follow their
-  informed decision even if you disagree. Stay honest without repeatedly arguing,
-  obstructing progress, or substituting your preference. Revisit the concern only
-  if material new information emerges.
+  informed decision even if you disagree. Revisit the concern when material new
+  information emerges.
 
 ## Documentation, skills, and agents
 
@@ -42,14 +41,16 @@ guidance and the user's current request within the harness's instruction hierarc
   or targeted version, known official URLs, and relevant constraints. Request
   compact findings or examples, primary-source links, version caveats, and
   unresolved uncertainty.
-- Keep external searching, fetching, and extraction in the child's context, and
-  send follow-up questions to that child. The child performs the lookup without
-  further delegation. The parent receives focused findings, not full pages. Local
-  code, types, and repository documentation may be inspected directly.
-- Honor the user's delegation restrictions. If delegation is prohibited, the
-  agent is unavailable, or required web capability is unavailable, explain the
-  limitation and continue independent authorized work. Do not search or fetch
-  external documentation in the parent as a fallback.
+- For delegated research, keep external searching, fetching, and extraction in the
+  child's context, and send follow-up questions to that child. The child performs
+  the lookup without further delegation. The parent receives focused findings,
+  not full pages. Local code, types, and repository documentation may be inspected
+  directly.
+- Honor the user's delegation restrictions. If delegation is prohibited or the
+  agent is unavailable, explain the limitation and perform a focused primary-source
+  lookup in the parent when its tools and permissions allow. If required web
+  capability is unavailable, continue independent authorized work and report
+  unresolved documentation questions.
 - Respect lockfiles and compatibility constraints. Upgrade dependencies only when
   needed for the task; do not automatically replace them with the latest release.
 - Use available skills when explicitly requested or when their workflow helps.
@@ -62,8 +63,11 @@ guidance and the user's current request within the harness's instruction hierarc
 
 - Inspect the working tree before editing. Preserve unrelated changes and untracked
   files; never discard, reset, or stash them without explicit authorization.
-- Commit as work progresses in small, logical units after verifying each change.
-  Honor explicit requests to leave changes uncommitted.
+- For implementation tasks, local commits are authorized; pushing is not. This is
+  the user's standing request to commit, even where a harness default says to
+  commit only when asked. Commit as work progresses in small, logical units after
+  verifying each change. Review, planning, and other read-only tasks do not
+  authorize commits. Honor explicit requests to leave changes uncommitted.
 - Before each commit, inspect the diff, stage only the intended files, and follow
   the repository's commit-message conventions.
 - Push only when requested. Get authorization for destructive Git operations,

@@ -19,8 +19,7 @@ implementation is out of scope.
 
 **BEFORE attempting ANY fix:**
 
-1. **Read Error Messages Carefully**
-   - Don't skip past errors or warnings
+1. **Read Errors and Warnings Carefully**
    - They often contain the exact solution
    - Read stack traces completely
    - Note line numbers, file paths, error codes
@@ -29,7 +28,8 @@ implementation is out of scope.
    - Can you trigger it reliably?
    - What are the exact steps?
    - Does it happen every time?
-   - If not reproducible -> gather more data, don't guess
+   - If reproduction is unreliable, gather observations that distinguish the
+     competing explanations.
 
 3. **Check Recent Changes**
    - What changed that could cause this?
@@ -39,9 +39,7 @@ implementation is out of scope.
 
 4. **Gather Evidence in Multi-Component Systems**
 
-   **WHEN system has multiple components (CI -> build -> signing, API -> service -> database):**
-
-   **When existing evidence does not locate the failure, add targeted diagnostics:**
+   **WHEN a system has multiple components (CI -> build -> signing, API -> service -> database) and existing evidence does not locate the failure, add targeted diagnostics:**
    ```
    For EACH component boundary:
      - Log what data enters component
@@ -62,7 +60,7 @@ implementation is out of scope.
 
    **WHEN error is deep in call stack:**
 
-   See `root-cause-tracing.md` in this directory for the complete backward tracing technique.
+   See [root-cause-tracing.md](root-cause-tracing.md) in this directory for the complete backward tracing technique.
 
    **Quick version:**
    - Where does bad value originate?
@@ -71,7 +69,7 @@ implementation is out of scope.
    - Fix at source, not at symptom
 
 For recurring failures, unclear causal links, or an explicit Five Whys request,
-optionally use [five-whys.md](five-whys.md). Follow the evidence across multiple
+optionally use the `five-whys` skill. Follow the evidence across multiple
 causal paths when needed; do not force a question chain for a clear local bug.
 
 ### Phase 2: Pattern Analysis
@@ -87,9 +85,10 @@ causal paths when needed; do not force a question chain for a clear local bug.
    - Understand the dependencies and assumptions before applying the pattern
 
 3. **Identify Differences**
-   - What's different between working and broken?
-   - List every difference, however small
-   - Don't assume "that can't matter"
+   - Compare working and failing cases. Prioritize differences that could explain
+     the observed failure, including small differences.
+   - Test those explanations and broaden the investigation when the evidence
+     does not support them.
 
 4. **Understand Dependencies**
    - What other components does this need?
@@ -100,26 +99,20 @@ causal paths when needed; do not force a question chain for a clear local bug.
 
 **Scientific method:**
 
-1. **Form Single Hypothesis**
-   - State clearly: "I think X is the root cause because Y"
-   - Write it down
-   - Be specific, not vague
+1. **Form a Testable Hypothesis**
+   - Record a specific explanation: "I think X is the root cause because Y"
 
-2. **Test Minimally**
-   - Make the SMALLEST possible change to test hypothesis
-   - One variable at a time
-   - Don't fix multiple things at once
+2. **Test One Hypothesis at a Time**
+   - Use the smallest change needed to test the explanation
+   - Change one variable at a time so the result can be attributed to it
 
 3. **Verify Before Continuing**
-   - Did it work? Yes -> Phase 4
-   - Didn't work? Form NEW hypothesis
-   - DON'T add more fixes on top
+   - Read the result and reassess the hypothesis after each test
+   - If supported, proceed to Phase 4; otherwise, use the evidence to choose the next test
 
-4. **When You Don't Know**
-   - Say "I don't understand X"
-   - Don't pretend to know
-   - Ask for help
-   - Research more
+4. **State Remaining Uncertainty**
+   - Explain what remains unknown and what evidence would resolve it
+   - Research further or ask a focused question when more context is needed
 
 ### Phase 4: Implementation
 
@@ -135,23 +128,26 @@ causal paths when needed; do not force a question chain for a clear local bug.
    material design changes with the user; do not infer architectural failure
    solely from an arbitrary attempt count.
 
-## When Process Reveals "No Root Cause"
+## When the cause is external or remains uncertain
 
-If systematic investigation reveals issue is truly environmental, timing-dependent, or external:
+Environmental and timing-dependent failures still have causes. Separate a
+confirmed external cause from a hypothesis that remains unverified. State what
+you reproduced, what the evidence supports, and which observations are missing;
+do not declare the investigation complete merely because a failure is intermittent.
 
-1. You've completed the process
-2. Document what you investigated
-3. Implement appropriate handling (retry, timeout, error message)
-4. Add monitoring/logging for future investigation
+When more evidence is unavailable, report the limit and the next useful check.
+Within the authorized task, consider mitigation such as a timeout, clearer error,
+or bounded retry. Before retrying, check whether the operation is safe to repeat;
+an ambiguous failure after a side effect can otherwise duplicate work or data.
 
 ## Supporting Techniques
 
 These techniques are part of systematic debugging and available in this directory:
 
-- **[five-whys.md](five-whys.md)** - Optional evidence-backed causal questioning for recurring or unclear failures
-- **`root-cause-tracing.md`** - Trace bugs backward through call stack to find original trigger
-- **`defense-in-depth.md`** - Add validation at multiple layers after finding root cause
-- **`condition-based-waiting.md`** - Replace arbitrary timeouts with condition polling
+- **[root-cause-tracing.md](root-cause-tracing.md)** - Trace bugs backward through call stack to find original trigger
+- **[defense-in-depth.md](defense-in-depth.md)** - Add validation at multiple layers after finding root cause
+- **[condition-based-waiting.md](condition-based-waiting.md)** - Replace arbitrary timeouts with condition polling
 
 **Related skills:**
+- **`five-whys`** - Optional evidence-backed causal questioning for recurring or unclear failures
 - **`verification-before-completion`** - Verify fix worked before claiming success

@@ -1,9 +1,9 @@
-# Models are the only dynamic part of the provider-native templates.
+# Shared agent definitions select one of these model profiles.
 # OpenCode values include their reasoning variant.
 # A missing *_work value falls back to the normal harness value.
 
 [brainstorm]
-opencode = "openai/gpt-6-astra#medium"
+opencode = "openai/gpt-6-astra#high"
 opencode_work = "google-vertex/claude-opus-5-5#high"
 claude = "claude-opus-5-5"
 codex = "gpt-6-astra"
@@ -13,12 +13,6 @@ opencode = "openai/gpt-6.1-sol#high"
 opencode_work = "google-vertex/claude-opus-5-5#high"
 claude = "claude-opus-5-5"
 codex = "gpt-6.1-sol"
-
-[mini_reasoning]
-opencode = "openai/gpt-6-luna#high"
-opencode_work = "google-vertex/gemini-4-argon#high"
-claude = "claude-sonnet-5-5"
-codex = "gpt-6-luna"
 
 [docs_fetcher]
 opencode = "openai/gpt-6-luna#high"
@@ -31,9 +25,3 @@ opencode = "openai/gpt-6-luna#high"
 opencode_work = "google-vertex/claude-sonnet-5-5#high"
 claude = "claude-sonnet-5-5"
 codex = "gpt-6-luna"
-
-[sidebar]
-opencode = "openai/gpt-6.1-sol#high"
-opencode_work = "google-vertex/claude-opus-5-5#high"
-claude = "claude-opus-5-5"
-codex = "gpt-6.1-sol"

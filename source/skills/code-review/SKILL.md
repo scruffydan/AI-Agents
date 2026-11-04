@@ -33,17 +33,22 @@ asking again for routine choices.
 
 Inspect the requested files or diff and relevant callers.
 
+The parent reviewer owns functional correctness, integration, and regression
+coverage. Check the changed behavior against requirements and relevant callers,
+including edge cases, component interactions, and whether tests cover the change.
+Combine these checks with the specialist findings.
+
 - For a targeted request, use only the relevant perspectives. An ordinary review
   does not automatically require five agents; inspect straightforward code directly.
 - For an explicitly requested full review, cover all five specialists below.
 
 Available specialists:
 
-- `code-security`: input handling, authentication, authorization, and data exposure.
-- `code-readability`: naming, structure, documentation, and maintainability.
-- `code-performance`: algorithms, queries, I/O, memory, and concurrency.
-- `code-redundancy`: duplication, unused code, and shared business rules.
-- `code-simplifier`: nesting, unnecessary complexity, and simpler control flow.
+- `code-security`: attack surface, trust boundaries, and data exposure.
+- `code-readability`: naming, documentation, and formatting.
+- `code-performance`: algorithms, I/O, memory, and concurrency.
+- `code-redundancy`: duplication and dead code.
+- `code-simplifier`: control flow and complexity.
 
 Use the environment's supported agent tools and configured models. For a full
 review, run specialists concurrently within available capacity; queue remaining
@@ -60,9 +65,9 @@ Combine duplicate findings and discard unsupported claims. Prioritize concrete
 correctness and security risks over cosmetic changes.
 
 For each material finding, provide severity, a file and line reference, the
-trigger and impact, and a practical recommendation. Explain actual conflicts
-between recommendations without inventing debates or forcing every specialist to
-comment. Identify uncertainties, checks performed, and checks that were not run.
+trigger and impact, and a practical recommendation. Explain material conflicts
+between supported recommendations. Identify uncertainties, checks performed, and
+checks that were not run.
 If no actionable issues are found, say so and state the review's limits.
 
 ## Evaluate supplied feedback

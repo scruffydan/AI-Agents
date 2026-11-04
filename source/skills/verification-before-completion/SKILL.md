@@ -20,7 +20,7 @@ Reuse a successful check from this session when its code, dependencies,
 configuration, fixtures, and relevant environment remain unchanged. Moving from
 implementation to commit or push does not itself invalidate evidence. Rerun
 checks when relevant inputs change, a failure needs investigation, or a material
-concern remains unresolved. Do not claim an old result verifies new changes.
+concern remains unresolved.
 
 ## Report accurately
 
@@ -31,6 +31,3 @@ State which checks actually ran and their outcomes, including failures and block
 checks. Distinguish static inspection, automated tests, and live testing. A passing
 linter does not prove a build passes; a passing build does not prove a bug is fixed.
 If a check cannot run, explain the limitation without implying success.
-
-Use `update-readme` for documentation accuracy. Verification, documentation, and
-Git skills can share valid evidence rather than repeating the same checks.

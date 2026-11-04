@@ -23,8 +23,7 @@ Honor authorization already given for implementation.
 
 Record substantial agreed decisions in a design document when useful to the task
 or required by the repository. Do not create documents, branches, or commits just
-because brainstorming occurred. Use `implementation-workflow` for complex
-implementation, reusing the design rather than restarting requirements analysis.
+because brainstorming occurred. Reuse the agreed design during implementation.
 
 ## Configured Brainstorming Agent
 
@@ -33,10 +32,14 @@ creative exploration instructions and model selection. Pass the user's request,
 relevant conversation context, constraints, and established decisions so it can
 work independently. Return its ideas to the user and incorporate follow-up feedback.
 
-In OpenCode, use the `brainstorm` primary agent and select its configured model
-in `/models`. An existing session keeps its selected model when changing agents;
-loading this skill alone does not switch it.
+In OpenCode, use the `brainstorm` primary agent and confirm its active model in
+`/models`. Selecting an agent by ID leaves the session model unchanged; desktop
+agent switching can restore that agent's remembered or configured model. Loading
+this skill alone does not select a model.
 
 Keep this path read-only in both the current conversation and the agent: do not
-edit files or run shell commands. If the requested agent or model is unavailable,
-report the limitation instead of silently substituting another model.
+edit files. Use read-only inspection within the active harness's tools and
+permissions. In OpenCode, obtain approval before running shell commands. Delegated
+agents must follow their configured tools and instructions. If the requested agent
+or model is unavailable, report the limitation instead of silently substituting
+another model.

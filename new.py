@@ -11,6 +11,7 @@ if sys.version_info < (3, 11):
     raise SystemExit("Python 3.11 or newer is required.")
 
 import build
+from renderers import yaml_string
 
 
 def create_agent(name: str, description: str, profile: str, harnesses: list[str]) -> None:
@@ -18,9 +19,8 @@ def create_agent(name: str, description: str, profile: str, harnesses: list[str]
     build.validate_harnesses(harnesses)
     for harness in harnesses:
         build.resolve_model(profile, harness, False, None)
-        _, pattern = build.AGENT_PATHS[harness]
-        if (build.TEMPLATES / harness / pattern.format(name=name)).exists():
-            raise ValueError(f"{harness} already has an explicit agent template named {name}")
+    if name == "thorough-plan" and "opencode" in harnesses:
+        raise ValueError("OpenCode reserves thorough-plan for its primary planning agent")
     path = build.AGENTS / f"{name}.md"
     content = (
         f"+++\ndescription = {json.dumps(description, ensure_ascii=False)}\n"
@@ -37,14 +37,10 @@ def create_agent(name: str, description: str, profile: str, harnesses: list[str]
 
 def create_skill(name: str, description: str) -> None:
     build.validate_name(name)
-    for harness in build.HARNESSES:
-        template = build.TEMPLATES / harness / build.LAYOUT[harness]["skills"] / name
-        if template.exists():
-            raise ValueError(f"{harness} already has a templated skill named {name}")
     path = build.SKILLS / name
     path.mkdir()  # Exclusive: never replace an existing folder or symlink.
     (path / "SKILL.md").write_text(
-        f"---\nname: {name}\ndescription: {build.yaml_string(description)}\n---\n\n"
+        f"---\nname: {name}\ndescription: {yaml_string(description)}\n---\n\n"
         f"# {name.replace('-', ' ').title()}\n\n"
         "TODO: Describe when to use this skill, its steps, and the expected result.\n"
     )
