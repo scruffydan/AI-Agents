@@ -63,7 +63,7 @@ guidance and the user's current request within the harness's instruction hierarc
 
 - Inspect the working tree before editing. Preserve unrelated changes and untracked
   files; never discard, reset, or stash them without explicit authorization.
-- For implementation tasks, commit as you go in small, logical units. This is
+- For implementation tasks, commit as you go in logical units. This is
   the user's standing authorization for local commits. Honor explicit requests
   to leave changes uncommitted. Review, planning, and other read-only tasks do not
   authorize commits.
