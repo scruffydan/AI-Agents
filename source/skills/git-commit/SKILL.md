@@ -7,9 +7,10 @@ description: Drafts commit messages that match repository conventions and create
 
 The parent owns the commit workflow in the current conversation. Follow the
 user's and repository's authorization, preserve unrelated changes and untracked
-files, and keep each commit focused. A message-only request does not authorize
-staging or committing. Loading this skill only for message conventions does not
-request a new commit.
+files, and keep each commit focused. For implementation tasks, commit as you go
+in small, logical units unless the user requests uncommitted changes. Read-only
+and message-only requests do not authorize staging or committing. Loading this
+skill only for message conventions does not request a new commit.
 
 ## Prepare the changes
 

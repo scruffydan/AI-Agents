@@ -63,11 +63,10 @@ guidance and the user's current request within the harness's instruction hierarc
 
 - Inspect the working tree before editing. Preserve unrelated changes and untracked
   files; never discard, reset, or stash them without explicit authorization.
-- For implementation tasks, local commits are authorized; pushing is not. This is
-  the user's standing request to commit, even where a harness default says to
-  commit only when asked. Commit as work progresses in small, logical units.
-  Review, planning, and other read-only tasks do not authorize commits. Honor
-  explicit requests to leave changes uncommitted.
+- For implementation tasks, commit as you go in small, logical units. This is
+  the user's standing authorization for local commits. Honor explicit requests
+  to leave changes uncommitted. Review, planning, and other read-only tasks do not
+  authorize commits.
 - Before each commit, inspect the diff, stage only the intended files, and follow
   the repository's commit-message conventions.
 - Push only when requested. Get authorization for destructive Git operations,

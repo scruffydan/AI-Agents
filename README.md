@@ -139,8 +139,9 @@ Agent instructions can include shared fragments from `source/prompts/`:
 Browse [source/skills](source/skills) for the available workflows, including
 brainstorming, planning, code review, debugging, and Git tasks.
 
-Git workflows keep local commits lightweight. Use focused checks during
-implementation when warranted, and broader relevant validation at PR readiness.
+Commit implementation changes as you go in small, logical units. Keep local
+commits lightweight and use focused checks during implementation when warranted,
+with broader relevant validation at PR readiness.
 Reuse valid local or CI results instead of repeating checks for each commit or
 push. Inspection can be sufficient for small documentation or other low-impact edits.
 
