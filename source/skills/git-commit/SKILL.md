@@ -7,16 +7,19 @@ description: Drafts commit messages that match repository conventions and create
 
 The parent owns the commit workflow in the current conversation. Follow the
 user's and repository's authorization, preserve unrelated changes and untracked
-files, and keep each commit focused. A message-only request does not authorize
-staging or committing. Loading this skill only for message conventions does not
-request a new commit.
+files, and keep each commit focused. For implementation tasks, commit as you go
+in logical units unless the user requests uncommitted changes. Read-only
+and message-only requests do not authorize staging or committing. Loading this
+skill only for message conventions does not request a new commit.
 
 ## Prepare the changes
 
 - Inspect the working tree and intended diff. For an authorized commit, stage
   only the intended changes and inspect `git diff --cached`. Do not silently
   include or unstage unrelated staged changes; resolve conflicting scope first.
-- Use `verification-before-completion` and `update-readme`.
+- Apply the lightweight commit guidance in `verification-before-completion` and
+  use `update-readme` when applicable. A routine local commit does not require
+  a full test suite, build, or lint run.
 - For a message-only request, leave the index untouched and identify the diff or
   changes the message should describe.
 
