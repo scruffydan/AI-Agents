@@ -16,7 +16,9 @@ request a new commit.
 - Inspect the working tree and intended diff. For an authorized commit, stage
   only the intended changes and inspect `git diff --cached`. Do not silently
   include or unstage unrelated staged changes; resolve conflicting scope first.
-- Use `verification-before-completion` and `update-readme`.
+- Apply the lightweight commit guidance in `verification-before-completion` and
+  use `update-readme` when applicable. A routine local commit does not require
+  a full test suite, build, or lint run.
 - For a message-only request, leave the index untouched and identify the diff or
   changes the message should describe.
 

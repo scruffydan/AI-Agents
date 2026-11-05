@@ -65,9 +65,9 @@ guidance and the user's current request within the harness's instruction hierarc
   files; never discard, reset, or stash them without explicit authorization.
 - For implementation tasks, local commits are authorized; pushing is not. This is
   the user's standing request to commit, even where a harness default says to
-  commit only when asked. Commit as work progresses in small, logical units after
-  verifying each change. Review, planning, and other read-only tasks do not
-  authorize commits. Honor explicit requests to leave changes uncommitted.
+  commit only when asked. Commit as work progresses in small, logical units.
+  Review, planning, and other read-only tasks do not authorize commits. Honor
+  explicit requests to leave changes uncommitted.
 - Before each commit, inspect the diff, stage only the intended files, and follow
   the repository's commit-message conventions.
 - Push only when requested. Get authorization for destructive Git operations,
@@ -100,6 +100,10 @@ guidance and the user's current request within the harness's instruction hierarc
 - For bugs, establish the cause from evidence before changing code. Run relevant
   existing checks and add regression coverage for meaningful behavior or security
   changes. Scale verification to the change; avoid tests that merely restate text.
+- Keep local commits lightweight and use focused checks during implementation
+  when warranted. Reserve broader relevant tests, lint, and builds for PR readiness.
+  Committing, pushing, or reporting completion does not itself require new test
+  runs; reuse successful checks while their relevant inputs remain unchanged.
 - Review the final diff for unintended edits, exposed data, and compatibility
   issues. Update documentation when behavior or setup changes.
 - Report what changed, which checks actually ran and their outcomes, and any

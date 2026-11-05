@@ -10,7 +10,8 @@ intended branch and remote without disturbing unrelated changes.
 
 Before pushing:
 
-- Use `verification-before-completion` and `update-readme`.
+- Apply the push or PR guidance in `verification-before-completion`, as applicable,
+  and use `update-readme` when needed. Pushing does not itself require new test runs.
 - Use `git-commit` for repository-specific message conventions. Free-form subjects
   are valid when the repository uses them. Preserve existing commits when checking
   message style.
