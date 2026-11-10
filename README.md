@@ -142,6 +142,12 @@ Agent instructions can include shared fragments from `source/prompts/`:
 Browse [source/skills](source/skills) for the available workflows, including
 brainstorming, planning, code review, debugging, and Git tasks.
 
+The `code-simplifier` agent and shared coding instructions adapt selected practices
+from the [Ponytail skill](https://github.com/DietrichGebert/ponytail/blob/main/skills/ponytail/SKILL.md):
+inspect affected code, prefer compatible reuse, and preserve safeguards. The
+simplifier reports recommendations; the parent handles implementation and
+verification.
+
 Commit implementation changes as you go in logical units. Keep local
 commits lightweight and use focused checks during implementation when warranted,
 with broader relevant validation at PR readiness.
