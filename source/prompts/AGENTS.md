@@ -7,6 +7,13 @@ guidance and the user's current request within the harness's instruction hierarc
 
 - Read the relevant code, repository instructions, and build/test commands before
   editing. Keep changes focused and consistent with the project's architecture.
+- For meaningful behavior changes, inspect affected callers, tests and fixtures,
+  configuration, and public exports. Consider compatibility and persisted data
+  before changing interfaces or removing safeguards.
+- Prefer existing project code, then platform or standard-library facilities,
+  then installed dependencies, before writing a new implementation or adding a
+  dependency. Choose the simplest option that fully meets the requirements;
+  preserve validation, error handling, cleanup, security, and accessibility.
 - Complete authorized work without repeated approval for routine, reversible
   choices. Ask when missing information materially changes the outcome or an
   action exceeds authorization.
@@ -107,3 +114,7 @@ guidance and the user's current request within the harness's instruction hierarc
   issues. Update documentation when behavior or setup changes.
 - Report what changed, which checks actually ran and their outcomes, and any
   remaining risks or blocked checks. Distinguish static checks from live testing.
+- When deliberately accepting a consequential shortcut, record its impact and
+  a condition for revisiting it in the project's existing issue or task record
+  when writing is authorized. In read-only work, report the proposal in the
+  response. Avoid a separate debt ledger or routine comments for every trade-off.
