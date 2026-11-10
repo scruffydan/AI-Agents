@@ -1,7 +1,9 @@
 # Optional Feature Record
 
-Adapt this outline to the project's existing conventions. One document is enough
-unless its size or existing structure warrants separate files. A feature record
+Use this detailed outline only when complex work benefits from it. Adapt useful
+sections to an existing issue, PR, or project record. When a local handoff file is
+needed, reuse one rolling `CONTEXT.md` at the project root or an existing equivalent;
+avoid documents per feature or session and separate context archives. A record
 captures current intent; code and recorded verification establish actual behavior.
 Use stable requirement and task IDs only when they help track substantial work.
 
@@ -53,6 +55,12 @@ Update these notes at a meaningful handoff or pause when writing is authorized,
 rather than logging every tool call. On resume, inspect the working tree and
 revision, verify important claims against current code, and recheck time-sensitive
 references. A handoff does not transfer permissions or authorize pending actions.
+
+At completion, cancellation, or supersession, preserve lasting information in the
+relevant issue, PR, or existing documentation before pruning obsolete progress.
+Retain unrelated active work and unresolved risks. When nothing remains active,
+leave `No active work` and useful pointers in the context file. Cleanup requires
+the same writing authorization as other record updates.
 
 ## References
 

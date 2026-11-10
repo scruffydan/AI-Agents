@@ -13,8 +13,9 @@ guidance and the user's current request within the harness's instruction hierarc
 - Give concise progress updates during longer tasks.
 - At the start of substantial work or when resuming, use the `project-context`
   skill to consult existing project records and any configured shared knowledge
-  pointer. Load relevant context, keep task state with the project, and respect
-  the current task's read and write permissions.
+  pointer. For work that needs continuity, maintain an existing record or a single
+  root `CONTEXT.md` using the skill's handoff and cleanup rules. Respect the current
+  task's read and write permissions.
 
 ## Project scope and stakes
 

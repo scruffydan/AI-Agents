@@ -142,27 +142,6 @@ Agent instructions can include shared fragments from `source/prompts/`:
 Browse [source/skills](source/skills) for the available workflows, including
 brainstorming, planning, code review, debugging, and Git tasks.
 
-We adapt selected practices from [GitHub Spec Kit](https://github.com/github/spec-kit):
-observable acceptance criteria, tasks linked to requirements, and explicit
-verification evidence. These are incorporated into our shared skills and optional
-feature record, with documentation kept proportional to the task. Spec Kit is
-not a dependency; see the [design rationale and sources](docs/feature-context.md).
-
-For substantial work spanning sessions or harnesses, the planning skill includes
-an optional [feature record](source/skills/thorough-plan/feature-record.md):
-acceptance criteria, linked tasks and checks, consequential decisions, and resume
-notes. Reuse the target project's documentation conventions and existing records.
-Read-only planning presents the record in chat; saving it requires an authorized
-writing task. Small changes can keep their plan in the conversation.
-
-The `project-context` skill retrieves existing project records and any configured
-shared knowledge when starting substantial work or resuming. Task state and
-code-specific documentation stay in the project; a shared wiki holds reusable
-knowledge and links back to those records. To connect one, add a short pointer in
-your local harness or project instructions identifying its location and startup
-page. This repository installs the guidance; wiki access and synchronization must
-be configured separately. Keep private locations and content out of public repos.
-
 Commit implementation changes as you go in logical units. Keep local
 commits lightweight and use focused checks during implementation when warranted,
 with broader relevant validation at PR readiness.
@@ -179,6 +158,33 @@ Use the `thorough-plan` skill for detailed read-only planning in any harness.
 OpenCode also provides a `brainstorm` primary agent. After
 selecting `brainstorm`, confirm the active model in `/models`: selecting a primary
 agent by ID can leave the session model unchanged.
+
+### Project context
+
+For substantial work that needs continuity, the `project-context` skill reuses
+existing issues, PRs, or project records. When a local handoff file is needed, use
+one rolling `CONTEXT.md` at the project root or an existing equivalent. Keep active
+goals, important decisions, status, verification, and next actions concise.
+
+Update the record at meaningful handoffs. At completion, cancellation, or
+supersession, preserve lasting information in existing issues, PRs, or documentation
+before pruning obsolete progress. Retain unrelated active work and unresolved
+risks. When nothing remains active, leave `No active work` and useful pointers.
+Avoid documents per feature or session and separate context archives.
+
+We adapt selected practices from [GitHub Spec Kit](https://github.com/github/spec-kit):
+observable acceptance criteria, linked tasks, and verification evidence. The
+optional [detailed feature outline](source/skills/thorough-plan/feature-record.md)
+is for complex work; small changes can stay in chat. Read-only planning presents
+proposed records in the response; saving or cleaning them requires writing
+authorization. Spec Kit is not a dependency; see the
+[design rationale and sources](docs/feature-context.md).
+
+A configured shared wiki can hold reusable knowledge and links back to project
+records. To connect one, add a short pointer in your local harness or project
+instructions identifying its location and startup page. Wiki access and
+synchronization require separate configuration. Keep private locations and
+content out of public repos.
 
 ## Permission limits
 

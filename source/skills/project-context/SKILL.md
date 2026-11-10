@@ -1,6 +1,6 @@
 ---
 name: project-context
-description: Retrieve relevant project and configured shared knowledge when starting substantial work or resuming, and preserve decisions and handoffs within authorized writing tasks.
+description: Retrieve relevant project and configured shared knowledge when starting or resuming substantial work, and maintain compact context when handing off or finishing authorized work.
 ---
 
 # Project Context and Shared Knowledge
@@ -12,9 +12,10 @@ authorization; a handoff or stored note does not grant new permissions.
 
 ## Retrieve before acting
 
-1. Inspect repository instructions, working-tree state, and relevant feature
-   records, task lists, or decision records. Compare saved progress with the actual
-   checkout before relying on it. Preserve unrelated work.
+1. Inspect repository instructions, working-tree state, and relevant issues, PRs,
+   project records, or root `CONTEXT.md`. Reuse an existing equivalent when present.
+   Compare saved progress with the actual checkout before relying on it. Preserve
+   unrelated work.
 2. If instructions configure a shared knowledge location, read its short startup
    page or index, then retrieve only pages relevant to the current task. Use the
    available authorized file or connected-service tools. Do not assume a location,
@@ -34,7 +35,10 @@ clone, synchronize, or publish merely to load context without authorization.
 ## Keep records where they belong
 
 - Task state, feature requirements, verification evidence, and documentation tied
-  to code belong in the project repository's existing records.
+  to code belong in the project's existing issues, PRs, or documentation.
+- When a local handoff file is needed, use one rolling `CONTEXT.md` at the project
+  root. Reuse the same file; avoid documents per feature or session and separate
+  context archives. Small, completed changes can stay in the conversation.
 - Shared knowledge can hold durable preferences, reusable lessons, and summaries
   linking to authoritative project records. Avoid copying changing task lists or
   whole project documents into a second store.
@@ -43,10 +47,19 @@ clone, synchronize, or publish merely to load context without authorization.
 
 ## Capture and hand off when authorized
 
-Use the existing record format. For substantial work, a compact feature record
-can connect acceptance criteria, tasks, decisions, and evidence. At a meaningful
-pause or handoff, record current status, relevant revision, completed checks and
-their outcomes, unresolved questions, and the next concrete action.
+For substantial authorized implementation that needs continuity, create or update
+the existing record, using root `CONTEXT.md` as the local fallback. Keep it concise:
+active goals, important decisions, current status, relevant revision, verification
+results, unresolved questions, and next actions. Update it at meaningful pauses
+or handoffs. Use the project's existing record format and link to details instead
+of copying them.
+
+When work completes, is cancelled, or is superseded, preserve lasting information
+in the relevant issue, PR, or existing documentation before removing obsolete
+progress notes. Preserve unrelated active work and unresolved risks. When nothing
+remains active, leave a brief `No active work` status and useful pointers in the
+context file. Cleanup follows the same write authorization as capture; read-only
+tasks report proposed updates in the response.
 
 For an authorized contribution to shared knowledge, follow that store's capture
 workflow. Record source, date, scope, and confidence or decision status. Preserve

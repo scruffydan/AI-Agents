@@ -47,10 +47,23 @@ next harness can retrieve them. Link relevant records from the project's existin
 instruction entry point when useful; keep that entry point concise.
 
 Avoid duplicate specifications when a project already uses issues, ADRs, or Spec
-Kit artifacts. Update the authoritative record and link to it. On resume, compare
-recorded state with the actual checkout, and recheck important assumptions before
-acting. Label imported research and unconfirmed claims separately from accepted
-decisions, with source and date/version information where useful.
+Kit artifacts. For substantial authorized work that needs continuity, update an
+existing issue, PR, or project record. When a local handoff file is needed, use a
+single rolling `CONTEXT.md` at the project root or an existing equivalent. Keep
+active goals, decisions, status, verification, and next actions concise, linking
+to authoritative details. The detailed feature outline is optional for complex
+work; avoid documents per feature or session and separate context archives.
+
+Update the record at meaningful handoffs. At completion, cancellation, or
+supersession, preserve lasting information in the relevant issue, PR, or existing
+documentation before pruning obsolete progress. Keep unrelated active work and
+unresolved risks. When nothing remains active, leave `No active work` and useful
+pointers in the context file. These updates require writing authorization.
+
+On resume, compare recorded state with the actual checkout, and recheck important
+assumptions before acting. Label imported research and unconfirmed claims
+separately from accepted decisions, with source and date/version information
+where useful.
 
 Saving context follows the task's existing write permissions. A request to plan
 or review remains read-only. A saved handoff does not grant authorization for

@@ -25,17 +25,23 @@ steps, and verification. Compare alternatives when they involve meaningful
 trade-offs. Flag blockers and open decisions without inventing requirements or
 repeating questions already answered.
 
-For substantial work that spans sessions or agents, propose a compact feature
-record using [feature-record.md](feature-record.md). Reuse existing specs, issues,
-task lists, and decision records instead of creating competing sources of truth.
-Give requirements observable acceptance criteria, link tasks to those requirements,
-and identify the evidence that will establish completion. Keep unresolved choices
-explicit; a proposed plan does not make an assumption an accepted decision.
+For substantial work that needs continuity, reuse an existing issue, PR, or project
+record. When a local handoff file is needed, use one rolling `CONTEXT.md` at the
+project root, or an existing equivalent. Keep active goals, important decisions,
+status, verification, and next actions concise. The optional detailed outline in
+[feature-record.md](feature-record.md) can help with unusually complex work; use
+only useful sections without creating documents per feature or session.
 
-When saving artifacts is authorized, keep the record in the project's existing
-documentation location so every harness can read it. During read-only planning,
-present the proposed record in the response without writing it. Small changes can
-use a brief plan in the conversation; omit fields and documents that add no value.
+Give requirements observable acceptance criteria, link tasks to them, and identify
+the evidence that will establish completion. Keep unresolved choices explicit;
+a proposed plan does not make an assumption an accepted decision.
+
+When saving artifacts is authorized, follow the `project-context` skill's handoff
+and cleanup rules: preserve lasting information before pruning completed,
+cancelled, or superseded work; retain unrelated active work and unresolved risks.
+When nothing remains active, leave `No active work` and useful pointers in the
+context file. During read-only planning, present the proposed record in the
+response without writing it. Small changes can use a brief plan in the conversation.
 
 Revise the plan when the user changes requirements or new evidence changes the
 approach. Explain the relevant change concisely. End with the plan and any real
