@@ -139,6 +139,14 @@ Agent instructions can include shared fragments from `source/prompts/`:
 Browse [source/skills](source/skills) for the available workflows, including
 brainstorming, planning, code review, debugging, and Git tasks.
 
+For substantial work spanning sessions or harnesses, the planning skill includes
+an optional [feature record](source/skills/mode-thorough-plan/feature-record.md):
+acceptance criteria, linked tasks and checks, consequential decisions, and resume
+notes. Reuse the target project's documentation conventions and existing records.
+Read-only planning presents the record in chat; saving it requires an authorized
+writing task. Small changes can keep their plan in the conversation.
+See the [design rationale and sources](docs/feature-context.md).
+
 Commit implementation changes as you go in logical units. Keep local
 commits lightweight and use focused checks during implementation when warranted,
 with broader relevant validation at PR readiness.

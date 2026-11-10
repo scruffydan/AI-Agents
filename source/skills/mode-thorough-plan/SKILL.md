@@ -25,6 +25,18 @@ steps, and verification. Compare alternatives when they involve meaningful
 trade-offs. Flag blockers and open decisions without inventing requirements or
 repeating questions already answered.
 
+For substantial work that spans sessions or agents, propose a compact feature
+record using [feature-record.md](feature-record.md). Reuse existing specs, issues,
+task lists, and decision records instead of creating competing sources of truth.
+Give requirements observable acceptance criteria, link tasks to those requirements,
+and identify the evidence that will establish completion. Keep unresolved choices
+explicit; a proposed plan does not make an assumption an accepted decision.
+
+When saving artifacts is authorized, keep the record in the project's existing
+documentation location so every harness can read it. During read-only planning,
+present the proposed record in the response without writing it. Small changes can
+use a brief plan in the conversation; omit fields and documents that add no value.
+
 Revise the plan when the user changes requirements or new evidence changes the
 approach. Explain the relevant change concisely. End with the plan and any real
 remaining decisions; wait for an implementation request when the user asked only
