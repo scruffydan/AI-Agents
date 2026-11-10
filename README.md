@@ -147,6 +147,14 @@ Read-only planning presents the record in chat; saving it requires an authorized
 writing task. Small changes can keep their plan in the conversation.
 See the [design rationale and sources](docs/feature-context.md).
 
+The `project-context` skill retrieves existing project records and any configured
+shared knowledge when starting substantial work or resuming. Task state and
+code-specific documentation stay in the project; a shared wiki holds reusable
+knowledge and links back to those records. To connect one, add a short pointer in
+your local harness or project instructions identifying its location and startup
+page. This repository installs the guidance; wiki access and synchronization must
+be configured separately. Keep private locations and content out of public repos.
+
 Commit implementation changes as you go in logical units. Keep local
 commits lightweight and use focused checks during implementation when warranted,
 with broader relevant validation at PR readiness.
