@@ -142,13 +142,18 @@ Agent instructions can include shared fragments from `source/prompts/`:
 Browse [source/skills](source/skills) for the available workflows, including
 brainstorming, planning, code review, debugging, and Git tasks.
 
+We adapt selected practices from [GitHub Spec Kit](https://github.com/github/spec-kit):
+observable acceptance criteria, tasks linked to requirements, and explicit
+verification evidence. These are incorporated into our shared skills and optional
+feature record, with documentation kept proportional to the task. Spec Kit is
+not a dependency; see the [design rationale and sources](docs/feature-context.md).
+
 For substantial work spanning sessions or harnesses, the planning skill includes
 an optional [feature record](source/skills/thorough-plan/feature-record.md):
 acceptance criteria, linked tasks and checks, consequential decisions, and resume
 notes. Reuse the target project's documentation conventions and existing records.
 Read-only planning presents the record in chat; saving it requires an authorized
 writing task. Small changes can keep their plan in the conversation.
-See the [design rationale and sources](docs/feature-context.md).
 
 The `project-context` skill retrieves existing project records and any configured
 shared knowledge when starting substantial work or resuming. Task state and
