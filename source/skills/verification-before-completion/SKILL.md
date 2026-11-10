@@ -50,3 +50,9 @@ checks. When tests were unnecessary, a brief explanation is enough. Distinguish
 static inspection, automated tests, and live testing. A passing linter does not
 prove a build passes; a passing build does not prove a bug is fixed. If a needed
 check cannot run, explain the limitation without implying success.
+
+When a feature spec or task record exists, compare the final behavior with its
+acceptance criteria. Identify requirements without evidence, unexplained work,
+and stale or contradictory decisions. Within authorized documentation work,
+record actual results and remaining gaps in the existing record. Task completion
+alone does not demonstrate that an acceptance criterion passed.

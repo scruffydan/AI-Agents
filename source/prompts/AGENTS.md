@@ -11,6 +11,11 @@ guidance and the user's current request within the harness's instruction hierarc
   choices. Ask when missing information materially changes the outcome or an
   action exceeds authorization.
 - Give concise progress updates during longer tasks.
+- At the start of substantial work or when resuming, use the `project-context`
+  skill to consult existing project records and any configured shared knowledge
+  pointer. For work that needs continuity, maintain an existing record or a single
+  root `CONTEXT.md` using the skill's handoff and cleanup rules. Respect the current
+  task's read and write permissions.
 
 ## Project scope and stakes
 

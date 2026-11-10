@@ -76,12 +76,16 @@ class AuthoringTests(unittest.TestCase):
         self.cli("new.py", "agent", "missing-profile", "--profile", "missing", success=False)
         self.assertFalse((self.root / "source/agents/missing-profile.md").exists())
         self.cli("new.py", "agent", "brainstorm", success=False)
-        self.cli("new.py", "agent", "thorough-plan", success=False)
-        self.assertFalse((self.root / "source/agents/thorough-plan.md").exists())
-        self.cli("new.py", "agent", "thorough-plan", "--harness", "claude")
+        self.cli("new.py", "skill", "brainstorming", success=False)
+
+    def test_retired_primary_name_can_be_used_for_a_shared_subagent(self):
+        self.cli("new.py", "agent", "thorough-plan")
         self.cli("build.py")
         self.assertTrue((self.root / "build/claude/agents/thorough-plan.md").exists())
-        self.cli("new.py", "skill", "brainstorming", success=False)
+        opencode = (self.root / "build/opencode/agents/thorough-plan.md").read_text()
+        self.assertIn("mode: subagent\n", opencode)
+        self.assertIn("action: question\n", opencode)
+        self.assertIn("action: subagent\n", opencode)
 
     def test_failed_build_preserves_previous_output(self):
         self.cli("build.py")
@@ -99,7 +103,6 @@ class AuthoringTests(unittest.TestCase):
             ("broken", metadata + "{{include:missing.md}}", "Missing prompt include"),
             ("broken", metadata + "{{include:_cycle.md}}", "Recursive prompt include"),
             ("broken", metadata.replace('"deep_review"', '"missing"') + "Body", "Unknown model profile"),
-            ("thorough-plan", metadata + "Conflicting agent", "Duplicate output"),
         )
         for name, content, error in cases:
             with self.subTest(agent=name, error=error):

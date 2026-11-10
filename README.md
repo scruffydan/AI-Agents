@@ -37,6 +37,11 @@ If previously installed, move retired `explore` and `sidebar` agents and the
 changes you want to keep. The repository no longer generates custom commands;
 older installed commands are also left alone.
 
+The shared planning skill is now `thorough-plan`. If previously installed,
+move the old `mode-thorough-plan` skill folders and OpenCode's retired
+`~/.config/opencode/agents/thorough-plan.md` out of their installation directories,
+preserving local changes. The installer leaves retired entries alone.
+
 ### OpenCode settings
 
 `install.py` leaves `opencode.json` alone. To install the repository's settings
@@ -124,9 +129,7 @@ OpenCode model IDs include their reasoning variant, such as `#high`.
 
 For native settings, edit `render_codex`, `render_claude`, or `render_opencode`
 in `renderers.py`. Each function keeps its defaults and named exceptions together.
-A new primary mode needs a renderer case and, if it has no shared agent definition,
-an output entry in `build.py`. OpenCode reserves `thorough-plan` for its planning
-agent.
+A new primary mode needs a renderer case and a shared agent definition.
 
 Agent instructions can include shared fragments from `source/prompts/`:
 
@@ -151,9 +154,37 @@ push. Inspection can be sufficient for small documentation or other low-impact e
 | Claude Code | `/code-review` |
 | OpenCode | Load `@code-review` |
 
-OpenCode also provides `brainstorm` and `thorough-plan` primary agents. After
+Use the `thorough-plan` skill for detailed read-only planning in any harness.
+OpenCode also provides a `brainstorm` primary agent. After
 selecting `brainstorm`, confirm the active model in `/models`: selecting a primary
 agent by ID can leave the session model unchanged.
+
+### Project context
+
+For substantial work that needs continuity, the `project-context` skill reuses
+existing issues, PRs, or project records. When a local handoff file is needed, use
+one rolling `CONTEXT.md` at the project root or an existing equivalent. Keep active
+goals, important decisions, status, verification, and next actions concise.
+
+Update the record at meaningful handoffs. At completion, cancellation, or
+supersession, preserve lasting information in existing issues, PRs, or documentation
+before pruning obsolete progress. Retain unrelated active work and unresolved
+risks. When nothing remains active, leave `No active work` and useful pointers.
+Avoid documents per feature or session and separate context archives.
+
+We adapt selected practices from [GitHub Spec Kit](https://github.com/github/spec-kit):
+observable acceptance criteria, linked tasks, and verification evidence. The
+optional [detailed feature outline](source/skills/thorough-plan/feature-record.md)
+is for complex work; small changes can stay in chat. Read-only planning presents
+proposed records in the response; saving or cleaning them requires writing
+authorization. Spec Kit is not a dependency; see the
+[design rationale and sources](docs/feature-context.md).
+
+A configured shared wiki can hold reusable knowledge and links back to project
+records. To connect one, add a short pointer in your local harness or project
+instructions identifying its location and startup page. Wiki access and
+synchronization require separate configuration. Keep private locations and
+content out of public repos.
 
 ## Permission limits
 

@@ -168,9 +168,6 @@ def build(
             if harness in agent["harnesses"]:
                 model = resolve_model(agent["model_profile"], harness, work, opencode_provider)
                 add(harness, name, renderers.RENDERERS[harness](agent, model))
-        if harness == "opencode":
-            plan = renderers.OPENCODE_PLAN
-            add(harness, plan["name"], renderers.render_opencode(plan, None))
 
     if BUILD.exists():
         shutil.rmtree(BUILD)

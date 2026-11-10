@@ -222,12 +222,13 @@ install.install(list(build.HARNESSES), Path.home(), force=True)
                 for directory in (".config/opencode/skills", ".claude/skills", ".agents/skills"):
                     for skill in (self.root / "source/skills").glob("*/SKILL.md"):
                         self.assertTrue((self.home / directory / skill.parent.name / "SKILL.md").is_file())
-                    for mode in ("brainstorming", "mode-thorough-plan"):
+                    for mode in ("brainstorming", "thorough-plan"):
                         self.assertTrue((self.home / directory / mode / "SKILL.md").is_file())
                     self.assertFalse((self.home / directory / "brainstorm-with-agent").exists())
                     self.assertFalse((self.home / directory / "receiving-code-review").exists())
                 opencode = self.home / ".config/opencode"
                 self.assertTrue((opencode / "agents/brainstorm.md").is_file())
+                self.assertFalse((opencode / "agents/thorough-plan.md").exists())
                 self.assertFalse((opencode / "commands/code-full-review.md").exists())
                 for legacy in ("agent", "command", "skill"):
                     self.assertFalse((opencode / legacy).exists())

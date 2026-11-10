@@ -192,7 +192,7 @@ class BuildTests(unittest.TestCase):
                             (output / source.parent.name / resource.name).read_bytes(),
                             resource.read_bytes(),
                         )
-            for name in ("brainstorming", "mode-thorough-plan", "code-review"):
+            for name in ("brainstorming", "thorough-plan", "code-review"):
                 with self.subTest(harness=harness, skill=name):
                     content = (output / name / "SKILL.md").read_text()
                     self.assertIn(f"name: {name}\n", content)
@@ -242,21 +242,31 @@ class BuildTests(unittest.TestCase):
                 self.assertIn(f"tools: {tools}\n", header)
                 self.assertEqual("effort: high\n" in header, effort)
 
-    def test_opencode_primary_modes_keep_interactive_behavior(self):
+    def test_opencode_brainstorm_keeps_interactive_behavior(self):
         self.build("opencode")
         agents = self.root / "build/opencode/agents"
         brainstorm = (agents / "brainstorm.md").read_text()
-        plan = (agents / "thorough-plan.md").read_text()
-        for text in (brainstorm, plan):
-            header = text.split("---", 2)[1]
-            self.assertIn("mode: primary\n", header)
-            self.assertNotIn("action: question\n", header)
-            self.assertNotIn("action: subagent\n", header)
+        header = brainstorm.split("---", 2)[1]
+        self.assertIn("mode: primary\n", header)
+        self.assertNotIn("action: question\n", header)
+        self.assertNotIn("action: subagent\n", header)
         self.assertIn("Select it when you want to brainstorm interactively.", brainstorm)
         self.assertIn("Ask clarifying questions", brainstorm)
         self.assertIn("suggest switching to build mode", brainstorm)
-        self.assertNotIn("\nmodel:", plan.split("---", 2)[1])
-        self.assertIn("Load the `mode-thorough-plan` skill", plan)
+
+    def test_planning_skill_replaces_opencode_primary_mode(self):
+        for args in ((), ("--work",)):
+            with self.subTest(args=args):
+                self.build(*args)
+                self.assertFalse((self.root / "build/opencode/agents/thorough-plan.md").exists())
+                for directory in ("codex/.agents/skills", "claude/skills", "opencode/skills"):
+                    skills = self.root / "build" / directory
+                    self.assertFalse((skills / "mode-thorough-plan").exists())
+                    for filename in ("SKILL.md", "feature-record.md"):
+                        self.assertEqual(
+                            (skills / "thorough-plan" / filename).read_bytes(),
+                            (self.root / "source/skills/thorough-plan" / filename).read_bytes(),
+                        )
 
     def test_referenced_shared_skill_support_files_exist(self):
         references = {

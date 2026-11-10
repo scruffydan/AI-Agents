@@ -5,13 +5,6 @@ import re
 import tomllib
 
 
-OPENCODE_PLAN = {
-    "name": "thorough-plan",
-    "description": "Analyze requirements and code to create an implementation plan without modifying files.",
-    "body": "Load the `mode-thorough-plan` skill and follow its planning instructions.",
-}
-
-
 def yaml_string(value: str) -> str:
     """Quote Unicode without JSON surrogate pairs or YAML line normalization."""
     quoted = json.dumps(value, ensure_ascii=False)
@@ -70,7 +63,7 @@ def render_claude(agent: dict, model: str) -> str:
 
 def render_opencode(agent: dict, model: str | None) -> str:
     name = agent["name"]
-    primary = name in {"brainstorm", "thorough-plan"}
+    primary = name == "brainstorm"
     description, body = agent["description"], agent["body"]
     if name == "brainstorm":
         description = (

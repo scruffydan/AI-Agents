@@ -24,6 +24,9 @@ Honor authorization already given for implementation.
 Record substantial agreed decisions in a design document when useful to the task
 or required by the repository. Do not create documents, branches, or commits just
 because brainstorming occurred. Reuse the agreed design during implementation.
+When recording a consequential choice, include its context, status, rationale,
+and consequences. Keep proposals distinct from accepted decisions, and link any
+superseding decision rather than erasing the earlier rationale.
 
 ## Configured Brainstorming Agent
 
