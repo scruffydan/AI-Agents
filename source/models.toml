@@ -15,13 +15,13 @@ claude = "claude-opus-5-5"
 codex = "gpt-6.1-sol"
 
 [docs_fetcher]
-opencode = "openai/gpt-6-luna#high"
+opencode = "openai/gpt-6.1-terra#low"
 opencode_work = "google-vertex/claude-sonnet-5-5#high"
 claude = "claude-sonnet-5-5"
-codex = "gpt-6-luna"
+codex = "gpt-6.1-terra"
 
 [git_commit]
-opencode = "openai/gpt-6-luna#high"
+opencode = "openai/gpt-6.1-terra#low"
 opencode_work = "google-vertex/claude-sonnet-5-5#high"
 claude = "claude-sonnet-5-5"
-codex = "gpt-6-luna"
+codex = "gpt-6.1-terra"
