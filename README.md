@@ -37,6 +37,11 @@ If previously installed, move retired `explore` and `sidebar` agents and the
 changes you want to keep. The repository no longer generates custom commands;
 older installed commands are also left alone.
 
+The shared planning skill is now `thorough-plan`. If previously installed,
+move the old `mode-thorough-plan` skill folders and OpenCode's retired
+`~/.config/opencode/agents/thorough-plan.md` out of their installation directories,
+preserving local changes. The installer leaves retired entries alone.
+
 ### OpenCode settings
 
 `install.py` leaves `opencode.json` alone. To install the repository's settings
@@ -124,9 +129,7 @@ OpenCode model IDs include their reasoning variant, such as `#high`.
 
 For native settings, edit `render_codex`, `render_claude`, or `render_opencode`
 in `renderers.py`. Each function keeps its defaults and named exceptions together.
-A new primary mode needs a renderer case and, if it has no shared agent definition,
-an output entry in `build.py`. OpenCode reserves `thorough-plan` for its planning
-agent.
+A new primary mode needs a renderer case and a shared agent definition.
 
 Agent instructions can include shared fragments from `source/prompts/`:
 
@@ -140,7 +143,7 @@ Browse [source/skills](source/skills) for the available workflows, including
 brainstorming, planning, code review, debugging, and Git tasks.
 
 For substantial work spanning sessions or harnesses, the planning skill includes
-an optional [feature record](source/skills/mode-thorough-plan/feature-record.md):
+an optional [feature record](source/skills/thorough-plan/feature-record.md):
 acceptance criteria, linked tasks and checks, consequential decisions, and resume
 notes. Reuse the target project's documentation conventions and existing records.
 Read-only planning presents the record in chat; saving it requires an authorized
@@ -167,7 +170,8 @@ push. Inspection can be sufficient for small documentation or other low-impact e
 | Claude Code | `/code-review` |
 | OpenCode | Load `@code-review` |
 
-OpenCode also provides `brainstorm` and `thorough-plan` primary agents. After
+Use the `thorough-plan` skill for detailed read-only planning in any harness.
+OpenCode also provides a `brainstorm` primary agent. After
 selecting `brainstorm`, confirm the active model in `/models`: selecting a primary
 agent by ID can leave the session model unchanged.
 

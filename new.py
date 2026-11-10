@@ -19,8 +19,6 @@ def create_agent(name: str, description: str, profile: str, harnesses: list[str]
     build.validate_harnesses(harnesses)
     for harness in harnesses:
         build.resolve_model(profile, harness, False, None)
-    if name == "thorough-plan" and "opencode" in harnesses:
-        raise ValueError("OpenCode reserves thorough-plan for its primary planning agent")
     path = build.AGENTS / f"{name}.md"
     content = (
         f"+++\ndescription = {json.dumps(description, ensure_ascii=False)}\n"

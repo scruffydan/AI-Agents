@@ -1,5 +1,5 @@
 ---
-name: mode-thorough-plan
+name: thorough-plan
 description: Use when the user requests a detailed implementation plan or architecture analysis without making changes.
 ---
 
