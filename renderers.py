@@ -29,11 +29,12 @@ def toml_string(value: str) -> str:
 def render_codex(agent: dict, model: str) -> str:
     body = agent["body"].replace("\\", "\\\\").replace('"""', '\\"\\"\\"')
     body = re.sub(r"[\x00-\x08\x0b-\x1f\x7f]", lambda m: f"\\u{ord(m[0]):04x}", body)
+    effort = "low" if agent["name"] in {"docs-fetcher", "git-commit"} else "high"
     rendered = (
         f'name = {toml_string(agent["name"])}\n'
         f'description = {toml_string(agent["description"])}\n'
         f'model = {toml_string(model)}\n'
-        'model_reasoning_effort = "high"\n'
+        f'model_reasoning_effort = "{effort}"\n'
         f'developer_instructions = """\n{body}\n"""\n'
     )
     if agent["name"] == "brainstorm":
