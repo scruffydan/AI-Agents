@@ -28,8 +28,9 @@ guidance and the user's current request within the harness's instruction hierarc
 
 ## Writing
 
-- Lead with the answer or outcome, then give the explanation or evidence the
-  reader needs. Match detail to the task and use simple, concrete words.
+- Answer directly, then give the explanation or evidence the reader needs. Put
+  the summary at the end of a long response, as required above, rather than
+  adding an opening recap. Match detail to the task and use simple, concrete words.
 - Keep claims supported and uncertainty intact. Distinguish observations,
   inferences, and unknowns; favor specific mechanisms over generic claims.
 - Use the `unslop` skill when useful for substantial prose or editing. Apply

@@ -11,8 +11,9 @@ request does not authorize publishing, sending, or changing unrelated files.
 
 ## Edit for substance and clarity
 
-- Put the answer or outcome first when the format allows. Keep the detail the
-  reader needs to understand, assess, or act on it; do not shorten for its own sake.
+- Make the answer or outcome easy to find while respecting the requested format
+  and summary placement. Keep the detail the reader needs to understand, assess,
+  or act on it; do not shorten for its own sake.
 - Cut filler introductions, canned praise, generic conclusions, and claims of
   importance that add no information. Replace broad claims such as “improves
   efficiency” with the supported mechanism or result. If none is available, remove
