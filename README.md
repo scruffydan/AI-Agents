@@ -148,6 +148,20 @@ inspect affected code, prefer compatible reuse, and preserve safeguards. The
 simplifier reports recommendations; the parent handles implementation and
 verification.
 
+The optional `code-blast-radius` reviewer traces indirect effects on consumers,
+interfaces, configuration, dependencies, timing, and persisted or wire data.
+Ask `code-review` for a targeted blast-radius pass, especially for API/schema
+changes, shared libraries, or migrations. The existing five-specialist full
+review stays unchanged. This agent only inspects and reports: it separates
+confirmed risks, investigated and cleared cases, and unresolved assumptions,
+then recommends checks or remedies for the parent to execute.
+
+It adapts selected ideas from Cursor's
+[pstack blast-radius skill](https://github.com/cursor/plugins/blob/main/pstack/skills/blast-radius/SKILL.md).
+The [agent source](source/agents/code-blast-radius.md) retains the upstream MIT
+notice. It uses the same model profile and harness defaults as `code-simplifier`;
+the permission limits below still apply.
+
 Commit implementation changes as you go in logical units. Keep local
 commits lightweight and use focused checks during implementation when warranted,
 with broader relevant validation at PR readiness.

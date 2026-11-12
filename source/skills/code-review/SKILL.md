@@ -42,13 +42,28 @@ Combine these checks with the specialist findings.
   does not automatically require five agents; inspect straightforward code directly.
 - For an explicitly requested full review, cover all five specialists below.
 
-Available specialists:
+Full-review specialists:
 
 - `code-security`: attack surface, trust boundaries, and data exposure.
 - `code-readability`: naming, documentation, and formatting.
 - `code-performance`: algorithms, I/O, memory, and concurrency.
 - `code-redundancy`: duplication and dead code.
 - `code-simplifier`: control flow and complexity.
+
+Optional targeted perspective:
+
+- `code-blast-radius`: indirect impact beyond the diff, compatibility, and safety
+  assumptions. Opt in when requested, especially for API or schema changes,
+  shared libraries, and migrations. It is not added automatically to ordinary or
+  full reviews. For example, request a blast-radius pass on a schema migration
+  and its readers and writers.
+
+The blast-radius specialist inspects authorized code, history, and records only;
+it does not edit files, create tests or scripts, execute code or tests, publish,
+or delegate. It distinguishes confirmed risks, investigated and cleared cases,
+and unresolved assumptions, recommending the smallest useful checks to the
+parent. The parent owns execution and implementation, retains overall
+correctness, and deduplicates findings with the other perspectives.
 
 Use the environment's supported agent tools and configured models. For a full
 review, run specialists concurrently within available capacity; queue remaining
