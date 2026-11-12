@@ -1,6 +1,6 @@
 ---
 name: unslop
-description: Cut AI tells from any writing.
+description: Edit prose to remove AI writing patterns such as stock vocabulary, filler, hedging, and mannered phrasing. Use when asked to unslop or de-AI text, or to polish a substantial prose draft; not for code, short routine replies, or deciding the content and structure of documentation or agent instructions.
 ---
 
 # Unslop
@@ -65,6 +65,8 @@ Rule numbers are stable ids that other skills cite. A removed rule leaves a gap.
 Original instructions from Lauren Tan's pstack
 [unslop skill](https://github.com/cursor/plugins/blob/837067b75aa20ab58d7b2a2f6c0531e37118c596/pstack/skills/unslop/SKILL.md),
 revision `837067b75aa20ab58d7b2a2f6c0531e37118c596`. The instruction body and
-rule numbers are unchanged. Only `disable-model-invocation` was removed for
-portable name/description metadata, and this source note was added. The upstream
-MIT notice is retained in [LICENSE](LICENSE).
+rule numbers are unchanged. The frontmatter differs: `disable-model-invocation`
+was removed for portable name/description metadata, and the description was
+rewritten for model-invoked discovery, because upstream's description never had
+to select the skill. This source note was added. The upstream MIT notice is
+retained in [LICENSE](LICENSE).
