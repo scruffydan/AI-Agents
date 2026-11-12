@@ -12,8 +12,9 @@ guidance and the user's current request within the harness's instruction hierarc
   before changing interfaces or removing safeguards.
 - Prefer existing project code, then platform or standard-library facilities,
   then installed dependencies, before writing a new implementation or adding a
-  dependency. Choose the simplest option that fully meets the requirements;
-  preserve validation, error handling, cleanup, security, and accessibility.
+  dependency. Use native capabilities where they meet the requirements instead
+  of building custom subsystems. Preserve validation, error handling, cleanup,
+  security, and accessibility.
 - Complete authorized work without repeated approval for routine, reversible
   choices. Ask when missing information materially changes the outcome or an
   action exceeds authorization.
@@ -33,9 +34,10 @@ guidance and the user's current request within the harness's instruction hierarc
   something with users, revenue, or other stakes that needs stronger reliability?"
 - Clarify users, expected lifespan, and tolerance for downtime or data loss when
   relevant. Personal use does not imply that data loss is acceptable.
-- Match architecture, dependencies, testing, and deployment to those requirements.
-  Prefer the simplest adequate solution and existing dependencies. Reuse the
-  answer until the project's scope or stakes change.
+- Start with the smallest end-to-end solution that meets those requirements and
+  stakes. Add state, background infrastructure, abstractions, or dependencies only
+  for a concrete requirement. Match testing and deployment to the same stakes;
+  reuse the scope assessment until the project's scope or stakes change.
 
 ## Independent judgment and user decisions
 
@@ -111,8 +113,11 @@ guidance and the user's current request within the harness's instruction hierarc
 ## Verification and handoff
 
 - For bugs, establish the cause from evidence before changing code. Run relevant
-  existing checks and add regression coverage for meaningful behavior or security
-  changes. Scale verification to the change; avoid tests that merely restate text.
+  existing checks and add regression coverage for consequential behavior, security,
+  and data preservation. Scale verification to the impact; avoid exhaustive
+  low-impact permutations and tests that merely restate text, mirror scaffolding,
+  or simulate declarative tools to retest their guarantees. Reduce unnecessary
+  implementation complexity instead of layering tests around it.
 - Keep local commits lightweight and use focused checks during implementation
   when warranted. Reserve broader relevant tests, lint, and builds for PR readiness.
   Committing, pushing, or reporting completion does not itself require new test
