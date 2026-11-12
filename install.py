@@ -102,6 +102,7 @@ def install(harnesses: list[str], home: Path, force: bool) -> None:
             "codex": ".codex", "claude": ".claude", "opencode": ".config/opencode",
         }[harness]
         layout = build.LAYOUT[harness]
+        install_item(output / "THIRD_PARTY_NOTICES.md", target / "THIRD_PARTY_NOTICES.md")
         install_item(output / layout["base"], target / layout["base"])
         agents = output / Path(build.AGENT_PATHS[harness]).parent
         skills = output / layout["skills"]

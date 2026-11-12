@@ -32,6 +32,12 @@ its installed copy.
 | Claude Code | `~/.claude/CLAUDE.md` | `~/.claude/agents/` | `~/.claude/skills/` |
 | OpenCode | `~/.config/opencode/AGENTS.md` | `~/.config/opencode/agents/` | `~/.config/opencode/skills/` |
 
+`THIRD_PARTY_NOTICES.md` is installed beside each harness's base instructions:
+`~/.codex/THIRD_PARTY_NOTICES.md`, `~/.claude/THIRD_PARTY_NOTICES.md`, and
+`~/.config/opencode/THIRD_PARTY_NOTICES.md`. It carries the full notices for
+adapted agents and shared prompts without adding license text to model prompts.
+Skill licenses remain beside their `SKILL.md` files.
+
 If previously installed, move retired `explore` and `sidebar` agents and the
 `implementation-workflow` skill out of these directories. Preserve any local
 changes you want to keep. The repository no longer generates custom commands;
@@ -70,7 +76,9 @@ Older configs must remove any global `read "*"` allowance to restore native
 ./build.py opencode --opencode-provider opencode
 ```
 
-Each build replaces `build/` with output for the selected harnesses.
+Each build replaces `build/` with output for the selected harnesses. Each
+`build/<harness>/` includes an unchanged copy of root `THIRD_PARTY_NOTICES.md`
+beside its base instructions. Keep this file with redistributed configurations.
 `--opencode-provider` accepts `openai` or `opencode` and cannot be combined with
 `--work`, whose OpenCode models use Google Vertex. Configure Vertex credentials,
 project, location, and model access separately on the work machine.
@@ -120,6 +128,19 @@ Both creation commands require lowercase names with single hyphens, refuse to
 overwrite existing content, and create TODO instructions to finish before
 installing. `--description` is optional.
 
+### Credit adapted material
+
+When an agent, prompt, or skill adapts upstream material, link the upstream
+source pinned to a commit and keep its license notice in this repository,
+outside the text sent to the model:
+
+- Skills: copy the upstream `LICENSE` file unchanged beside `SKILL.md`, and add
+  the skill to the table in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+- Agents and shared prompts: these are single files, so put the upstream link,
+  copyright line, and license text in `THIRD_PARTY_NOTICES.md`. Keep license text
+  out of the file itself; an agent may carry a short attribution that points
+  there.
+
 ### Models and harness settings
 
 Agent model profiles refer to entries in `source/models.toml`. Each profile has
@@ -143,10 +164,10 @@ Browse [source/skills](source/skills) for the available workflows, including
 brainstorming, planning, code review, debugging, and Git tasks.
 
 The `code-simplifier` agent and shared coding instructions adapt selected practices
-from the [Ponytail skill](https://github.com/DietrichGebert/ponytail/blob/main/skills/ponytail/SKILL.md):
-inspect affected code, prefer compatible reuse, and preserve safeguards. The
-simplifier reports recommendations; the parent handles implementation and
-verification.
+from the [Ponytail skill](https://github.com/DietrichGebert/ponytail/blob/df9e89941d50419fd5bcf1de41e28097f1db49b2/skills/ponytail/SKILL.md):
+inspect affected code, prefer compatible reuse, and preserve safeguards. Its MIT
+notice is in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). The simplifier
+reports recommendations; the parent handles implementation and verification.
 
 The optional `code-blast-radius` reviewer traces indirect effects on consumers,
 interfaces, configuration, dependencies, timing, and persisted or wire data.
@@ -157,9 +178,9 @@ confirmed risks, investigated and cleared cases, and unresolved assumptions,
 then recommends checks or remedies for the parent to execute.
 
 It adapts selected ideas from Cursor's
-[pstack blast-radius skill](https://github.com/cursor/plugins/blob/main/pstack/skills/blast-radius/SKILL.md).
-The [agent source](source/agents/code-blast-radius.md) retains the upstream MIT
-notice. It uses the same model profile and harness defaults as `code-simplifier`;
+[pstack blast-radius skill](https://github.com/cursor/plugins/blob/df581122cde17e6e27686b5a448bde23e4ad4318/pstack/skills/blast-radius/SKILL.md);
+the upstream MIT notice is in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+The agent uses the same model profile and harness defaults as `code-simplifier`;
 the permission limits below still apply.
 
 Commit implementation changes as you go in logical units. Keep local

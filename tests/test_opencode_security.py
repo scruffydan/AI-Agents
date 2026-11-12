@@ -59,7 +59,7 @@ class OpenCodeSecurityTests(unittest.TestCase):
         cls.addClassCleanup(temporary.cleanup)
         root = Path(temporary.name)
         shutil.copytree(REPO / "source", root / "source")
-        for name in ("build.py", "renderers.py"):
+        for name in ("build.py", "renderers.py", "THIRD_PARTY_NOTICES.md"):
             shutil.copy2(REPO / name, root / name)
         subprocess.run(
             [sys.executable, "build.py", "opencode"], cwd=root,

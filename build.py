@@ -153,6 +153,7 @@ def build(
         raise ValueError("--work cannot be combined with --opencode-provider; work models use Google Vertex.")
     model_profiles.cache_clear()
     agents = load_agents()
+    notices = (ROOT / "THIRD_PARTY_NOTICES.md").read_bytes()
 
     # Finish rendering before replacing the previous successful build.
     outputs = {}
@@ -176,6 +177,7 @@ def build(
     for harness in harnesses:
         output_dir = BUILD / harness
         output_dir.mkdir(parents=True)
+        (output_dir / "THIRD_PARTY_NOTICES.md").write_bytes(notices)
         layout = LAYOUT[harness]
         shutil.copy(PROMPTS / "AGENTS.md", output_dir / layout["base"])
         shutil.copytree(

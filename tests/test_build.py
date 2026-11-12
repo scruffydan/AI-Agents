@@ -18,7 +18,7 @@ class BuildTests(unittest.TestCase):
         self.addCleanup(temporary.cleanup)
         self.root = Path(temporary.name)
         shutil.copytree(REPO / "source", self.root / "source")
-        for name in ("build.py", "renderers.py"):
+        for name in ("build.py", "renderers.py", "THIRD_PARTY_NOTICES.md"):
             shutil.copy2(REPO / name, self.root / name)
 
     def build(self, *args):
@@ -26,6 +26,41 @@ class BuildTests(unittest.TestCase):
             [sys.executable, "build.py", *args], cwd=self.root, capture_output=True, text=True
         )
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+    def test_notices_ship_with_each_harness_outside_prompt_text(self):
+        self.build()
+        notices = (self.root / "THIRD_PARTY_NOTICES.md").read_bytes()
+        for harness, base, agent in (
+            ("codex", "AGENTS.md", ".codex/agents/code-blast-radius.toml"),
+            ("claude", "CLAUDE.md", "agents/code-blast-radius.md"),
+            ("opencode", "AGENTS.md", "agents/code-blast-radius.md"),
+        ):
+            with self.subTest(harness=harness):
+                output = self.root / "build" / harness
+                self.assertEqual((output / "THIRD_PARTY_NOTICES.md").read_bytes(), notices)
+                agent_text = (output / agent).read_text()
+                self.assertIn("THIRD_PARTY_NOTICES.md", agent_text)
+                for text in (agent_text, (output / base).read_text()):
+                    self.assertNotIn("Permission is hereby granted", text)
+
+    def test_missing_notices_does_not_replace_previous_build(self):
+        self.build()
+        output = self.root / "build"
+        original = {path.relative_to(output): path.read_bytes()
+                    for path in output.rglob("*") if path.is_file()}
+        (self.root / "THIRD_PARTY_NOTICES.md").unlink()
+
+        result = subprocess.run(
+            [sys.executable, "build.py"], cwd=self.root, capture_output=True, text=True,
+        )
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("THIRD_PARTY_NOTICES.md", result.stderr)
+        self.assertEqual(
+            {path.relative_to(output): path.read_bytes()
+             for path in output.rglob("*") if path.is_file()},
+            original,
+        )
 
     def test_codex_agent_text_survives_toml_rendering(self):
         body = 'Match \\bword\\b in C:\\queries, keep the literal """ delimiter.'

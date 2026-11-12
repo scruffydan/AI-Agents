@@ -57,30 +57,5 @@ other review perspectives for the parent to deduplicate.
 
 ## Attribution
 
-Adapted selected ideas from the pstack blast-radius skill:
-https://github.com/cursor/plugins/blob/main/pstack/skills/blast-radius/SKILL.md
-Upstream license: https://github.com/cursor/plugins/blob/main/pstack/LICENSE
-
-```text
-MIT License
-
-Copyright (c) 2026 Lauren Tan
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-```
+Adapts selected ideas from the MIT-licensed [pstack blast-radius skill](https://github.com/cursor/plugins/blob/df581122cde17e6e27686b5a448bde23e4ad4318/pstack/skills/blast-radius/SKILL.md), Copyright (c) 2026 Lauren Tan.
+The full license text is in `THIRD_PARTY_NOTICES.md` alongside the harness's base instructions (one directory above the installed agent file).
