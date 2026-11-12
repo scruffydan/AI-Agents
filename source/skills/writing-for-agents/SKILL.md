@@ -73,7 +73,7 @@ from observed behavior, and identify untested or blocked checks honestly.
 ## Source
 
 Adapted selected instruction-writing ideas from Matt Pocock's
-[writing-for-agents](https://github.com/mattpocock/skills/blob/main/skills/productivity/writing-for-agents/SKILL.md):
+[writing-for-agents](https://github.com/mattpocock/skills/blob/321658273cb1d20b76026717d027d505790106d4/skills/productivity/writing-for-agents/SKILL.md):
 precise triggers, progressive disclosure, grouped rules, and checkable completion.
 See [LICENSE](LICENSE) for the upstream MIT notice. This is a focused adaptation,
 not an import of the upstream framework.

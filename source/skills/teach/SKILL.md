@@ -48,7 +48,7 @@ do not require quizzes, exercises, a curriculum, or a separate learning session.
 
 ## Source
 
-Adapted from [pstack teach](https://github.com/cursor/plugins/blob/main/pstack/skills/teach/SKILL.md)
+Adapted from [pstack teach](https://github.com/cursor/plugins/blob/d7cde2b84eadbcd6fd890302c876f4436ccb6d82/pstack/skills/teach/SKILL.md)
 by Lauren Tan in cursor/plugins, under the MIT License. The upstream notice is
 retained in [LICENSE](LICENSE). This adaptation keeps the explanation practices
 without its mandatory delegation, skill calls, or image generation.
