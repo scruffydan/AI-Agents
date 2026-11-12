@@ -76,8 +76,8 @@ A short answer with a few strong references is enough for a narrow question.
 ## Source
 
 Adapted from selected investigation and evidence practices in
-[pstack's why skill](https://github.com/cursor/plugins/blob/main/pstack/skills/why/SKILL.md)
+[pstack's why skill](https://github.com/cursor/plugins/blob/ce649c03ac3b75b6ae80cbd15b7e2c536caedb5a/pstack/skills/why/SKILL.md)
 and its
-[epistemics reference](https://github.com/cursor/plugins/blob/main/pstack/skills/why/references/epistemics.md).
+[epistemics reference](https://github.com/cursor/plugins/blob/ce649c03ac3b75b6ae80cbd15b7e2c536caedb5a/pstack/skills/why/references/epistemics.md).
 The upstream orchestration and tool-specific workflow are not required here.
 See [LICENSE](LICENSE) for the upstream MIT notice.

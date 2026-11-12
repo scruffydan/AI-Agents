@@ -84,6 +84,6 @@ second ledger. Report what was actually saved or created and any remaining gaps.
 ## Source
 
 Adapted from selected ideas in Matt Pocock's
-[to-tickets skill](https://github.com/mattpocock/skills/blob/main/skills/engineering/to-tickets/SKILL.md):
+[to-tickets skill](https://github.com/mattpocock/skills/blob/9e2abf8611a345efbf779aacb171cff015bcdeb6/skills/engineering/to-tickets/SKILL.md):
 vertical slices, explicit blockers, and expand–migrate–contract.
 The upstream MIT notice is retained in [LICENSE](LICENSE).
