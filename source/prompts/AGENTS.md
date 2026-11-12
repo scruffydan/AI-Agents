@@ -27,6 +27,17 @@ guidance and the user's current request within the harness's instruction hierarc
   root `CONTEXT.md` using the skill's handoff and cleanup rules. Respect the current
   task's read and write permissions.
 
+## Writing
+
+- Answer directly, then give the explanation or evidence the reader needs. Put
+  the summary at the end of a long response, as required above, rather than
+  adding an opening recap. Match detail to the task and use simple, concrete words.
+- Keep claims supported and uncertainty intact. Distinguish observations,
+  inferences, and unknowns; favor specific mechanisms over generic claims.
+- Use the `unslop` skill when useful for substantial prose or editing. Apply
+  these everyday defaults directly to short replies; they do not require a skill
+  or file read on every response.
+
 ## Project scope and stakes
 
 - For an unfamiliar project, ask unless already established: "Is this a small
