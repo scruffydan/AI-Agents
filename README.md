@@ -32,6 +32,12 @@ its installed copy.
 | Claude Code | `~/.claude/CLAUDE.md` | `~/.claude/agents/` | `~/.claude/skills/` |
 | OpenCode | `~/.config/opencode/AGENTS.md` | `~/.config/opencode/agents/` | `~/.config/opencode/skills/` |
 
+`THIRD_PARTY_NOTICES.md` is installed beside each harness's base instructions:
+`~/.codex/THIRD_PARTY_NOTICES.md`, `~/.claude/THIRD_PARTY_NOTICES.md`, and
+`~/.config/opencode/THIRD_PARTY_NOTICES.md`. It carries the full notices for
+adapted agents and shared prompts without adding license text to model prompts.
+Skill licenses remain beside their `SKILL.md` files.
+
 If previously installed, move retired `explore` and `sidebar` agents and the
 `implementation-workflow` skill out of these directories. Preserve any local
 changes you want to keep. The repository no longer generates custom commands;
@@ -70,7 +76,9 @@ Older configs must remove any global `read "*"` allowance to restore native
 ./build.py opencode --opencode-provider opencode
 ```
 
-Each build replaces `build/` with output for the selected harnesses.
+Each build replaces `build/` with output for the selected harnesses. Each
+`build/<harness>/` includes an unchanged copy of root `THIRD_PARTY_NOTICES.md`
+beside its base instructions. Keep this file with redistributed configurations.
 `--opencode-provider` accepts `openai` or `opencode` and cannot be combined with
 `--work`, whose OpenCode models use Google Vertex. Configure Vertex credentials,
 project, location, and model access separately on the work machine.

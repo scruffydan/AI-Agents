@@ -19,7 +19,7 @@ class AuthoringTests(unittest.TestCase):
         self.addCleanup(temporary.cleanup)
         self.root = Path(temporary.name)
         shutil.copytree(REPO / "source", self.root / "source")
-        for name in ("build.py", "renderers.py", "new.py"):
+        for name in ("build.py", "renderers.py", "new.py", "THIRD_PARTY_NOTICES.md"):
             shutil.copy2(REPO / name, self.root / name)
 
     def cli(self, *args, success=True):

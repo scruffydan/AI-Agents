@@ -20,7 +20,7 @@ class InstallTests(unittest.TestCase):
         self.home = Path(temporary.name) / "home"
         self.home.mkdir()
         shutil.copytree(REPO / "source", self.root / "source")
-        for name in ("build.py", "renderers.py", "install.py"):
+        for name in ("build.py", "renderers.py", "install.py", "THIRD_PARTY_NOTICES.md"):
             shutil.copy2(REPO / name, self.root / name)
 
     def run_install(self, *args, input_text="", force=True):
@@ -34,6 +34,20 @@ class InstallTests(unittest.TestCase):
         result = self.run_install(*args, input_text=input_text)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         return result
+
+    def test_notices_install_beside_base_instructions_for_all_harnesses(self):
+        self.install("--all")
+        notices = (self.root / "THIRD_PARTY_NOTICES.md").read_bytes()
+        for directory in (".codex", ".claude", ".config/opencode"):
+            with self.subTest(directory=directory):
+                self.assertEqual(
+                    (self.home / directory / "THIRD_PARTY_NOTICES.md").read_bytes(),
+                    notices,
+                )
+
+        result = self.install("--all")
+        self.assertNotIn("Installed:", result.stdout)
+        self.assertFalse((self.home / ".ai-agents-backups").exists())
 
     def test_unrelated_skills_and_agents_are_preserved(self):
         unrelated_skill = self.home / ".claude/skills/my-own-skill/SKILL.md"

@@ -8,6 +8,12 @@ so their notices are kept here. Skills are folders, so each adapted skill carrie
 the upstream `LICENSE` beside its `SKILL.md`; they are listed under
 [Adapted skills](#adapted-skills).
 
+Builds copy this file unchanged beside each harness's base instructions, and
+installs place it in `~/.codex/`, `~/.claude/`, or `~/.config/opencode/`.
+The `source/` links below identify repository files. Installed skill licenses
+are beside their `SKILL.md` files in `~/.agents/skills/` (Codex),
+`~/.claude/skills/`, or `~/.config/opencode/skills/`.
+
 Each upstream link below is pinned to the last upstream commit that changed the
 linked skill before the adaptation landed here.
 

@@ -58,4 +58,4 @@ other review perspectives for the parent to deduplicate.
 ## Attribution
 
 Adapts selected ideas from the MIT-licensed [pstack blast-radius skill](https://github.com/cursor/plugins/blob/df581122cde17e6e27686b5a448bde23e4ad4318/pstack/skills/blast-radius/SKILL.md), Copyright (c) 2026 Lauren Tan.
-The full license text is in `THIRD_PARTY_NOTICES.md` at the root of the repository this agent file is built from.
+The full license text is in `THIRD_PARTY_NOTICES.md` alongside the harness's base instructions (one directory above the installed agent file).
