@@ -1,6 +1,6 @@
 ---
 name: teach
-description: Explain a concept, code path, or technical decision when the user wants to understand what it means, how it works, or why it behaves that way.
+description: Explain what a concept means or how code works today, from the current code and docs. Use for how-it-works questions, including why code behaves as it does, not why a design was chosen or introduced (use why) or diagnosing failures.
 ---
 
 # Teach
@@ -31,7 +31,8 @@ implementation work.
 - Separate observed facts from inferred intent, analogies, and uncertainty. Code
   can establish what happens without establishing why its author chose it.
   Qualify unsupported explanations and identify missing evidence rather than
-  inventing a rationale.
+  inventing a rationale. When the user wants that rationale or its history, use
+  the `why` skill instead.
 - Use a small diagram only when relationships or flow become easier to understand
   and a suitable format is available. Plain text or a short trace is enough when
   rendering is unavailable; do not require image generation or extra tooling.

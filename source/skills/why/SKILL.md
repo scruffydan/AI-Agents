@@ -1,6 +1,6 @@
 ---
 name: why
-description: Investigate why code or an architectural decision exists using implementation, targeted history, and decision records. Use for design rationale questions rather than debugging failures or Five Whys process analysis.
+description: Investigate why a design or architectural choice was made, using code history and decision records. Use for rationale questions like why X was built this way or chosen over Y, not how code works today (use teach), debugging failures, or Five Whys process analysis.
 ---
 
 # Investigate Design Rationale
@@ -12,10 +12,12 @@ not authorize edits, instrumentation, commits, or external messages and writes.
 ## Bound the question
 
 Identify the decision, files or symbols, and relevant version or time period.
-Distinguish “why was this introduced?” from “what requires it now?” Reuse context
-and narrow an ambiguous question only when the answer would materially change
-the investigation. Match effort to the question; do not start a repository-wide
-or all-category parallel sweep by default.
+Distinguish “why was this introduced?” from “what requires it now?” When the
+question is how the code works or behaves today rather than why it was chosen,
+use the `teach` skill instead. Reuse context and narrow an ambiguous question
+only when the answer would materially change the investigation. Match effort to
+the question; do not start a repository-wide or all-category parallel sweep by
+default.
 
 ## Trace the decision
 
