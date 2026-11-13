@@ -96,3 +96,4 @@ an unchanged copy of the upstream license file.
 | `file-pr` | [tstack](https://github.com/t3dotgg/tstack) | Theo Browne | [LICENSE](source/skills/file-pr/LICENSE) |
 | `leaving-pr-comments` | [tstack](https://github.com/t3dotgg/tstack) | Theo Browne | [LICENSE](source/skills/leaving-pr-comments/LICENSE) |
 | `modernize` | [tstack](https://github.com/t3dotgg/tstack) | Theo Browne | [LICENSE](source/skills/modernize/LICENSE) |
+| `takeover` | [tstack](https://github.com/t3dotgg/tstack) | Theo Browne | [LICENSE](source/skills/takeover/LICENSE) |
