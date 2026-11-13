@@ -141,6 +141,20 @@ outside the text sent to the model:
   out of the file itself; an agent may carry a short attribution that points
   there.
 
+To see which adapted upstream files changed after their pins, run:
+
+```bash
+GH_TOKEN="$(gh auth token)" ./upstream.py   # token optional; raises the API limit
+./upstream.py --list                        # offline: pinned files and where they are cited
+```
+
+The script reads pins from the links above, compares each file's content at the
+pin with the upstream default branch, and lists the upstream commits and a review
+command for each change. It never edits pins: decide whether to adopt the change,
+then update every link to the same commit. Exit status is 0 when nothing changed,
+1 when a file changed or disappeared upstream, and 2 when a link is broken or one
+file has different pins.
+
 ### Models and harness settings
 
 Agent model profiles refer to entries in `source/models.toml`. Each profile has
