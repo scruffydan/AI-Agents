@@ -93,3 +93,7 @@ an unchanged copy of the upstream license file.
 | `why` | [pstack](https://github.com/cursor/plugins) (`pstack/` in cursor/plugins) | Lauren Tan | [LICENSE](source/skills/why/LICENSE) |
 | `to-tickets` | [mattpocock/skills](https://github.com/mattpocock/skills) | Matt Pocock | [LICENSE](source/skills/to-tickets/LICENSE) |
 | `writing-for-agents` | [mattpocock/skills](https://github.com/mattpocock/skills) | Matt Pocock | [LICENSE](source/skills/writing-for-agents/LICENSE) |
+| `file-pr` | [tstack](https://github.com/t3dotgg/tstack) | Theo Browne | [LICENSE](source/skills/file-pr/LICENSE) |
+| `leaving-pr-comments` | [tstack](https://github.com/t3dotgg/tstack) | Theo Browne | [LICENSE](source/skills/leaving-pr-comments/LICENSE) |
+| `modernize` | [tstack](https://github.com/t3dotgg/tstack) | Theo Browne | [LICENSE](source/skills/modernize/LICENSE) |
+| `takeover` | [tstack](https://github.com/t3dotgg/tstack) | Theo Browne | [LICENSE](source/skills/takeover/LICENSE) |
