@@ -67,6 +67,17 @@ symlinks are refused.
 Older configs must remove any global `read "*"` allowance to restore native
 `.env` prompts. Later agent-specific rules can still override those prompts.
 
+## T3 Code remote host setup
+
+The separate [T3 background-service guide](docs/t3-background-service.md) covers
+the official app on Dan's Mac, with a service-owned backend and the Dock app as
+a client. Run `./t3-service-env.sh` to install `~/.t3/service.env` with GitHub
+HTTPS/`gh` authentication scoped to T3. It asks before replacing an existing
+file, preserves launchd's inherited indexed Git settings, creates no backups,
+and leaves service activation separate. Run it in the Mac user's desktop session.
+SSH remotes and ordinary terminal behavior stay unchanged. `install.py` does not
+configure T3.
+
 ## Build without installing
 
 ```bash
@@ -258,3 +269,6 @@ agent metadata, model references, includes, TOML, and duplicate agent paths befo
 replacing output. Generated YAML and skill metadata are not validated for harness
 requirements; permission tests model OpenCode rules locally rather than testing
 live enforcement.
+
+T3 setup tests use Bash, Git, and fake `gh` and `launchctl` commands without network
+access. No live T3 service or host authentication is exercised by the suite.
