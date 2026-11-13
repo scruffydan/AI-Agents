@@ -161,7 +161,7 @@ Agent instructions can include shared fragments from `source/prompts/`:
 ## Use skills and modes
 
 Browse [source/skills](source/skills) for the available workflows, including
-brainstorming, planning, code review, debugging, and Git tasks.
+brainstorming, planning, code review, debugging, Git tasks, and pull requests.
 
 The `code-simplifier` agent and shared coding instructions adapt selected practices
 from the [Ponytail skill](https://github.com/DietrichGebert/ponytail/blob/df9e89941d50419fd5bcf1de41e28097f1db49b2/skills/ponytail/SKILL.md):
