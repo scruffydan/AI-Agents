@@ -392,6 +392,38 @@ install.install(list(build.HARNESSES), Path.home(), force=True)
         )
         self.assertFalse((self.home / ".codex").exists())
 
+    def test_local_context_is_opt_in_and_created_privately(self):
+        local = self.home / ".config/ai-agents/local.md"
+        self.install("codex")
+        self.assertFalse(local.exists())
+
+        result = self.install("codex", "--init-local")
+        self.assertTrue(local.is_file())
+        self.assertEqual(local.stat().st_mode & 0o777, 0o600)
+        self.assertIn("Created local context template:", result.stdout)
+
+        local.write_text("My approved work context")
+        self.install("codex")
+        result = self.install("codex", "--init-local")
+        self.assertEqual(local.read_text(), "My approved work context")
+        self.assertIn("Preserved existing local context:", result.stdout)
+
+    def test_init_local_preserves_directory_and_dangling_symlink(self):
+        local = self.home / ".config/ai-agents/local.md"
+        local.mkdir(parents=True)
+        sentinel = local / "keep.md"
+        sentinel.write_text("keep")
+        self.install("codex", "--init-local")
+        self.assertEqual(sentinel.read_text(), "keep")
+
+        sentinel.unlink()
+        local.rmdir()
+        target = self.home / "must-not-create.md"
+        local.symlink_to(target)
+        self.install("codex", "--init-local")
+        self.assertTrue(local.is_symlink())
+        self.assertFalse(target.exists())
+
     def test_help_and_invalid_arguments_write_nothing(self):
         cases = (
             (("--help",), 0), (("-h",), 0), (("--bogus",), 2), (("unknown",), 2),

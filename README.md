@@ -14,6 +14,7 @@ Run the picker, or name the harnesses to install:
 ./install.py                 # Interactive; Enter selects Codex
 ./install.py codex claude    # Install selected harnesses
 ./install.py --all           # Install all three
+./install.py codex --init-local  # Also create an optional machine-local context template
 ```
 
 Choose one form; `--all` cannot be combined with harness names. Explicit names
@@ -235,24 +236,42 @@ proposed records in the response; saving or cleaning them requires writing
 authorization. Spec Kit is not a dependency; see the
 [design rationale and sources](docs/feature-context.md).
 
-A configured shared wiki can hold reusable knowledge and links back to project
-records. The shared base instructions read the optional machine-local file
-`~/.config/ai-agents/shared-knowledge.md` through `project-context`. Create that
-file with the store's absolute startup-page path and access boundaries, for example:
+### Machine-local context
 
-```text
-Shared owner knowledge starts at <absolute-checkout-path>/START.md.
-Use its selective retrieval and pending-correction guidance.
-Keep capture and curation in the dedicated knowledge project.
-Report unavailable or stale knowledge; do not broaden sandbox access for retrieval.
-This configuration grants no synchronization or publishing permission.
+Shared base instructions consult `~/.config/ai-agents/local.md` when it exists
+and is readable. If it is absent or inaccessible, agents continue normally without
+a missing-configuration notice. Work machines can omit it or use it for approved
+work context; no personal wiki is assumed.
+
+To create an optional neutral template while installing:
+
+```bash
+./install.py codex --init-local
 ```
 
-Replace the placeholder locally. The installer does not create or replace this
-file, so reinstalling base instructions preserves the machine's knowledge pointer.
-Configure each host separately and test fresh-session retrieval with its actual
-permissions. Wiki access and synchronization require separate configuration.
-Keep private locations and content out of public repos.
+The new file is created with mode `600`. Existing files, directories, and symlinks
+are preserved, even with `--force`. Normal installation leaves this file alone.
+The template contains a heading and comments describing what to add; it includes
+no active knowledge pointer. Edit it locally with machine-specific context and,
+if wanted, a wiki startup-page path and access boundaries:
+
+```markdown
+# Machine-local context
+
+## Shared knowledge
+
+For shared knowledge, read `~/.config/ai-agents/<repo-name>/START.md`.
+Use its selective retrieval and pending-correction guidance.
+Keep capture and curation writes in the dedicated knowledge project.
+Report unavailable or stale configured knowledge.
+Do not broaden sandbox access for retrieval.
+This file grants no synchronization or publishing permission.
+```
+
+Replace `<repo-name>` with the actual checkout directory name; it is not a literal
+folder name. Creating `local.md` does not clone or move a repository.
+Keep private locations and content out of public repos. Configure each host separately and test fresh-session retrieval with its
+actual permissions. Wiki access and synchronization require separate configuration.
 
 ## Permission limits
 

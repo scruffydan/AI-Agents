@@ -11,6 +11,7 @@ if sys.version_info < (3, 11):
 import argparse
 from datetime import datetime
 import filecmp
+import os
 from pathlib import Path
 import shutil
 import tempfile
@@ -113,6 +114,26 @@ def install(harnesses: list[str], home: Path, force: bool) -> None:
                 install_item(entry, destination_dir / entry.name)
 
 
+def init_local_context(home: Path) -> None:
+    destination = home / ".config/ai-agents/local.md"
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        fd = os.open(destination, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+    except FileExistsError:
+        print(f"Preserved existing local context: {destination}")
+        return
+    with os.fdopen(fd, "w") as handle:
+        handle.write(
+            "# Machine-local context\n\n"
+            "<!-- Optional: add machine-specific context and approved knowledge sources here.\n"
+            "For a wiki, replace <repo-name> in ~/.config/ai-agents/<repo-name>/START.md\n"
+            "with its checkout directory name, and describe its access boundaries.\n"
+            "Leave this section empty on machines without a knowledge store.\n"
+            "Keep private paths and content out of the shared AI-Agents repository. -->\n"
+        )
+    print(f"Created local context template: {destination}")
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -121,6 +142,10 @@ def main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument("--all", action="store_true", help="Install all three harnesses.")
     parser.add_argument("--work", action="store_true", help="Use work model mappings.")
+    parser.add_argument(
+        "--init-local", action="store_true",
+        help="Create ~/.config/ai-agents/local.md if absent; never replace existing local context.",
+    )
     parser.add_argument(
         "--opencode-provider", choices=build.OPENCODE_PROVIDERS,
         help="Override the provider prefix for rendered OpenCode models.",
@@ -141,6 +166,8 @@ def main(argv: list[str] | None = None) -> int:
     try:
         build.build(harnesses, work=args.work, opencode_provider=args.opencode_provider)
         install(harnesses, Path.home(), args.force)
+        if args.init_local:
+            init_local_context(Path.home())
     except (ValueError, OSError) as exc:
         parser.exit(1, f"Install failed: {exc}\n")
     return 0
