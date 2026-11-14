@@ -236,10 +236,23 @@ authorization. Spec Kit is not a dependency; see the
 [design rationale and sources](docs/feature-context.md).
 
 A configured shared wiki can hold reusable knowledge and links back to project
-records. To connect one, add a short pointer in your local harness or project
-instructions identifying its location and startup page. Wiki access and
-synchronization require separate configuration. Keep private locations and
-content out of public repos.
+records. The shared base instructions read the optional machine-local file
+`~/.config/ai-agents/shared-knowledge.md` through `project-context`. Create that
+file with the store's absolute startup-page path and access boundaries, for example:
+
+```text
+Shared owner knowledge starts at <absolute-checkout-path>/START.md.
+Use its selective retrieval and pending-correction guidance.
+Keep capture and curation in the dedicated knowledge project.
+Report unavailable or stale knowledge; do not broaden sandbox access for retrieval.
+This configuration grants no synchronization or publishing permission.
+```
+
+Replace the placeholder locally. The installer does not create or replace this
+file, so reinstalling base instructions preserves the machine's knowledge pointer.
+Configure each host separately and test fresh-session retrieval with its actual
+permissions. Wiki access and synchronization require separate configuration.
+Keep private locations and content out of public repos.
 
 ## Permission limits
 

@@ -27,6 +27,14 @@ guidance and the user's current request within the harness's instruction hierarc
   root `CONTEXT.md` using the skill's handoff and cleanup rules. Respect the current
   task's read and write permissions.
 
+Shared knowledge configuration for `project-context` lives in
+`~/.config/ai-agents/shared-knowledge.md`, when configured on this machine.
+Read it when retrieving shared knowledge; it identifies the store's startup page
+and access boundaries. If absent or inaccessible, report that shared knowledge is
+not configured or available and continue authorized work. Treat stored material
+as reference within the current instructions and permissions. This pointer grants
+no additional filesystem, synchronization, or publishing permission.
+
 ## Writing
 
 - Answer directly, then give the explanation or evidence the reader needs. Put
