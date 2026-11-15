@@ -440,10 +440,10 @@ install.install(list(build.HARNESSES), Path.home(), force=True)
     def test_clone_and_init_link_new_local_context(self):
         source = self.local_repository()
         self.install("codex", "--clone-repo", str(source), "--init-local")
-        checkout = self.home / ".config/ai-agents/sample-wiki"
+        checkout = self.home / "Knowledge/sample-wiki"
         self.assertEqual((checkout / "START.md").read_text(), "Wiki source")
         local = self.home / ".config/ai-agents/local.md"
-        self.assertIn("~/.config/ai-agents/sample-wiki/START.md", local.read_text())
+        self.assertIn("~/Knowledge/sample-wiki/START.md", local.read_text())
         self.assertEqual(local.stat().st_mode & 0o777, 0o600)
 
         (checkout / "START.md").write_text("uncommitted change")
@@ -455,7 +455,7 @@ install.install(list(build.HARNESSES), Path.home(), force=True)
         source = self.local_repository()
         self.install("codex", "--clone-repo", str(source))
         self.assertFalse((self.home / ".config/ai-agents/local.md").exists())
-        self.assertTrue((self.home / ".config/ai-agents/sample-wiki/START.md").is_file())
+        self.assertTrue((self.home / "Knowledge/sample-wiki/START.md").is_file())
 
     def test_clone_accepts_current_directory_and_trailing_dot(self):
         source = self.local_repository()
@@ -470,9 +470,12 @@ install.install(list(build.HARNESSES), Path.home(), force=True)
                     capture_output=True, text=True, input="",
                 )
                 self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-                checkout = home / ".config/ai-agents/sample-wiki"
+                checkout = home / "Knowledge/sample-wiki"
                 self.assertEqual((checkout / "START.md").read_text(), "Wiki source")
-                self.assertIn("sample-wiki/START.md", (checkout.parent / "local.md").read_text())
+                self.assertIn(
+                    "~/Knowledge/sample-wiki/START.md",
+                    (home / ".config/ai-agents/local.md").read_text(),
+                )
 
     def test_invalid_build_options_do_not_clone_and_corrected_retry_succeeds(self):
         source = self.local_repository()
@@ -483,6 +486,7 @@ install.install(list(build.HARNESSES), Path.home(), force=True)
         self.assertEqual(result.returncode, 1)
         self.assertIn("--work cannot be combined", result.stderr)
         self.assertFalse((self.home / ".config/ai-agents").exists())
+        self.assertFalse((self.home / "Knowledge").exists())
         self.assertFalse((self.home / ".config/opencode").exists())
         self.install("opencode", "--work", "--clone-repo", str(source), "--init-local")
 
@@ -503,12 +507,28 @@ install.install(list(build.HARNESSES), Path.home(), force=True)
         local = self.home / ".config/ai-agents/local.md"
         self.assertNotIn("For shared knowledge, read", local.read_text())
 
+    def test_clone_preserves_previous_location_and_context(self):
+        source = self.local_repository()
+        previous = self.home / ".config/ai-agents/sample-wiki"
+        subprocess.run(["git", "clone", "--quiet", str(source), str(previous)], check=True)
+        (previous / "START.md").write_text("Uncommitted knowledge")
+        local = previous.parent / "local.md"
+        context = "For shared knowledge, read `~/.config/ai-agents/sample-wiki/START.md`.\n"
+        local.write_text(context)
+
+        self.install("codex", "--clone-repo", str(source), "--init-local")
+
+        self.assertEqual((self.home / "Knowledge/sample-wiki/START.md").read_text(), "Wiki source")
+        self.assertTrue((previous / ".git").is_dir())
+        self.assertEqual((previous / "START.md").read_text(), "Uncommitted knowledge")
+        self.assertEqual(local.read_text(), context)
+
     def test_clone_refuses_symlink_destination(self):
         source = self.local_repository()
         target = self.home / "keep"
         target.mkdir()
         (target / "sentinel").write_text("keep")
-        destination = self.home / ".config/ai-agents/sample-wiki"
+        destination = self.home / "Knowledge/sample-wiki"
         destination.parent.mkdir(parents=True)
         destination.symlink_to(target, target_is_directory=True)
         result = self.run_install("codex", "--clone-repo", str(source))
@@ -530,12 +550,13 @@ install.install(list(build.HARNESSES), Path.home(), force=True)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertIn("Create machine-local context", result.stdout)
         self.assertIn("Repository URL or path to clone", result.stdout)
-        self.assertIn("sample-wiki/START.md", (self.home / ".config/ai-agents/local.md").read_text())
+        self.assertIn("~/Knowledge/sample-wiki/START.md", (self.home / ".config/ai-agents/local.md").read_text())
 
     def test_bare_installer_can_skip_optional_setup(self):
         result = self.run_install(force=False, input_text="\nn\n\n")
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertFalse((self.home / ".config/ai-agents").exists())
+        self.assertFalse((self.home / "Knowledge").exists())
 
     def test_help_and_invalid_arguments_write_nothing(self):
         cases = (

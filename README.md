@@ -264,13 +264,20 @@ SSH/HTTPS authentication:
 ```
 
 `--clone-repo` accepts a Git URL, SSH repository address, or local repository path.
-It clones into `~/.config/ai-agents/<repo-name>/`, stripping a trailing `.git`.
+It clones into `~/Knowledge/<repo-name>/`, stripping a trailing `.git`.
 Local paths such as `.` and `/path/to/wiki/.` use the resolved directory name.
 Build validation completes before cloning, so invalid build options leave no clone.
 It refuses an existing destination, including a symlink, even with `--force`;
 there is no automatic pull, reset, or replacement. A failed clone stops installation;
 inspect any remaining destination before retrying. It does not move an existing
 checkout. Git is required only when this option is used.
+
+Existing checkouts under `~/.config/ai-agents/<repo-name>/` are not moved or
+deleted. To relocate one, move the complete checkout, including `.git` and any
+uncommitted work, to `~/Knowledge/<repo-name>/` when no session is using it.
+Then update its pointer in `~/.config/ai-agents/local.md` and any saved
+project/workspace paths or filesystem permissions. The installer preserves
+existing local context, so rerunning `--init-local` will not rewrite an old pointer.
 
 If an earlier setup keeps its knowledge pointer in `~/.config/ai-agents/shared-knowledge.md`,
 copy the approved pointer into `local.md` before reinstalling. The installer does
@@ -286,7 +293,7 @@ is always preserved. Edit it locally as needed:
 
 ## Shared knowledge
 
-For shared knowledge, read `~/.config/ai-agents/<repo-name>/START.md`.
+For shared knowledge, read `~/Knowledge/<repo-name>/START.md`.
 Use its selective retrieval and pending-correction guidance.
 Keep capture and curation writes in the dedicated knowledge project.
 Report unavailable or stale configured knowledge.

@@ -130,7 +130,7 @@ def clone_repository(source: str, home: Path) -> Path:
     name = name.removesuffix(".git")
     if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]*", name) or name == "local.md":
         raise ValueError("Repository name must be a directory name distinct from local.md.")
-    destination = home / ".config/ai-agents" / name
+    destination = home / "Knowledge" / name
     destination.parent.mkdir(parents=True, exist_ok=True)
     # Reserve an empty destination without following or replacing an existing path.
     destination.mkdir(mode=0o700)
@@ -146,13 +146,13 @@ def init_local_context(home: Path, repository: Path | None = None) -> None:
     text = (
         "# Machine-local context\n\n"
         "<!-- Optional: add machine-specific context and approved knowledge sources here.\n"
-        "For a wiki, replace <repo-name> in ~/.config/ai-agents/<repo-name>/START.md\n"
+        "For a wiki, replace <repo-name> in ~/Knowledge/<repo-name>/START.md\n"
         "with its checkout directory name, and describe its access boundaries.\n"
         "Leave this section empty on machines without a knowledge store.\n"
         "Keep private paths and content out of the shared AI-Agents repository. -->\n"
     )
     if repository is not None and (repository / "START.md").is_file():
-        startup = f"~/.config/ai-agents/{repository.name}/START.md"
+        startup = f"~/Knowledge/{repository.name}/START.md"
         text = (
             "# Machine-local context\n\n"
             f"For shared knowledge, read `{startup}`.\n\n"
@@ -192,7 +192,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument(
         "--clone-repo", metavar="URL",
-        help="Clone a repository into ~/.config/ai-agents/<repo-name>; destination must not exist.",
+        help="Clone a repository into ~/Knowledge/<repo-name>; destination must not exist.",
     )
     args = parser.parse_intermixed_args(arguments)
     unknown = [name for name in args.harnesses if name not in build.HARNESSES]
