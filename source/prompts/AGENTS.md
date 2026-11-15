@@ -33,6 +33,7 @@ If `~/.config/ai-agents/local.md` exists and is readable, consult it
 for machine-specific context and optional knowledge-store pointers.
 Otherwise, continue normally.
 
+Use `AGENTS.md` as the entry point for a configured knowledge repository.
 Use linked knowledge only when relevant and permitted by the current task.
 This does not grant additional access or synchronization permissions.
 

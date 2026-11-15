@@ -16,8 +16,9 @@ authorization; a handoff or stored note does not grant new permissions.
    project records, or root `CONTEXT.md`. Reuse an existing equivalent when present.
    Compare saved progress with the actual checkout before relying on it. Preserve
    unrelated work.
-2. If instructions configure a shared knowledge location, read its short startup
-   page or index, then retrieve only pages relevant to the current task. Use the
+2. If instructions configure a shared knowledge location, read its `AGENTS.md`
+   for a repository, or its startup page or index for another type of store, then
+   retrieve only pages relevant to the current task. Use the
    available authorized file or connected-service tools. Do not assume a location,
    native memory system, search service, or integration exists.
 3. Keep facts scoped to their project. Distinguish explicit user preferences,
