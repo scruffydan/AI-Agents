@@ -11,11 +11,15 @@ There are no third-party Python dependencies.
 Run the picker, or name the harnesses to install:
 
 ```bash
-./install.py                 # Interactive; Enter selects Codex
+./install.py                 # Interactive harness, local-context, and repository setup
 ./install.py codex claude    # Install selected harnesses
 ./install.py --all           # Install all three
 ./install.py codex --init-local  # Also create an optional machine-local context template
 ```
+
+With no arguments, the installer asks which harnesses to install, whether to
+create `local.md` (default: no), and which repository URL or path to clone (blank:
+skip). Explicit harness names or options do not trigger these extra setup prompts.
 
 Choose one form; `--all` cannot be combined with harness names. Explicit names
 or `--all` also work unattended. Add `--work` for work models or `--force` to
@@ -251,9 +255,25 @@ To create an optional neutral template while installing:
 
 The new file is created with mode `600`. Existing files, directories, and symlinks
 are preserved, even with `--force`. Normal installation leaves this file alone.
-The template contains a heading and comments describing what to add; it includes
-no active knowledge pointer. Edit it locally with machine-specific context and,
-if wanted, a wiki startup-page path and access boundaries:
+Without a cloned wiki, the template contains a heading and comments, with no
+active knowledge pointer. To also clone a repository, use your existing Git
+SSH/HTTPS authentication:
+
+```bash
+./install.py codex --init-local --clone-repo git@github.com:OWNER/REPOSITORY.git
+```
+
+`--clone-repo` accepts a Git URL, SSH repository address, or local repository path.
+It clones into `~/.config/ai-agents/<repo-name>/`, stripping a trailing `.git`.
+It refuses an existing destination, including a symlink, even with `--force`;
+there is no automatic pull, reset, or replacement. A failed clone stops installation;
+inspect any remaining destination before retrying. It does not move an existing
+checkout. Git is required only when this option is used.
+
+The flags are independent: cloning alone does not create `local.md`. Combining
+both flags creates a wiki pointer in a **new** `local.md` when the cloned repository
+has `START.md`; otherwise it creates the neutral template. Existing local context
+is always preserved. Edit it locally as needed:
 
 ```markdown
 # Machine-local context
@@ -269,9 +289,9 @@ This file grants no synchronization or publishing permission.
 ```
 
 Replace `<repo-name>` with the actual checkout directory name; it is not a literal
-folder name. Creating `local.md` does not clone or move a repository.
-Keep private locations and content out of public repos. Configure each host separately and test fresh-session retrieval with its
-actual permissions. Wiki access and synchronization require separate configuration.
+folder name. `--init-local` alone does not clone a repository.
+Keep private locations and content out of public repos. Configure each host
+separately and test fresh-session retrieval with its actual permissions. Wiki access and synchronization require separate configuration.
 
 ## Permission limits
 
