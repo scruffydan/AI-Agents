@@ -214,10 +214,14 @@ def main(argv: list[str] | None = None) -> int:
         parser.error(str(exc))
     try:
         build.build(harnesses, work=args.work, opencode_provider=args.opencode_provider)
-        repository = clone_repository(args.clone_repo, Path.home()) if args.clone_repo else None
+        repository = None
+        try:
+            if args.clone_repo:
+                repository = clone_repository(args.clone_repo, Path.home())
+        finally:
+            if args.init_local:
+                init_local_context(Path.home(), repository)
         install(harnesses, Path.home(), args.force)
-        if args.init_local:
-            init_local_context(Path.home(), repository)
     except (ValueError, OSError) as exc:
         parser.exit(1, f"Install failed: {exc}\n")
     return 0
