@@ -117,7 +117,7 @@ def install(harnesses: list[str], home: Path, force: bool) -> None:
                 install_item(entry, destination_dir / entry.name)
 
 
-def clone_repository(source: str, home: Path) -> Path:
+def repository_destination(source: str, home: Path) -> Path:
     if source.startswith("-") or "::" in source:
         raise ValueError("Use a Git URL, SSH repository address, or local repository path.")
     if "://" in source:
@@ -130,14 +130,16 @@ def clone_repository(source: str, home: Path) -> Path:
     name = name.removesuffix(".git")
     if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]*", name) or name == "local.md":
         raise ValueError("Repository name must be a directory name distinct from local.md.")
-    destination = home / "Knowledge" / name
+    return home / "Knowledge" / name
+
+
+def clone_repository(source: str, destination: Path) -> None:
     destination.parent.mkdir(parents=True, exist_ok=True)
     # Reserve an empty destination without following or replacing an existing path.
     destination.mkdir(mode=0o700)
     result = subprocess.run(["git", "clone", "--", source, str(destination)])
     if result.returncode:
         raise ValueError(f"Git clone failed; inspect {destination} before retrying.")
-    return destination
 
 
 def init_local_context(home: Path, repository: Path | None = None) -> None:
@@ -151,12 +153,13 @@ def init_local_context(home: Path, repository: Path | None = None) -> None:
         "Omit the knowledge pointer on machines without a knowledge store.\n\n"
         "Keep private paths and content out of the shared AI-Agents repository.\n"
     )
-    if repository is not None and (repository / "AGENTS.md").is_file():
+    if repository is not None:
         startup = f"~/Knowledge/{repository.name}/AGENTS.md"
         text = (
             "# Machine-local context\n\n"
             f"For shared knowledge, read `{startup}`.\n\n"
-            "Follow its selective retrieval and correction guidance.\n"
+            "If the checkout or AGENTS.md is unavailable, report that and continue without it.\n"
+            "Follow its selective retrieval and correction guidance when available.\n"
             "Keep capture and curation in the knowledge project.\n"
             "This grants no additional access or publishing permissions.\n"
         )
@@ -217,7 +220,8 @@ def main(argv: list[str] | None = None) -> int:
         repository = None
         try:
             if args.clone_repo:
-                repository = clone_repository(args.clone_repo, Path.home())
+                repository = repository_destination(args.clone_repo, Path.home())
+                clone_repository(args.clone_repo, repository)
         finally:
             if args.init_local:
                 init_local_context(Path.home(), repository)
