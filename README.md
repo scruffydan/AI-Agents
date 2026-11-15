@@ -268,9 +268,11 @@ It clones into `~/Knowledge/<repo-name>/`, stripping a trailing `.git`.
 Local paths such as `.` and `/path/to/wiki/.` use the resolved directory name.
 Build validation completes before cloning, so invalid build options leave no clone.
 It refuses an existing destination, including a symlink, even with `--force`;
-there is no automatic pull, reset, or replacement. A failed clone stops installation;
-inspect any remaining destination before retrying. It does not move an existing
-checkout. Git is required only when this option is used.
+there is no automatic pull, reset, or replacement. A failed clone still initializes
+`local.md` when `--init-local` is selected, using the neutral template without a
+knowledge pointer. It stops harness installation and returns an error; inspect any
+remaining clone destination before retrying. It does not move an existing checkout.
+Git is required only when this option is used.
 
 Existing checkouts under `~/.config/ai-agents/<repo-name>/` are not moved or
 deleted. To relocate one, move the complete checkout, including `.git` and any

@@ -517,11 +517,13 @@ install.install(list(build.HARNESSES), Path.home(), force=True)
         self.assertEqual((target / "sentinel").read_text(), "keep")
         self.assertFalse((target / ".git").exists())
 
-    def test_clone_failure_does_not_install_or_create_context(self):
+    def test_clone_failure_initializes_local_context_without_installing(self):
         result = self.run_install("codex", "--clone-repo", str(self.home / "missing.git"), "--init-local")
         self.assertEqual(result.returncode, 1)
         self.assertFalse((self.home / ".codex").exists())
-        self.assertFalse((self.home / ".config/ai-agents/local.md").exists())
+        local = self.home / ".config/ai-agents/local.md"
+        self.assertTrue(local.is_file())
+        self.assertNotIn("For shared knowledge, read", local.read_text())
         self.assertIn("Git clone failed", result.stderr)
 
     def test_bare_installer_prompts_for_local_context_and_repository(self):
