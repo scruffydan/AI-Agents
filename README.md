@@ -265,10 +265,16 @@ SSH/HTTPS authentication:
 
 `--clone-repo` accepts a Git URL, SSH repository address, or local repository path.
 It clones into `~/.config/ai-agents/<repo-name>/`, stripping a trailing `.git`.
+Local paths such as `.` and `/path/to/wiki/.` use the resolved directory name.
+Build validation completes before cloning, so invalid build options leave no clone.
 It refuses an existing destination, including a symlink, even with `--force`;
 there is no automatic pull, reset, or replacement. A failed clone stops installation;
 inspect any remaining destination before retrying. It does not move an existing
 checkout. Git is required only when this option is used.
+
+If an earlier setup keeps its knowledge pointer in `~/.config/ai-agents/shared-knowledge.md`,
+copy the approved pointer into `local.md` before reinstalling. The installer does
+not migrate that file, and the new shared instructions consult only `local.md`.
 
 The flags are independent: cloning alone does not create `local.md`. Combining
 both flags creates a wiki pointer in a **new** `local.md` when the cloned repository

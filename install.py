@@ -120,8 +120,13 @@ def install(harnesses: list[str], home: Path, force: bool) -> None:
 def clone_repository(source: str, home: Path) -> Path:
     if source.startswith("-") or "::" in source:
         raise ValueError("Use a Git URL, SSH repository address, or local repository path.")
-    path = urlsplit(source).path if "://" in source else source
-    name = path.rstrip("/").rsplit("/", 1)[-1].rsplit(":", 1)[-1]
+    if "://" in source:
+        path = urlsplit(source).path
+    elif re.match(r"[^/]+:", source):
+        path = source.split(":", 1)[1]
+    else:
+        path = str(Path(source).resolve())
+    name = path.rstrip("/").rsplit("/", 1)[-1]
     name = name.removesuffix(".git")
     if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]*", name) or name == "local.md":
         raise ValueError("Repository name must be a directory name distinct from local.md.")
@@ -208,8 +213,8 @@ def main(argv: list[str] | None = None) -> int:
     except ValueError as exc:
         parser.error(str(exc))
     try:
-        repository = clone_repository(args.clone_repo, Path.home()) if args.clone_repo else None
         build.build(harnesses, work=args.work, opencode_provider=args.opencode_provider)
+        repository = clone_repository(args.clone_repo, Path.home()) if args.clone_repo else None
         install(harnesses, Path.home(), args.force)
         if args.init_local:
             init_local_context(Path.home(), repository)

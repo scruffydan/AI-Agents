@@ -457,6 +457,35 @@ install.install(list(build.HARNESSES), Path.home(), force=True)
         self.assertFalse((self.home / ".config/ai-agents/local.md").exists())
         self.assertTrue((self.home / ".config/ai-agents/sample-wiki/START.md").is_file())
 
+    def test_clone_accepts_current_directory_and_trailing_dot(self):
+        source = self.local_repository()
+        for index, path in enumerate((".", str(source) + "/.")):
+            with self.subTest(path=path):
+                home = self.home / str(index)
+                home.mkdir()
+                result = subprocess.run(
+                    [sys.executable, str(self.root / "install.py"), "codex",
+                     "--clone-repo", path, "--init-local", "--force"],
+                    cwd=source, env={**os.environ, "HOME": str(home)},
+                    capture_output=True, text=True, input="",
+                )
+                self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+                checkout = home / ".config/ai-agents/sample-wiki"
+                self.assertEqual((checkout / "START.md").read_text(), "Wiki source")
+                self.assertIn("sample-wiki/START.md", (checkout.parent / "local.md").read_text())
+
+    def test_invalid_build_options_do_not_clone_and_corrected_retry_succeeds(self):
+        source = self.local_repository()
+        result = self.run_install(
+            "opencode", "--work", "--opencode-provider", "openai",
+            "--clone-repo", str(source), "--init-local",
+        )
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("--work cannot be combined", result.stderr)
+        self.assertFalse((self.home / ".config/ai-agents").exists())
+        self.assertFalse((self.home / ".config/opencode").exists())
+        self.install("opencode", "--work", "--clone-repo", str(source), "--init-local")
+
     def test_clone_preserves_existing_context_and_nonwiki_gets_neutral_template(self):
         source = self.local_repository(startup=False)
         local = self.home / ".config/ai-agents/local.md"
