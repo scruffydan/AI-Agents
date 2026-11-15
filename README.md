@@ -285,15 +285,17 @@ not migrate that file, and the new shared instructions consult only `local.md`.
 
 The flags are independent: cloning alone does not create `local.md`. Combining
 both flags creates a wiki pointer in a **new** `local.md` when the cloned repository
-has `START.md`; otherwise it creates the neutral template. Existing local context
-is always preserved. Edit it locally as needed:
+has `AGENTS.md`; otherwise it creates the neutral template. Always use `AGENTS.md`
+as a knowledge repository's entry point. Existing local context is preserved;
+update its pointer locally to the repository's `AGENTS.md` when needed. Edit it
+locally as needed:
 
 ```markdown
 # Machine-local context
 
 ## Shared knowledge
 
-For shared knowledge, read `~/Knowledge/<repo-name>/START.md`.
+For shared knowledge, read `~/Knowledge/<repo-name>/AGENTS.md`.
 Use its selective retrieval and pending-correction guidance.
 Keep capture and curation writes in the dedicated knowledge project.
 Report unavailable or stale configured knowledge.

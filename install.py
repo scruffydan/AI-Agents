@@ -146,13 +146,13 @@ def init_local_context(home: Path, repository: Path | None = None) -> None:
     text = (
         "# Machine-local context\n\n"
         "<!-- Optional: add machine-specific context and approved knowledge sources here.\n"
-        "For a wiki, replace <repo-name> in ~/Knowledge/<repo-name>/START.md\n"
+        "For a wiki, replace <repo-name> in ~/Knowledge/<repo-name>/AGENTS.md\n"
         "with its checkout directory name, and describe its access boundaries.\n"
         "Leave this section empty on machines without a knowledge store.\n"
         "Keep private paths and content out of the shared AI-Agents repository. -->\n"
     )
-    if repository is not None and (repository / "START.md").is_file():
-        startup = f"~/Knowledge/{repository.name}/START.md"
+    if repository is not None and (repository / "AGENTS.md").is_file():
+        startup = f"~/Knowledge/{repository.name}/AGENTS.md"
         text = (
             "# Machine-local context\n\n"
             f"For shared knowledge, read `{startup}`.\n\n"

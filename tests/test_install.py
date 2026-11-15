@@ -428,7 +428,7 @@ install.install(list(build.HARNESSES), Path.home(), force=True)
         source = self.home.parent / "sample-wiki.git"
         source.mkdir()
         subprocess.run(["git", "init", "--quiet", str(source)], check=True)
-        (source / ("START.md" if startup else "README.md")).write_text("Wiki source")
+        (source / ("AGENTS.md" if startup else "README.md")).write_text("Wiki source")
         subprocess.run(["git", "-C", str(source), "add", "."], check=True)
         subprocess.run(
             ["git", "-C", str(source), "-c", "user.name=Test", "-c",
@@ -441,21 +441,21 @@ install.install(list(build.HARNESSES), Path.home(), force=True)
         source = self.local_repository()
         self.install("codex", "--clone-repo", str(source), "--init-local")
         checkout = self.home / "Knowledge/sample-wiki"
-        self.assertEqual((checkout / "START.md").read_text(), "Wiki source")
+        self.assertEqual((checkout / "AGENTS.md").read_text(), "Wiki source")
         local = self.home / ".config/ai-agents/local.md"
-        self.assertIn("~/Knowledge/sample-wiki/START.md", local.read_text())
+        self.assertIn("~/Knowledge/sample-wiki/AGENTS.md", local.read_text())
         self.assertEqual(local.stat().st_mode & 0o777, 0o600)
 
-        (checkout / "START.md").write_text("uncommitted change")
+        (checkout / "AGENTS.md").write_text("uncommitted change")
         result = self.run_install("codex", "--clone-repo", str(source), "--init-local")
         self.assertEqual(result.returncode, 1)
-        self.assertEqual((checkout / "START.md").read_text(), "uncommitted change")
+        self.assertEqual((checkout / "AGENTS.md").read_text(), "uncommitted change")
 
     def test_clone_without_init_leaves_local_context_absent(self):
         source = self.local_repository()
         self.install("codex", "--clone-repo", str(source))
         self.assertFalse((self.home / ".config/ai-agents/local.md").exists())
-        self.assertTrue((self.home / "Knowledge/sample-wiki/START.md").is_file())
+        self.assertTrue((self.home / "Knowledge/sample-wiki/AGENTS.md").is_file())
 
     def test_clone_accepts_current_directory_and_trailing_dot(self):
         source = self.local_repository()
@@ -471,8 +471,8 @@ install.install(list(build.HARNESSES), Path.home(), force=True)
                 )
                 self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
                 checkout = home / "Knowledge/sample-wiki"
-                self.assertEqual((checkout / "START.md").read_text(), "Wiki source")
-                self.assertIn("sample-wiki/START.md", (home / ".config/ai-agents/local.md").read_text())
+                self.assertEqual((checkout / "AGENTS.md").read_text(), "Wiki source")
+                self.assertIn("sample-wiki/AGENTS.md", (home / ".config/ai-agents/local.md").read_text())
 
     def test_invalid_build_options_do_not_clone_and_corrected_retry_succeeds(self):
         source = self.local_repository()
@@ -530,7 +530,7 @@ install.install(list(build.HARNESSES), Path.home(), force=True)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertIn("Create machine-local context", result.stdout)
         self.assertIn("Repository URL or path to clone", result.stdout)
-        self.assertIn("sample-wiki/START.md", (self.home / ".config/ai-agents/local.md").read_text())
+        self.assertIn("sample-wiki/AGENTS.md", (self.home / ".config/ai-agents/local.md").read_text())
 
     def test_bare_installer_can_skip_optional_setup(self):
         result = self.run_install(force=False, input_text="\nn\n\n")
