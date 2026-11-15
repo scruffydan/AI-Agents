@@ -255,9 +255,9 @@ To create an optional neutral template while installing:
 
 The new file is created with mode `600`. Existing files, directories, and symlinks
 are preserved, even with `--force`. Normal installation leaves this file alone.
-Without a cloned wiki, the template contains a heading and comments, with no
-active knowledge pointer. To also clone a repository, use your existing Git
-SSH/HTTPS authentication:
+Without a cloned wiki, the template contains a heading and plain Markdown setup
+guidance, with no active knowledge pointer. To also clone a repository, use your
+existing Git SSH/HTTPS authentication:
 
 ```bash
 ./install.py codex --init-local --clone-repo git@github.com:OWNER/REPOSITORY.git
