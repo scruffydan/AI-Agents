@@ -424,11 +424,12 @@ install.install(list(build.HARNESSES), Path.home(), force=True)
         self.assertTrue(local.is_symlink())
         self.assertFalse(target.exists())
 
-    def local_repository(self, startup=True):
+    def local_repository(self, startup=("START.md",)):
         source = self.home.parent / "sample-wiki.git"
         source.mkdir()
         subprocess.run(["git", "init", "--quiet", str(source)], check=True)
-        (source / ("START.md" if startup else "README.md")).write_text("Wiki source")
+        for name in startup or ("README.md",):
+            (source / name).write_text("Wiki source")
         subprocess.run(["git", "-C", str(source), "add", "."], check=True)
         subprocess.run(
             ["git", "-C", str(source), "-c", "user.name=Test", "-c",
@@ -436,6 +437,20 @@ install.install(list(build.HARNESSES), Path.home(), force=True)
              "commit", "--quiet", "-m", "Seed"], check=True,
         )
         return source
+
+    def test_clone_and_init_link_agents_entry_point(self):
+        source = self.local_repository(startup=("AGENTS.md",))
+        self.install("codex", "--clone-repo", str(source), "--init-local")
+        local = self.home / ".config/ai-agents/local.md"
+        self.assertIn("~/Knowledge/sample-wiki/AGENTS.md", local.read_text())
+        self.assertTrue((self.home / "Knowledge/sample-wiki/AGENTS.md").is_file())
+
+    def test_clone_and_init_prefer_agents_over_legacy_start(self):
+        source = self.local_repository(startup=("AGENTS.md", "START.md"))
+        self.install("codex", "--clone-repo", str(source), "--init-local")
+        text = (self.home / ".config/ai-agents/local.md").read_text()
+        self.assertIn("~/Knowledge/sample-wiki/AGENTS.md", text)
+        self.assertNotIn("START.md", text)
 
     def test_clone_and_init_link_new_local_context(self):
         source = self.local_repository()
