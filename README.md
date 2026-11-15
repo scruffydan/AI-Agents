@@ -11,10 +11,15 @@ There are no third-party Python dependencies.
 Run the picker, or name the harnesses to install:
 
 ```bash
-./install.py                 # Interactive; Enter selects Codex
+./install.py                 # Interactive harness, local-context, and repository setup
 ./install.py codex claude    # Install selected harnesses
 ./install.py --all           # Install all three
+./install.py codex --init-local  # Also create an optional machine-local context template
 ```
+
+With no arguments, the installer asks which harnesses to install, whether to
+create `local.md` (default: no), and which repository URL or path to clone (blank:
+skip). Explicit harness names or options do not trigger these extra setup prompts.
 
 Choose one form; `--all` cannot be combined with harness names. Explicit names
 or `--all` also work unattended. Add `--work` for work models or `--force` to
@@ -235,11 +240,64 @@ proposed records in the response; saving or cleaning them requires writing
 authorization. Spec Kit is not a dependency; see the
 [design rationale and sources](docs/feature-context.md).
 
-A configured shared wiki can hold reusable knowledge and links back to project
-records. To connect one, add a short pointer in your local harness or project
-instructions identifying its location and startup page. Wiki access and
-synchronization require separate configuration. Keep private locations and
-content out of public repos.
+### Machine-local context
+
+Shared base instructions consult `~/.config/ai-agents/local.md` when it exists
+and is readable. If it is absent or inaccessible, agents continue normally without
+a missing-configuration notice. Work machines can omit it or use it for approved
+work context; no personal wiki is assumed.
+
+To create an optional neutral template while installing:
+
+```bash
+./install.py codex --init-local
+```
+
+The new file is created with mode `600`. Existing files, directories, and symlinks
+are preserved, even with `--force`. Normal installation leaves this file alone.
+Without a cloned wiki, the template contains a heading and comments, with no
+active knowledge pointer. To also clone a repository, use your existing Git
+SSH/HTTPS authentication:
+
+```bash
+./install.py codex --init-local --clone-repo git@github.com:OWNER/REPOSITORY.git
+```
+
+`--clone-repo` accepts a Git URL, SSH repository address, or local repository path.
+It clones into `~/.config/ai-agents/<repo-name>/`, stripping a trailing `.git`.
+Local paths such as `.` and `/path/to/wiki/.` use the resolved directory name.
+Build validation completes before cloning, so invalid build options leave no clone.
+It refuses an existing destination, including a symlink, even with `--force`;
+there is no automatic pull, reset, or replacement. A failed clone stops installation;
+inspect any remaining destination before retrying. It does not move an existing
+checkout. Git is required only when this option is used.
+
+If an earlier setup keeps its knowledge pointer in `~/.config/ai-agents/shared-knowledge.md`,
+copy the approved pointer into `local.md` before reinstalling. The installer does
+not migrate that file, and the new shared instructions consult only `local.md`.
+
+The flags are independent: cloning alone does not create `local.md`. Combining
+both flags creates a wiki pointer in a **new** `local.md` when the cloned repository
+has `START.md`; otherwise it creates the neutral template. Existing local context
+is always preserved. Edit it locally as needed:
+
+```markdown
+# Machine-local context
+
+## Shared knowledge
+
+For shared knowledge, read `~/.config/ai-agents/<repo-name>/START.md`.
+Use its selective retrieval and pending-correction guidance.
+Keep capture and curation writes in the dedicated knowledge project.
+Report unavailable or stale configured knowledge.
+Do not broaden sandbox access for retrieval.
+This file grants no synchronization or publishing permission.
+```
+
+Replace `<repo-name>` with the actual checkout directory name; it is not a literal
+folder name. `--init-local` alone does not clone a repository.
+Keep private locations and content out of public repos. Configure each host
+separately and test fresh-session retrieval with its actual permissions. Wiki access and synchronization require separate configuration.
 
 ## Permission limits
 

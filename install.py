@@ -11,9 +11,13 @@ if sys.version_info < (3, 11):
 import argparse
 from datetime import datetime
 import filecmp
+import os
+import re
 from pathlib import Path
 import shutil
+import subprocess
 import tempfile
+from urllib.parse import urlsplit
 
 import build
 
@@ -113,7 +117,61 @@ def install(harnesses: list[str], home: Path, force: bool) -> None:
                 install_item(entry, destination_dir / entry.name)
 
 
+def clone_repository(source: str, home: Path) -> Path:
+    if source.startswith("-") or "::" in source:
+        raise ValueError("Use a Git URL, SSH repository address, or local repository path.")
+    if "://" in source:
+        path = urlsplit(source).path
+    elif re.match(r"[^/]+:", source):
+        path = source.split(":", 1)[1]
+    else:
+        path = str(Path(source).resolve())
+    name = path.rstrip("/").rsplit("/", 1)[-1]
+    name = name.removesuffix(".git")
+    if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]*", name) or name == "local.md":
+        raise ValueError("Repository name must be a directory name distinct from local.md.")
+    destination = home / ".config/ai-agents" / name
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    # Reserve an empty destination without following or replacing an existing path.
+    destination.mkdir(mode=0o700)
+    result = subprocess.run(["git", "clone", "--", source, str(destination)])
+    if result.returncode:
+        raise ValueError(f"Git clone failed; inspect {destination} before retrying.")
+    return destination
+
+
+def init_local_context(home: Path, repository: Path | None = None) -> None:
+    destination = home / ".config/ai-agents/local.md"
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    text = (
+        "# Machine-local context\n\n"
+        "<!-- Optional: add machine-specific context and approved knowledge sources here.\n"
+        "For a wiki, replace <repo-name> in ~/.config/ai-agents/<repo-name>/START.md\n"
+        "with its checkout directory name, and describe its access boundaries.\n"
+        "Leave this section empty on machines without a knowledge store.\n"
+        "Keep private paths and content out of the shared AI-Agents repository. -->\n"
+    )
+    if repository is not None and (repository / "START.md").is_file():
+        startup = f"~/.config/ai-agents/{repository.name}/START.md"
+        text = (
+            "# Machine-local context\n\n"
+            f"For shared knowledge, read `{startup}`.\n\n"
+            "Follow its selective retrieval and correction guidance.\n"
+            "Keep capture and curation in the knowledge project.\n"
+            "This grants no additional access or publishing permissions.\n"
+        )
+    try:
+        fd = os.open(destination, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+    except FileExistsError:
+        print(f"Preserved existing local context: {destination}")
+        return
+    with os.fdopen(fd, "w") as handle:
+        handle.write(text)
+    print(f"Created local context: {destination}")
+
+
 def main(argv: list[str] | None = None) -> int:
+    arguments = sys.argv[1:] if argv is None else argv
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "harnesses", nargs="*", metavar="{" + ",".join(build.HARNESSES) + "}",
@@ -122,13 +180,21 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--all", action="store_true", help="Install all three harnesses.")
     parser.add_argument("--work", action="store_true", help="Use work model mappings.")
     parser.add_argument(
+        "--init-local", action="store_true",
+        help="Create ~/.config/ai-agents/local.md if absent; never replace existing local context.",
+    )
+    parser.add_argument(
         "--opencode-provider", choices=build.OPENCODE_PROVIDERS,
         help="Override the provider prefix for rendered OpenCode models.",
     )
     parser.add_argument(
         "-y", "--force", action="store_true", help="Replace changed files without prompting.",
     )
-    args = parser.parse_intermixed_args(argv)
+    parser.add_argument(
+        "--clone-repo", metavar="URL",
+        help="Clone a repository into ~/.config/ai-agents/<repo-name>; destination must not exist.",
+    )
+    args = parser.parse_intermixed_args(arguments)
     unknown = [name for name in args.harnesses if name not in build.HARNESSES]
     if unknown:
         parser.error(f"invalid harness: {', '.join(unknown)} (choose from {', '.join(build.HARNESSES)})")
@@ -136,11 +202,22 @@ def main(argv: list[str] | None = None) -> int:
         parser.error("Use --all or explicit harness names, not both.")
     try:
         harnesses = list(build.HARNESSES) if args.all else args.harnesses or select_harnesses()
+        if not arguments:
+            try:
+                answer = input("Create machine-local context (local.md)? [y/N]: ")
+                args.init_local = answer.strip().lower() in {"y", "yes"}
+                args.clone_repo = input("Repository URL or path to clone [Enter to skip]: ").strip() or None
+            except EOFError:
+                # Leave unanswered optional setup at its default.
+                pass
     except ValueError as exc:
         parser.error(str(exc))
     try:
         build.build(harnesses, work=args.work, opencode_provider=args.opencode_provider)
+        repository = clone_repository(args.clone_repo, Path.home()) if args.clone_repo else None
         install(harnesses, Path.home(), args.force)
+        if args.init_local:
+            init_local_context(Path.home(), repository)
     except (ValueError, OSError) as exc:
         parser.exit(1, f"Install failed: {exc}\n")
     return 0

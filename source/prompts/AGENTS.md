@@ -27,6 +27,15 @@ guidance and the user's current request within the harness's instruction hierarc
   root `CONTEXT.md` using the skill's handoff and cleanup rules. Respect the current
   task's read and write permissions.
 
+## Machine-local context
+
+If `~/.config/ai-agents/local.md` exists and is readable, consult it
+for machine-specific context and optional knowledge-store pointers.
+Otherwise, continue normally.
+
+Use linked knowledge only when relevant and permitted by the current task.
+This does not grant additional access or synchronization permissions.
+
 ## Writing
 
 - Answer directly, then give the explanation or evidence the reader needs. Put
