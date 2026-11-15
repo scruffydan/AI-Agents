@@ -440,10 +440,10 @@ install.install(list(build.HARNESSES), Path.home(), force=True)
     def test_clone_and_init_link_new_local_context(self):
         source = self.local_repository()
         self.install("codex", "--clone-repo", str(source), "--init-local")
-        checkout = self.home / ".config/ai-agents/sample-wiki"
+        checkout = self.home / "Knowledge/sample-wiki"
         self.assertEqual((checkout / "START.md").read_text(), "Wiki source")
         local = self.home / ".config/ai-agents/local.md"
-        self.assertIn("~/.config/ai-agents/sample-wiki/START.md", local.read_text())
+        self.assertIn("~/Knowledge/sample-wiki/START.md", local.read_text())
         self.assertEqual(local.stat().st_mode & 0o777, 0o600)
 
         (checkout / "START.md").write_text("uncommitted change")
@@ -455,7 +455,7 @@ install.install(list(build.HARNESSES), Path.home(), force=True)
         source = self.local_repository()
         self.install("codex", "--clone-repo", str(source))
         self.assertFalse((self.home / ".config/ai-agents/local.md").exists())
-        self.assertTrue((self.home / ".config/ai-agents/sample-wiki/START.md").is_file())
+        self.assertTrue((self.home / "Knowledge/sample-wiki/START.md").is_file())
 
     def test_clone_accepts_current_directory_and_trailing_dot(self):
         source = self.local_repository()
@@ -470,9 +470,9 @@ install.install(list(build.HARNESSES), Path.home(), force=True)
                     capture_output=True, text=True, input="",
                 )
                 self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-                checkout = home / ".config/ai-agents/sample-wiki"
+                checkout = home / "Knowledge/sample-wiki"
                 self.assertEqual((checkout / "START.md").read_text(), "Wiki source")
-                self.assertIn("sample-wiki/START.md", (checkout.parent / "local.md").read_text())
+                self.assertIn("sample-wiki/START.md", (home / ".config/ai-agents/local.md").read_text())
 
     def test_invalid_build_options_do_not_clone_and_corrected_retry_succeeds(self):
         source = self.local_repository()
@@ -508,7 +508,7 @@ install.install(list(build.HARNESSES), Path.home(), force=True)
         target = self.home / "keep"
         target.mkdir()
         (target / "sentinel").write_text("keep")
-        destination = self.home / ".config/ai-agents/sample-wiki"
+        destination = self.home / "Knowledge/sample-wiki"
         destination.parent.mkdir(parents=True)
         destination.symlink_to(target, target_is_directory=True)
         result = self.run_install("codex", "--clone-repo", str(source))
