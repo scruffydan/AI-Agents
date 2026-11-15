@@ -486,7 +486,7 @@ install.install(list(build.HARNESSES), Path.home(), force=True)
         self.assertFalse((self.home / ".config/opencode").exists())
         self.install("opencode", "--work", "--clone-repo", str(source), "--init-local")
 
-    def test_clone_preserves_existing_context_and_nonwiki_gets_neutral_template(self):
+    def test_clone_preserves_existing_context(self):
         source = self.local_repository(startup=False)
         local = self.home / ".config/ai-agents/local.md"
         local.parent.mkdir(parents=True)
@@ -497,11 +497,11 @@ install.install(list(build.HARNESSES), Path.home(), force=True)
         self.install("codex", "--init-local")
         self.assertNotIn("For shared knowledge, read", local.read_text())
 
-    def test_clone_without_startup_page_creates_neutral_context(self):
+    def test_clone_configures_pointer_before_entry_point_exists(self):
         source = self.local_repository(startup=False)
         self.install("codex", "--clone-repo", str(source), "--init-local")
         local = self.home / ".config/ai-agents/local.md"
-        self.assertNotIn("For shared knowledge, read", local.read_text())
+        self.assertIn("~/Knowledge/sample-wiki/AGENTS.md", local.read_text())
 
     def test_clone_refuses_symlink_destination(self):
         source = self.local_repository()
@@ -523,7 +523,8 @@ install.install(list(build.HARNESSES), Path.home(), force=True)
         self.assertFalse((self.home / ".codex").exists())
         local = self.home / ".config/ai-agents/local.md"
         self.assertTrue(local.is_file())
-        self.assertNotIn("For shared knowledge, read", local.read_text())
+        self.assertIn("~/Knowledge/missing/AGENTS.md", local.read_text())
+        self.assertNotIn("<repo-name>", local.read_text())
         self.assertIn("Git clone failed", result.stderr)
 
     def test_bare_installer_prompts_for_local_context_and_repository(self):

@@ -269,10 +269,11 @@ Local paths such as `.` and `/path/to/wiki/.` use the resolved directory name.
 Build validation completes before cloning, so invalid build options leave no clone.
 It refuses an existing destination, including a symlink, even with `--force`;
 there is no automatic pull, reset, or replacement. A failed clone still initializes
-`local.md` when `--init-local` is selected, using the neutral template without a
-knowledge pointer. It stops harness installation and returns an error; inspect any
-remaining clone destination before retrying. It does not move an existing checkout.
-Git is required only when this option is used.
+`local.md` when `--init-local` is selected, pointing to the requested repository's
+`AGENTS.md` at its intended checkout location. Agents report an unavailable checkout
+or entry point and continue without it. The installer stops harness installation
+and returns an error; inspect any remaining clone destination before retrying.
+It does not move an existing checkout. Git is required only when this option is used.
 
 Existing checkouts under `~/.config/ai-agents/<repo-name>/` are not moved or
 deleted. To relocate one, move the complete checkout, including `.git` and any
@@ -286,11 +287,12 @@ copy the approved pointer into `local.md` before reinstalling. The installer doe
 not migrate that file, and the new shared instructions consult only `local.md`.
 
 The flags are independent: cloning alone does not create `local.md`. Combining
-both flags creates a wiki pointer in a **new** `local.md` when the cloned repository
-has `AGENTS.md`; otherwise it creates the neutral template. Always use `AGENTS.md`
-as a knowledge repository's entry point. Existing local context is preserved;
-update its pointer locally to the repository's `AGENTS.md` when needed. Edit it
-locally as needed:
+both flags creates a pointer to `~/Knowledge/<repo-name>/AGENTS.md` in a **new**
+`local.md` from the requested repository name, even if cloning fails or the entry
+point is not yet present. With no repository specified, `--init-local` creates the
+neutral template. Always use `AGENTS.md` as a knowledge repository's entry point.
+Existing local context is preserved; update its pointer locally to the repository's
+`AGENTS.md` when needed. Edit it locally as needed:
 
 ```markdown
 # Machine-local context
