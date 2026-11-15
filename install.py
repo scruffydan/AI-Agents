@@ -145,11 +145,11 @@ def init_local_context(home: Path, repository: Path | None = None) -> None:
     destination.parent.mkdir(parents=True, exist_ok=True)
     text = (
         "# Machine-local context\n\n"
-        "<!-- Optional: add machine-specific context and approved knowledge sources here.\n"
-        "For a wiki, replace <repo-name> in ~/Knowledge/<repo-name>/AGENTS.md\n"
+        "Add machine-specific context and approved knowledge sources here.\n\n"
+        "For a wiki, replace `<repo-name>` in `~/Knowledge/<repo-name>/AGENTS.md`\n"
         "with its checkout directory name, and describe its access boundaries.\n"
-        "Leave this section empty on machines without a knowledge store.\n"
-        "Keep private paths and content out of the shared AI-Agents repository. -->\n"
+        "Omit the knowledge pointer on machines without a knowledge store.\n\n"
+        "Keep private paths and content out of the shared AI-Agents repository.\n"
     )
     if repository is not None and (repository / "AGENTS.md").is_file():
         startup = f"~/Knowledge/{repository.name}/AGENTS.md"
