@@ -67,6 +67,12 @@ workflow. Record source, date, scope, and confidence or decision status. Preserv
 explicit corrections and mark superseded guidance so later retrieval finds the
 current decision. Inferred preferences remain uncertain until confirmed.
 
+When a change lands on a project's default branch, check whether it changes a fact
+summarized in the configured shared wiki. For a material change, use the wiki's
+authorized inbox workflow to record the affected page, what changed, and a link
+to the landed revision. Check existing captures to avoid duplicates. An open PR
+is still a proposal. Routine changes that leave the summary accurate need no capture.
+
 Separate new capture notes from curation of maintained wiki pages. Reuse existing
 capture templates and unique filenames; respect the store's concurrency policy.
 During authorized curation, preserve captured sources, link synthesis to them,
