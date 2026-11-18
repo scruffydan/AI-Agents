@@ -158,10 +158,10 @@ class BuildTests(unittest.TestCase):
     def test_brainstorm_follows_work_and_provider_options(self):
         brainstorm = self.root / "build/opencode/agents/brainstorm.md"
         for args, model in (
-            ((), "openai/gpt-6-astra#high"),
+            ((), "openai/gpt-6.2-astra#high"),
             (("--work",), "google-vertex/claude-opus-5-5#high"),
-            (("--opencode-provider", "openai"), "openai/gpt-6-astra#high"),
-            (("--opencode-provider", "opencode"), "opencode/gpt-6-astra#high"),
+            (("--opencode-provider", "openai"), "openai/gpt-6.2-astra#high"),
+            (("--opencode-provider", "opencode"), "opencode/gpt-6.2-astra#high"),
         ):
             with self.subTest(args=args):
                 self.build("opencode", *args)
@@ -253,7 +253,7 @@ class BuildTests(unittest.TestCase):
                     self.assertNotIn("\nmodel:", header)
                 agent = self.root / "build/codex/.codex/agents/brainstorm.toml"
                 parsed = tomllib.loads(agent.read_text())
-                self.assertEqual(parsed["model"], "gpt-6-astra")
+                self.assertEqual(parsed["model"], "gpt-6.2-astra")
                 self.assertEqual(parsed["model_reasoning_effort"], "high")
                 self.assertTrue(parsed["features"]["shell_tool"])
                 self.assertNotIn("or running shell commands", parsed["developer_instructions"])
