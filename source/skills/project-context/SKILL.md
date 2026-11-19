@@ -62,26 +62,10 @@ remains active, leave a brief `No active work` status and useful pointers in the
 context file. Cleanup follows the same write authorization as capture; read-only
 tasks report proposed updates in the response.
 
-For an authorized contribution to shared knowledge, follow that store's capture
-workflow. Record source, date, scope, and confidence or decision status. Preserve
-explicit corrections and mark superseded guidance so later retrieval finds the
-current decision. Inferred preferences remain uncertain until confirmed.
-
-When a change lands on a project's default branch, check whether it changes a fact
-summarized in the configured shared wiki. For a material change, use the wiki's
-authorized inbox workflow to record the affected page, what changed, and a link
-to the landed revision. Check existing captures to avoid duplicates. An open PR
-is still a proposal. Routine changes that leave the summary accurate need no capture.
-
-Separate new capture notes from curation of maintained wiki pages. Reuse existing
-capture templates and unique filenames; respect the store's concurrency policy.
-During authorized curation, preserve captured sources, link synthesis to them,
-update affected pages and the index, and log significant changes. Check for broken
-links, unsupported summaries, and stale or conflicting claims.
-
-Preserve both contributions if writers conflict, and report unsynchronized work.
-Git publishing follows existing authorization and the Git workflow; never discard
-notes or force-push to make synchronization succeed.
+Before writing to a configured shared knowledge store, and when a change lands
+on a project's default branch while a shared wiki is configured, read
+[shared-knowledge.md](shared-knowledge.md) for the capture, curation, and
+conflict rules. Skip it when no shared store is configured.
 
 Store concise summaries and links, excluding secrets and unnecessary transcripts.
 Before moving knowledge between repositories, verify the destination audience and
