@@ -151,3 +151,11 @@ These techniques are part of systematic debugging and available in this director
 **Related skills:**
 - **`five-whys`** - Optional evidence-backed causal questioning for recurring or unclear failures
 - **`verification-before-completion`** - Verify fix worked before claiming success
+
+## Source
+
+Adapted from Jesse Vincent's
+[superpowers systematic-debugging skill](https://github.com/obra/superpowers/blob/030a222af19c1f3a93c6eb876a7422d8e4fc0162/skills/systematic-debugging/SKILL.md).
+The four-phase structure and the supporting technique topics come from upstream.
+The instructions were rewritten here to scale with the problem and to honor
+analysis-only requests. The upstream MIT notice is retained in [LICENSE](LICENSE).

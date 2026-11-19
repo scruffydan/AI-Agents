@@ -97,3 +97,6 @@ an unchanged copy of the upstream license file.
 | `leaving-pr-comments` | [tstack](https://github.com/t3dotgg/tstack) | Theo Browne | [LICENSE](source/skills/leaving-pr-comments/LICENSE) |
 | `modernize` | [tstack](https://github.com/t3dotgg/tstack) | Theo Browne | [LICENSE](source/skills/modernize/LICENSE) |
 | `takeover` | [tstack](https://github.com/t3dotgg/tstack) | Theo Browne | [LICENSE](source/skills/takeover/LICENSE) |
+| `brainstorming` | [superpowers](https://github.com/obra/superpowers) | Jesse Vincent | [LICENSE](source/skills/brainstorming/LICENSE) |
+| `systematic-debugging` | [superpowers](https://github.com/obra/superpowers) | Jesse Vincent | [LICENSE](source/skills/systematic-debugging/LICENSE) |
+| `verification-before-completion` | [superpowers](https://github.com/obra/superpowers) | Jesse Vincent | [LICENSE](source/skills/verification-before-completion/LICENSE) |
