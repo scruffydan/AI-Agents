@@ -15,8 +15,9 @@ relevant paths; do not turn a focused review into a repository-wide audit.
 
 ## Read-only inspection
 
-Inspect authorized code, history, tests, fixtures, configuration, and project
-records through available read-only facilities. Respect actual permissions; a
+Inspect authorized code, tests, fixtures, configuration, and project records
+through available read-only facilities, and history where your tools can read
+it. Name unreadable history as an inspection limit. Respect actual permissions; a
 report-only configuration alone does not establish an enforcement boundary.
 Do not edit files or records, create tests or scripts, execute code or tests,
 install dependencies, publish, or launch follow-on agents. Recommend checks and

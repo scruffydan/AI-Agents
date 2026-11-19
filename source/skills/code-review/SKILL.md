@@ -58,12 +58,10 @@ Optional targeted perspective:
   full reviews. For example, request a blast-radius pass on a schema migration
   and its readers and writers.
 
-The blast-radius specialist inspects authorized code, history, and records only;
-it does not edit files, create tests or scripts, execute code or tests, publish,
-or delegate. It distinguishes confirmed risks, investigated and cleared cases,
-and unresolved assumptions, recommending the smallest useful checks to the
-parent. The parent owns execution and implementation, retains overall
-correctness, and deduplicates findings with the other perspectives.
+The blast-radius specialist reports confirmed risks, investigated and cleared
+cases, and unresolved assumptions, and recommends checks without running them.
+The parent runs those checks, retains overall correctness, and deduplicates its
+findings with the other perspectives.
 
 Use the environment's supported agent tools and configured models. For a full
 review, run specialists concurrently within available capacity; queue remaining
@@ -71,16 +69,21 @@ specialists when capacity is limited. If delegation is unavailable, perform thos
 passes directly and disclose that limitation. Never invent an agent or assume
 that a permission configuration is enforced across harnesses.
 
-Give each specialist the target, requirements, relevant context, and explicit
-read-only/report-only instructions. Do not let reviewers modify files or ask the
-user questions; they should return uncertainties to the calling agent. Keep
-commands within the review's authorized scope and the agent's actual permissions.
+Give each specialist the review scope as changed paths with line ranges or as
+the diff text. Some harnesses give reviewers only file read and search tools, so
+they cannot compute a diff or read history themselves. Add the requirements,
+relevant context, and explicit read-only/report-only instructions. For a
+blast-radius pass, also pass the relevant history. Do not let reviewers modify
+files or ask the user questions; they should return uncertainties to the calling
+agent. Keep commands within the review's authorized scope and the agent's actual
+permissions.
 
 Combine duplicate findings and discard unsupported claims. Prioritize concrete
 correctness and security risks over cosmetic changes.
 
-For each material finding, provide severity, a file and line reference, the
-trigger and impact, and a practical recommendation. Explain material conflicts
+For each material finding, provide severity on the specialists' shared scale
+(critical, high, medium, low), a file and line reference, the trigger and
+impact, and a practical recommendation. Explain material conflicts
 between supported recommendations. Identify uncertainties, checks performed, and
 checks that were not run.
 If no actionable issues are found, say so and state the review's limits.

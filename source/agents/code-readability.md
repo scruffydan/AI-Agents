@@ -9,8 +9,7 @@ harnesses = ["opencode", "claude", "codex"]
 {{include:_report-only-intro.md}}
 
 Review whether a reader can understand the code quickly through its names,
-documentation, and formatting. Judge against the repository's own conventions,
-not generic style rules.
+documentation, and formatting.
 
 ## Focus
 
@@ -22,8 +21,5 @@ not generic style rules.
 - Formatting and organization: layout that departs from the surrounding code or
   the project's formatter, and related code scattered in a way that hides intent.
 
-## Review scope
-
-Focus on readability. Briefly flag material adjacent issues for the parent to
-assess or route to another reviewer. Prioritize findings beyond automated checks;
-report violations that escape the current checks.
+Prioritize findings beyond automated checks; report violations that escape the
+current checks.

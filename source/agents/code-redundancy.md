@@ -9,7 +9,7 @@ harnesses = ["opencode", "claude", "codex"]
 {{include:_report-only-intro.md}}
 
 Review duplication and dead code that add maintenance cost or let copies drift
-apart. Judge against the repository's own conventions, not generic style rules.
+apart.
 
 ## Focus
 
@@ -25,8 +25,3 @@ Search for references before calling something unused, and note dynamic or
 external use you could not rule out. Recommend consolidation only when the
 copies represent the same concept and should change together; coincidental
 similarity is cheaper to keep than the wrong abstraction.
-
-## Review scope
-
-Focus on duplication and dead code. Briefly flag material adjacent issues for the
-parent to assess or route to another reviewer.
