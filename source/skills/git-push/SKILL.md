@@ -1,6 +1,6 @@
 ---
 name: git-push
-description: Use before an authorized git push to check the outgoing commits, branch, remote, and readiness to publish.
+description: Check the outgoing commits, branch, remote, and readiness to publish, then push. Use before an authorized git push.
 ---
 
 # Git Push

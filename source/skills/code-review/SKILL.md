@@ -1,6 +1,6 @@
 ---
 name: code-review
-description: Use when reviewing code or changes, requesting specialist findings, or evaluating supplied code review feedback before deciding whether or how to apply it.
+description: Review code or a diff, coordinate specialist reviewers, and evaluate supplied review feedback before applying it. Use when asked to review code or changes, run a targeted or full specialist review, or assess a reviewer's comments.
 ---
 
 # Code Review and Feedback

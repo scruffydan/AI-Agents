@@ -1,6 +1,6 @@
 ---
 name: verification-before-completion
-description: Choose proportionate verification and report evidence accurately for implementation, commits, pushes, PRs, and completion claims.
+description: Choose proportionate verification and report evidence accurately. Use before claiming work is complete, fixed, or passing, and before a commit, push, or PR.
 ---
 
 # Verification Before Completion

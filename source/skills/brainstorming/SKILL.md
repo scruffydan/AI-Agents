@@ -1,6 +1,6 @@
 ---
 name: brainstorming
-description: Explore unresolved requirements or design alternatives before implementation, or use the configured brainstorming agent when explicitly requested. Routine text edits and fully specified small changes do not need this workflow.
+description: Explore unresolved requirements or design alternatives before implementation. Use when the approach is still open, or when the user explicitly asks for the brainstorming agent; not for routine text edits or fully specified small changes.
 ---
 
 # Explore a Design Before Implementation

@@ -1,6 +1,6 @@
 ---
 name: thorough-plan
-description: Use when the user requests a detailed implementation plan or architecture analysis without making changes.
+description: Analyze a requested change and produce an actionable implementation plan without editing files. Use when the user asks for a detailed plan or architecture analysis; not for splitting an agreed plan into tickets (use to-tickets).
 ---
 
 # Thorough Planning

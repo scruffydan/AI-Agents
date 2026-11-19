@@ -1,6 +1,6 @@
 ---
 name: technical-writing
-description: Write or revise technical documentation, tutorials, how-to guides, reference material, and explanations so readers can understand and complete their task.
+description: Write or revise technical documentation, tutorials, how-to guides, reference material, and explanations so readers can understand and complete their task. Use when drafting or restructuring documentation; not for deciding whether project docs need an update (use update-readme) or for removing AI phrasing (use unslop).
 ---
 
 # Technical Writing
