@@ -1,6 +1,6 @@
 ---
 name: systematic-debugging
-description: Use when encountering any bug, test failure, or unexpected behavior, before proposing fixes
+description: Investigate a bug, test failure, or unexpected behavior to establish its cause from evidence before proposing a fix. Use when the cause is not yet known or a first fix did not work; a clear local failure needs only a brief check.
 ---
 
 # Systematic Debugging
@@ -15,9 +15,9 @@ performing other mutations. Hypothesis testing and implementation steps apply
 only within the authorized task; stop at findings and recommendations when
 implementation is out of scope.
 
-### Phase 1: Root Cause Investigation
+## Phase 1: Root cause investigation
 
-**BEFORE attempting ANY fix:**
+Before attempting a fix:
 
 1. **Read Errors and Warnings Carefully**
    - They often contain the exact solution
@@ -39,18 +39,15 @@ implementation is out of scope.
 
 4. **Gather Evidence in Multi-Component Systems**
 
-   **WHEN a system has multiple components (CI -> build -> signing, API -> service -> database) and existing evidence does not locate the failure, add targeted diagnostics:**
-   ```
-   For EACH component boundary:
-     - Log what data enters component
-     - Log what data exits component
-     - Verify environment/config propagation
-     - Check state at each layer
+   When a system has several components (CI -> build -> signing, API -> service
+   -> database) and existing evidence does not locate the failure, add targeted
+   diagnostics at each component boundary:
+   - Log what data enters and exits the component
+   - Verify environment and config propagation
+   - Check state at each layer
 
-   Run once to gather evidence showing WHERE it breaks
-   THEN analyze evidence to identify failing component
-   THEN investigate that specific component
-   ```
+   Run once to see where it breaks, identify the failing component from that
+   evidence, then investigate that component.
 
    For example, compare a request's identifier, input shape, and result at the
    API, worker, and database boundaries to locate where behavior diverges. Record
@@ -58,9 +55,9 @@ implementation is out of scope.
 
 5. **Trace Data Flow**
 
-   **WHEN error is deep in call stack:**
-
-   See [root-cause-tracing.md](root-cause-tracing.md) in this directory for the complete backward tracing technique.
+   When the error is deep in the call stack, read
+   [root-cause-tracing.md](root-cause-tracing.md) for the complete backward
+   tracing technique.
 
    **Quick version:**
    - Where does bad value originate?
@@ -72,7 +69,7 @@ For recurring failures, unclear causal links, or an explicit Five Whys request,
 optionally use the `five-whys` skill. Follow the evidence across multiple
 causal paths when needed; do not force a question chain for a clear local bug.
 
-### Phase 2: Pattern Analysis
+## Phase 2: Pattern analysis
 
 **Find the pattern before fixing:**
 
@@ -95,7 +92,7 @@ causal paths when needed; do not force a question chain for a clear local bug.
    - What settings, config, environment?
    - What assumptions does it make?
 
-### Phase 3: Hypothesis and Testing
+## Phase 3: Hypothesis and testing
 
 **Scientific method:**
 
@@ -114,7 +111,7 @@ causal paths when needed; do not force a question chain for a clear local bug.
    - Explain what remains unknown and what evidence would resolve it
    - Research further or ask a focused question when more context is needed
 
-### Phase 4: Implementation
+## Phase 4: Implementation
 
 1. Create a focused reproduction or regression check for meaningful behavior or
    security changes. Confirm that it demonstrates the original failure. For
@@ -140,9 +137,9 @@ Within the authorized task, consider mitigation such as a timeout, clearer error
 or bounded retry. Before retrying, check whether the operation is safe to repeat;
 an ambiguous failure after a side effect can otherwise duplicate work or data.
 
-## Supporting Techniques
+## Supporting techniques
 
-These techniques are part of systematic debugging and available in this directory:
+Read the one that fits the situation:
 
 - **[root-cause-tracing.md](root-cause-tracing.md)** - Trace bugs backward through call stack to find original trigger
 - **[defense-in-depth.md](defense-in-depth.md)** - Add validation at multiple layers after finding root cause
