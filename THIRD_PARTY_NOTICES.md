@@ -19,7 +19,7 @@ linked skill before the adaptation landed here.
 
 ## Ponytail
 
-- Used in: [source/agents/code-simplifier.md](source/agents/code-simplifier.md)
+- Used in: [source/agents/code-maintainability.md](source/agents/code-maintainability.md)
   and [source/prompts/AGENTS.md](source/prompts/AGENTS.md), which adapt selected
   practices (adapted 2026-11-10).
 - Upstream: [Ponytail skill](https://github.com/DietrichGebert/ponytail/blob/df9e89941d50419fd5bcf1de41e28097f1db49b2/skills/ponytail/SKILL.md)

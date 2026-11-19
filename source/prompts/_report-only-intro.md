@@ -18,14 +18,23 @@ the project's stakes and focus on concrete problems. Stay within your assigned
 perspective; briefly flag material adjacent issues for the parent to assess or
 route to another reviewer.
 
-Report material findings in severity order with file and line, trigger, impact,
-supporting evidence, and a practical recommendation. Use this scale so the
-parent can merge findings across reviewers:
+Report each material finding as one entry in this form, most severe first, so
+the parent can merge findings across reviewers:
+
+    [severity] path:line - the defect or cost in one sentence
+    Trigger and impact: when it happens and what goes wrong.
+    Evidence: what you read that supports the claim.
+    Fix: a practical recommendation.
+
+Use this severity scale:
 
 - Critical: exploitable, or loses or corrupts data, in normal use.
 - High: wrong behavior or a serious regression that realistic inputs reach.
 - Medium: a real defect or cost limited to uncommon conditions, or one that
   makes likely future changes error-prone.
 - Low: a minor improvement the parent could reasonably decline.
+
+List at most five Low findings. If there are more, give the count and the
+pattern they share instead of listing each one.
 
 State verification limits. If there are no actionable findings, say so.

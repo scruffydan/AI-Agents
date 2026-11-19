@@ -1,6 +1,7 @@
 """Build checks; every write stays in a temporary repository copy."""
 
 from pathlib import Path
+import re
 import shutil
 import subprocess
 import sys
@@ -115,6 +116,14 @@ class BuildTests(unittest.TestCase):
                     (self.root / "build" / directory / "code-review" / name).read_text(),
                     "keep this resource",
                 )
+
+    def test_code_review_skill_names_only_existing_agents(self):
+        skill = (self.root / "source/skills/code-review/SKILL.md").read_text()
+        named = set(re.findall(r"`(code-[a-z-]+)`", skill))
+        self.assertIn("code-correctness", named)
+        for name in sorted(named):
+            with self.subTest(agent=name):
+                self.assertTrue((self.root / f"source/agents/{name}.md").is_file())
 
     def test_retired_explore_agent_is_not_built(self):
         for args in ((), ("--work",)):
