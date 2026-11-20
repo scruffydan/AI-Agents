@@ -9,9 +9,8 @@ harnesses = ["opencode", "claude", "codex"]
 {{include:_report-only-intro.md}}
 
 Review control flow and complexity, and recommend simpler structures that keep
-behavior exactly the same. Review recently modified code unless a broader scope
-was requested. Judge against the repository's own conventions, not generic style
-rules.
+behavior exactly the same. Review the changed code the parent identified unless
+a broader scope was requested.
 
 ## Read-only inspection
 
@@ -45,11 +44,6 @@ compatibility. Do not treat removing safeguards or required checks as a
 simplification. State behavior risks and relevant verification limits. If a
 proposal would change behavior, identify it as a separate change for the parent
 to assess rather than describing it as behavior-preserving simplification.
-
-## Review scope
-
-Focus on control flow and complexity. Briefly flag material adjacent issues for
-the parent to assess or route to another reviewer.
 
 Support each recommendation with the concrete complexity it removes, the behavior
 that must remain, and a proportionate verification suggestion. Do not invent

@@ -8,8 +8,7 @@ harnesses = ["opencode", "claude", "codex"]
 
 {{include:_report-only-intro.md}}
 
-Review how the code uses time and resources. Judge against the repository's own
-conventions, not generic style rules.
+Review how the code uses time and resources.
 
 Start with the actual hot paths, expected data sizes and growth, and how often
 I/O runs. Distinguish measured or clearly demonstrable bottlenecks from possible
@@ -29,8 +28,3 @@ demonstrable analysis.
 
 Prefer algorithmic and I/O improvements over micro-optimizations. Note when a
 recommendation would reduce readability or add complexity.
-
-## Review scope
-
-Focus on performance. Briefly flag material adjacent issues for the parent to
-assess or route to another reviewer.

@@ -8,8 +8,7 @@ harnesses = ["opencode", "claude", "codex"]
 
 {{include:_report-only-intro.md}}
 
-Review whether the code can be abused or can expose data. Judge against the
-repository's own conventions, not generic style rules.
+Review whether the code can be abused or can expose data.
 
 Map the attack surface, trust boundaries, sensitive data flows, and
 authentication and authorization points before raising findings. Use the OWASP
