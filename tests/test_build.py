@@ -1,6 +1,7 @@
 """Build checks; every write stays in a temporary repository copy."""
 
 from pathlib import Path
+import re
 import shutil
 import subprocess
 import sys
@@ -327,6 +328,31 @@ class BuildTests(unittest.TestCase):
             for path in (self.root / directory).rglob("*.md"):
                 with self.subTest(path=str(path.relative_to(self.root))):
                     self.assertNotIn("../", path.read_text())
+
+    def test_skill_metadata_and_links_fit_the_portable_format(self):
+        # Name and description limits come from the Agent Skills specification
+        # that all three harnesses read. This repository also restricts
+        # frontmatter to those two keys.
+        link = re.compile(r"\]\(([^)\s]+)\)")
+        for skill in sorted(path for path in (self.root / "source/skills").iterdir() if path.is_dir()):
+            text = (skill / "SKILL.md").read_text()
+            with self.subTest(skill=skill.name):
+                self.assertTrue(text.startswith("---\n"))
+                header = text.split("---\n", 2)[1]
+                fields = dict(line.split(": ", 1) for line in header.splitlines())
+                self.assertEqual(set(fields), {"name", "description"})
+                self.assertEqual(fields["name"], skill.name)
+                self.assertRegex(skill.name, r"^[a-z0-9]+(-[a-z0-9]+)*$")
+                self.assertLessEqual(len(skill.name), 64)
+                self.assertTrue(0 < len(fields["description"]) <= 1024)
+                self.assertNotRegex(fields["description"], "[<>]")
+                self.assertLessEqual(len(text.splitlines()), 500)
+            for page in sorted(skill.rglob("*.md")):
+                for target in link.findall(page.read_text()):
+                    if "://" in target or target.startswith("#"):
+                        continue
+                    with self.subTest(page=str(page.relative_to(self.root)), target=target):
+                        self.assertTrue((page.parent / target.split("#")[0]).is_file())
 
     def test_opencode_v2_build_has_native_directories_and_no_legacy_agent_fields(self):
         self.build("opencode", "--work")
