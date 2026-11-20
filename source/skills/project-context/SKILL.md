@@ -37,6 +37,10 @@ clone, synchronize, or publish merely to load context without authorization.
 
 - Task state, feature requirements, verification evidence, and documentation tied
   to code belong in the project's existing issues, PRs, or documentation.
+- For a deliberate, consequential shortcut, record its impact and revisit
+  condition in the existing issue or task record when writing is authorized (or
+  report the proposal in read-only work); skip separate debt ledgers and routine
+  trade-off comments.
 - When a local handoff file is needed, use one rolling `CONTEXT.md` at the project
   root. Reuse the same file; avoid documents per feature or session and separate
   context archives. Small, completed changes can stay in the conversation.
