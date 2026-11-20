@@ -72,14 +72,14 @@ hierarchy.
 - Inspect the working tree before editing. Preserve unrelated changes and
   untracked files; never discard, reset, or stash them without explicit
   authorization.
-- Commit implementation work in logical units as you go (standing authorization
-  unless asked to leave changes uncommitted; read-only work never authorizes
-  commits). Check the diff, stage only intended changes, and match repository
-  commit conventions.
-- Explain action and impact and get authorization before destructive Git
-  operations, cleanup, deployment, publishing, messages, or other external
-  changes beyond the task; don't re-ask for an action already authorized unless
-  its scope or impact has changed.
+- Commit implementation work in logical units as you go, and push non-default
+  branches when needed (standing authorization unless asked otherwise;
+  read-only work never authorizes commits or pushes). Check the diff, stage
+  only intended changes, and match repository commit conventions.
+- Explain action and impact and get authorization before pushing to the
+  default branch, destructive Git operations, cleanup, deployment, publishing,
+  messages, or other external changes beyond the task; don't re-ask for an
+  action already authorized unless its scope or impact has changed.
 
 ## Security and privacy
 

@@ -1,12 +1,14 @@
 ---
 name: git-push
-description: Check the outgoing commits, branch, remote, and readiness to publish, then push. Use before an authorized git push.
+description: Check the outgoing commits, branch, remote, and readiness to publish, then push. Use before a git push.
 ---
 
 # Git Push
 
-Push to the default branch (usually `main` or `master`) only when explicitly
-authorized. Inspect the working tree and the intended branch and remote without
+Pushing non-default branches during implementation work does not require
+separate authorization. Pushing to the default branch (usually `main` or
+`master`) requires explicit authorization, and read-only tasks never authorize
+pushes. Inspect the working tree and the intended branch and remote without
 disturbing unrelated changes.
 
 Before pushing:
@@ -24,7 +26,7 @@ Before pushing:
   history changes need explicit authorization.
 
 Use `git push` for a correctly configured upstream, or an explicit remote and
-branch for a new branch. Normal push authorization does not authorize force
+branch for a new branch. Normal push permission does not authorize force
 pushing. When a force push is explicitly authorized, verify the target and use
 `--force-with-lease`.
 
