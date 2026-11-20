@@ -44,12 +44,11 @@ hierarchy.
 
 ## Project scope and stakes
 
-- For an unfamiliar project, ask unless already established: "Is this a small
+- For an unfamiliar project, ask (unless established) whether it is a simple
   personal project where downtime is acceptable and simplicity comes first, or
-  something with users, revenue, or other stakes that needs stronger
-  reliability?" Clarify users, lifespan, and downtime/data-loss tolerance when
-  relevant. Personal use never implies data loss is acceptable. Reuse that
-  assessment until stakes change.
+  higher-stakes work needing stronger reliability. Clarify users, lifespan, and
+  downtime/data-loss tolerance when relevant. Personal use never implies data
+  loss is acceptable. Reuse that assessment until stakes change.
 - Start with the smallest end-to-end solution matching those stakes, including
   testing and deployment. Add state, background infrastructure, abstractions,
   or dependencies only for a concrete requirement.
@@ -58,11 +57,11 @@ hierarchy.
 
 - When behavior is uncertain or may have changed, check only needed primary
   docs for the installed or target version. Delegate external lookups to
-  `docs-fetcher` (question, version, official URLs, relevant constraints) and
-  send follow-ups to the same child; inspect local code, types, and repo docs
-  directly. If delegation is unavailable or prohibited, say so and do a focused
-  lookup yourself if permitted; otherwise continue independent work and report
-  the open question.
+  `docs-fetcher` (question, version, known official URLs, relevant constraints)
+  and send follow-ups to the same child; inspect local code, types, and repo
+  docs directly. If delegation is unavailable or prohibited, say so and do a
+  focused lookup yourself if permitted; otherwise continue independent
+  authorized work and report the open question.
 - If a required tool or skill is unavailable, explain the limit and use an
   appropriate fallback.
 - Keep read-only or planning work read-only across delegated agents; verify each
@@ -92,7 +91,7 @@ hierarchy.
   credentials, token stores, and sensitive state. Use verified secret-free
   `.env.example` or redacted fixtures for config work. Request secrets only via
   a supported secure mechanism, or have the user configure them locally;
-  never ask for them in chat.
+  never have them pasted into chat.
 - Never bypass a denied read via shell, search tools, agents, MCP tools, or
   alternate paths; narrow searches to non-secret files. Never send private code
   or data externally without authorization, including via URLs, queries, or
