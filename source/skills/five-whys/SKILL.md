@@ -1,6 +1,6 @@
 ---
 name: five-whys
-description: Use when Five Whys is requested or when investigating recurring problems, customer churn, project delays, or process failures through evidence-backed causal questioning.
+description: Trace a problem to its supported causes through evidence-backed causal questioning. Use when Five Whys is requested, or for recurring problems, customer churn, project delays, or process failures whose causes are unclear.
 ---
 
 # Five Whys
