@@ -130,8 +130,9 @@ and `description`, and keep instructions portable across harnesses. Supporting
 files can sit beside `SKILL.md` and use relative links. The whole folder is
 copied unchanged, without token expansion, except for macOS `.DS_Store` and Windows
 `Thumbs.db`, `ehthumbs.db`, and `Desktop.ini` metadata (Windows names match regardless
-of capitalization). Builds and installs exclude these files; content comparisons
-ignore them so OS metadata does not trigger unnecessary reinstalls.
+of capitalization) and the `.claude` folders Claude Code leaves beside files it
+edits. Builds and installs exclude these entries; content comparisons ignore them
+so they do not trigger unnecessary reinstalls.
 
 Both creation commands require lowercase names with single hyphens, refuse to
 overwrite existing content, and create TODO instructions to finish before
