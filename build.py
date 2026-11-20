@@ -42,7 +42,8 @@ WINDOWS_METADATA_NAMES = {"thumbs.db", "ehthumbs.db", "desktop.ini"}
 
 
 def is_os_metadata(name: str) -> bool:
-    return name == ".DS_Store" or name.lower() in WINDOWS_METADATA_NAMES
+    # Claude Code leaves `.claude` bookkeeping folders beside files it edits.
+    return name in {".DS_Store", ".claude"} or name.lower() in WINDOWS_METADATA_NAMES
 
 
 def ignore_os_metadata(_directory: str, names: list[str]) -> list[str]:

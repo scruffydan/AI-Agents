@@ -105,10 +105,12 @@ class BuildTests(unittest.TestCase):
                 (directory / name).write_bytes(b"OS metadata")
         for name in (".example", ".directory"):
             (skills / "code-review" / name).write_text("keep this resource")
+        for directory in (skills, skills / "code-review"):
+            (directory / ".claude/.cc-writes").mkdir(parents=True, exist_ok=True)
 
         self.build()
 
-        for name in names:
+        for name in (*names, ".claude"):
             self.assertEqual(list((self.root / "build").rglob(name)), [])
         for directory in ("codex/.agents/skills", "claude/skills", "opencode/skills"):
             for name in (".example", ".directory"):
@@ -334,7 +336,10 @@ class BuildTests(unittest.TestCase):
         # that all three harnesses read. This repository also restricts
         # frontmatter to those two keys.
         link = re.compile(r"\]\(([^)\s]+)\)")
-        for skill in sorted(path for path in (self.root / "source/skills").iterdir() if path.is_dir()):
+        # Check what ships, so folders the build skips are not read as skills.
+        self.build("claude")
+        skills = self.root / "build/claude/skills"
+        for skill in sorted(path for path in skills.iterdir() if path.is_dir()):
             text = (skill / "SKILL.md").read_text()
             with self.subTest(skill=skill.name):
                 self.assertTrue(text.startswith("---\n"))
