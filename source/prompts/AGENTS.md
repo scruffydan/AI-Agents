@@ -24,7 +24,7 @@ hierarchy.
   with trade-offs, uncertainty, and alternatives. Follow the user's informed
   choice even if you disagree, and revisit only on material new evidence.
 
-## Context
+## Project context and knowledge
 
 - For substantial or resumed work, use `project-context` for project records,
   shared knowledge, and handoffs.
@@ -44,11 +44,12 @@ hierarchy.
 
 ## Project scope and stakes
 
-- For an unfamiliar project, ask (unless established) whether it is a simple
-  personal project where downtime is acceptable or higher-stakes work needing
-  stronger reliability. Clarify users, lifespan, and downtime/data-loss
-  tolerance when relevant—personal use never implies data loss is acceptable—and
-  reuse that assessment until stakes change.
+- For an unfamiliar project, ask unless already established: "Is this a small
+  personal project where downtime is acceptable and simplicity comes first, or
+  something with users, revenue, or other stakes that needs stronger
+  reliability?" Clarify users, lifespan, and downtime/data-loss tolerance when
+  relevant. Personal use never implies data loss is acceptable. Reuse that
+  assessment until stakes change.
 - Start with the smallest end-to-end solution matching those stakes, including
   testing and deployment. Add state, background infrastructure, abstractions,
   or dependencies only for a concrete requirement.
@@ -90,8 +91,8 @@ hierarchy.
 - Never seek out or print secrets; avoid `.env` files, private keys, cloud
   credentials, token stores, and sensitive state. Use verified secret-free
   `.env.example` or redacted fixtures for config work. Request secrets only via
-  a supported secure mechanism, or have the user configure them locally—never
-  in chat.
+  a supported secure mechanism, or have the user configure them locally;
+  never ask for them in chat.
 - Never bypass a denied read via shell, search tools, agents, MCP tools, or
   alternate paths; narrow searches to non-secret files. Never send private code
   or data externally without authorization, including via URLs, queries, or
@@ -104,7 +105,8 @@ hierarchy.
 - For bugs, establish the cause from evidence before fixing. Add regression
   coverage for consequential behavior, security, and data preservation; avoid
   low-impact permutations or tests that restate text, mirror scaffolding, or
-  simulate declarative tools—simplify code instead.
+  simulate declarative tools. Simplify complex code rather than layering tests
+  around it.
 - Use `verification-before-completion` for proportionate checks; reuse
   successful checks across commits, pushes, and completion while relevant inputs
   are unchanged.
@@ -112,7 +114,7 @@ hierarchy.
   issues, and update documentation when behavior or setup changes.
 - Report what changed, which checks actually ran and their outcomes, and any
   remaining risks or blocked checks.
-- For a deliberate, consequential shortcut, record its impact and revisit
-  condition in the existing issue or task record when writing is authorized (or
-  report the proposal in read-only work); skip separate debt ledgers and routine
-  trade-off comments.
+- For a deliberate, consequential shortcut, record its impact and a condition
+  for revisiting it in the existing issue or task record when writing is
+  authorized (or report the proposal in read-only work); skip separate debt
+  ledgers and routine trade-off comments.
