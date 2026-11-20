@@ -46,3 +46,12 @@ permissions. In OpenCode, obtain approval before running shell commands. Delegat
 agents must follow their configured tools and instructions. If the requested agent
 or model is unavailable, report the limitation instead of silently substituting
 another model.
+
+## Source
+
+Started as an adaptation of Jesse Vincent's
+[superpowers brainstorming skill](https://github.com/obra/superpowers/blob/612fbcdd01be93b7e3432f04fc8a864e2c3b8a88/skills/brainstorming/SKILL.md)
+and has since been rewritten. It keeps the purpose of exploring a design before
+implementation, without upstream's mandatory use, one-question-at-a-time
+dialogue, or sectioned design presentation. The configured-agent path is local.
+The upstream MIT notice is retained in [LICENSE](LICENSE).

@@ -56,3 +56,12 @@ acceptance criteria. Identify requirements without evidence, unexplained work,
 and stale or contradictory decisions. Within authorized documentation work,
 record actual results and remaining gaps in the existing record. Task completion
 alone does not demonstrate that an acceptance criterion passed.
+
+## Source
+
+Started as an adaptation of Jesse Vincent's
+[superpowers verification-before-completion skill](https://github.com/obra/superpowers/blob/48410c7f1973bd66569a627ef27ef6619e0ba923/skills/verification-before-completion/SKILL.md)
+and has since been rewritten. It keeps the principle of evidence before
+completion claims, and replaces upstream's rule of fresh verification before
+every claim with verification matched to the change and workflow stage. The
+upstream MIT notice is retained in [LICENSE](LICENSE).
