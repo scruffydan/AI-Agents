@@ -28,8 +28,12 @@ run `/path/to/python3.11 install.py` with the same arguments.
 
 The installer skips unchanged entries, asks before replacing changed entries,
 and saves replacements under `~/.ai-agents-backups/<timestamp>-<suffix>/`. Unrelated
-entries are left alone. Removing an entry from this repository does not remove
-its installed copy.
+entries are left alone.
+
+Agents listed in `RETIRED_AGENTS` in [install.py](install.py) are moved to the
+same backup folder, with the same confirmation, unless the build still produces
+them. Removing any other entry from this repository does not remove its
+installed copy.
 
 | Harness | Base instructions | Agents | Skills |
 |---|---|---|---|
@@ -51,7 +55,7 @@ older installed commands are also left alone.
 The shared planning skill is now `thorough-plan`. If previously installed,
 move the old `mode-thorough-plan` skill folders and OpenCode's retired
 `~/.config/opencode/agents/thorough-plan.md` out of their installation directories,
-preserving local changes. The installer leaves retired entries alone.
+preserving local changes. The installer leaves these entries alone.
 
 ### OpenCode settings
 
