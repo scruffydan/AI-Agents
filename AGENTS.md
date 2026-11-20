@@ -9,3 +9,7 @@ Edit shared content in `source/` and harness settings in `renderers.py`.
 Test with `python3 -m unittest discover -s tests` (Python 3.11+).
 Skills are copied unchanged to all three harnesses: keep them portable
 (name + description frontmatter only, no harness-specific tool names).
+
+When removing or renaming a shipped agent or skill, update `install.py` in the
+same change so the installer can move old installed copies into its backup
+folder. Keep retirement entries so users who skip releases still get the cleanup.
