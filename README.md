@@ -43,12 +43,14 @@ its installed copy.
 adapted agents and shared prompts without adding license text to model prompts.
 Skill licenses remain beside their `SKILL.md` files.
 
-If previously installed, move retired `explore`, `sidebar`, `code-readability`,
-`code-redundancy`, and `code-simplifier` agents and the
-`implementation-workflow` skill out of these directories. The
-`code-maintainability` agent replaces the last three. Preserve any local
+If previously installed, move retired `explore` and `sidebar` agents and the
+`implementation-workflow` skill out of these directories. Preserve any local
 changes you want to keep. The repository no longer generates custom commands;
 older installed commands are also left alone.
+
+The `code-maintainability` agent replaces `code-readability`, `code-redundancy`,
+and `code-simplifier`. The installer moves installed copies of those three to
+its backup folder.
 
 The shared planning skill is now `thorough-plan`. If previously installed,
 move the old `mode-thorough-plan` skill folders and OpenCode's retired
