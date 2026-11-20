@@ -33,22 +33,25 @@ asking again for routine choices.
 
 Inspect the requested files or diff and relevant callers.
 
-The parent reviewer owns functional correctness, integration, and regression
-coverage. Check the changed behavior against requirements and relevant callers,
-including edge cases, component interactions, and whether tests cover the change.
-Combine these checks with the specialist findings.
+The parent reviewer owns integration and the final judgment: whether the change
+meets its requirements and fits the components around it. In a targeted or
+straightforward review, check correctness directly, including edge cases and
+whether tests cover the change. In a full review, `code-correctness` gives an
+independent read of that ground, which matters most when the parent wrote the
+change. Verify its findings like any other specialist's, and combine them with
+your own checks.
 
 - For a targeted request, use only the relevant perspectives. An ordinary review
-  does not automatically require five agents; inspect straightforward code directly.
-- For an explicitly requested full review, cover all five specialists below.
+  does not automatically require four agents; inspect straightforward code directly.
+- For an explicitly requested full review, cover all four specialists below.
 
 Full-review specialists:
 
+- `code-correctness`: logic, edge cases, failure paths, contracts, and test
+  coverage.
 - `code-security`: attack surface, trust boundaries, and data exposure.
-- `code-readability`: naming, documentation, and formatting.
 - `code-performance`: algorithms, I/O, memory, and concurrency.
-- `code-redundancy`: duplication and dead code.
-- `code-simplifier`: control flow and complexity.
+- `code-maintainability`: clarity, duplication and dead code, and complexity.
 
 Optional targeted perspective:
 

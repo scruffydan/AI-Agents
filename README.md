@@ -52,6 +52,10 @@ If previously installed, move retired `explore` and `sidebar` agents and the
 changes you want to keep. The repository no longer generates custom commands;
 older installed commands are also left alone.
 
+The `code-maintainability` agent replaces `code-readability`, `code-redundancy`,
+and `code-simplifier`. The installer moves installed copies of those three to
+its backup folder.
+
 The shared planning skill is now `thorough-plan`. If previously installed,
 move the old `mode-thorough-plan` skill folders and OpenCode's retired
 `~/.config/opencode/agents/thorough-plan.md` out of their installation directories,
@@ -187,24 +191,29 @@ Agent instructions can include shared fragments from `source/prompts/`:
 Browse [source/skills](source/skills) for the available workflows, including
 brainstorming, planning, code review, debugging, Git tasks, and pull requests.
 
-The `code-simplifier` agent and shared coding instructions adapt selected practices
-from the [Ponytail skill](https://github.com/DietrichGebert/ponytail/blob/df9e89941d50419fd5bcf1de41e28097f1db49b2/skills/ponytail/SKILL.md):
+The `code-maintainability` agent and shared coding instructions adapt selected
+practices from the [Ponytail skill](https://github.com/DietrichGebert/ponytail/blob/df9e89941d50419fd5bcf1de41e28097f1db49b2/skills/ponytail/SKILL.md):
 inspect affected code, prefer compatible reuse, and preserve safeguards. Its MIT
-notice is in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). The simplifier
+notice is in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). The agent
 reports recommendations; the parent handles implementation and verification.
+
+A full review runs four specialists: `code-correctness`, `code-security`,
+`code-performance`, and `code-maintainability`. `code-correctness` looks for
+defects from a context that did not write the change; the parent keeps
+integration and the final judgment.
 
 The optional `code-blast-radius` reviewer traces indirect effects on consumers,
 interfaces, configuration, dependencies, timing, and persisted or wire data.
 Ask `code-review` for a targeted blast-radius pass, especially for API/schema
-changes, shared libraries, or migrations. The existing five-specialist full
-review stays unchanged. This agent only inspects and reports: it separates
+changes, shared libraries, or migrations. It is not part of the four-specialist
+full review. This agent only inspects and reports: it separates
 confirmed risks, investigated and cleared cases, and unresolved assumptions,
 then recommends checks or remedies for the parent to execute.
 
 It adapts selected ideas from Cursor's
 [pstack blast-radius skill](https://github.com/cursor/plugins/blob/df581122cde17e6e27686b5a448bde23e4ad4318/pstack/skills/blast-radius/SKILL.md);
 the upstream MIT notice is in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
-The agent uses the same model profile and harness defaults as `code-simplifier`;
+The agent uses the same model profile and harness defaults as `code-maintainability`;
 the permission limits below still apply.
 
 Commit implementation changes as you go in logical units. Keep local
