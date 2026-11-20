@@ -306,7 +306,6 @@ class BuildTests(unittest.TestCase):
     def test_referenced_shared_skill_support_files_exist(self):
         references = {
             "code-review": ("feedback.md",),
-            "project-context": ("shared-knowledge.md",),
             "systematic-debugging": (
                 "root-cause-tracing.md", "defense-in-depth.md", "condition-based-waiting.md",
             ),

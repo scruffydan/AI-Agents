@@ -62,10 +62,8 @@ remains active, leave a brief `No active work` status and useful pointers in the
 context file. Cleanup follows the same write authorization as capture; read-only
 tasks report proposed updates in the response.
 
-Before writing to a configured shared knowledge store, and when a change lands
-on a project's default branch while a shared wiki is configured, read
-[shared-knowledge.md](shared-knowledge.md) for the capture, curation, and
-conflict rules. Skip it when no shared store is configured.
+For authorized contributions to shared knowledge, follow the configured store's
+instructions and applicable machine-local guidance.
 
 Store concise summaries and links, excluding secrets and unnecessary transcripts.
 Before moving knowledge between repositories, verify the destination audience and
