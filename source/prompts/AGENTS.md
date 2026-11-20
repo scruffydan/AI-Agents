@@ -111,3 +111,7 @@ hierarchy.
   issues, and update documentation when behavior or setup changes.
 - Report what changed, which checks actually ran and their outcomes, and any
   remaining risks or blocked checks.
+- For a deliberate, consequential shortcut, record its impact and revisit
+  condition in the existing issue or task record when writing is authorized (or
+  report the proposal in read-only work); skip separate debt ledgers and routine
+  trade-off comments.
