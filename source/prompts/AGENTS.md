@@ -76,10 +76,10 @@ hierarchy.
   unless asked to leave changes uncommitted; read-only work never authorizes
   commits). Check the diff, stage only intended changes, and match repository
   commit conventions.
-- Push only when requested. Explain action and impact and get authorization
-  before destructive Git operations, cleanup, deployment, publishing, messages,
-  or other external changes beyond the task; don't re-ask for an action already
-  authorized unless its scope or impact has changed.
+- Explain action and impact and get authorization before destructive Git
+  operations, cleanup, deployment, publishing, messages, or other external
+  changes beyond the task; don't re-ask for an action already authorized unless
+  its scope or impact has changed.
 
 ## Security and privacy
 
