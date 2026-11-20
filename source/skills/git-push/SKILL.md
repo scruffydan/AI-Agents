@@ -5,8 +5,9 @@ description: Check the outgoing commits, branch, remote, and readiness to publis
 
 # Git Push
 
-Push only when requested or already authorized. Inspect the working tree and the
-intended branch and remote without disturbing unrelated changes.
+Push to the default branch (usually `main` or `master`) only when explicitly
+authorized. Inspect the working tree and the intended branch and remote without
+disturbing unrelated changes.
 
 Before pushing:
 
