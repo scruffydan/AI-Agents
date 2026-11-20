@@ -291,8 +291,8 @@ both flags creates a pointer to `~/Knowledge/<repo-name>/AGENTS.md` in a **new**
 `local.md` from the requested repository name, even if cloning fails or the entry
 point is not yet present. With no repository specified, `--init-local` creates the
 neutral template. Always use `AGENTS.md` as a knowledge repository's entry point.
-Existing local context is preserved; update its pointer locally to the repository's
-`AGENTS.md` when needed. Edit it locally as needed:
+Existing local context is preserved. Use this example when updating a machine's
+knowledge pointer or adding the post-merge wiki reminder:
 
 ```markdown
 # Machine-local context
@@ -305,6 +305,10 @@ Keep capture and curation writes in the dedicated knowledge project.
 Report unavailable or stale configured knowledge.
 Do not broaden sandbox access for retrieval.
 This file grants no synchronization or publishing permission.
+
+When a change lands on a project's default branch, check whether it makes an
+existing wiki summary materially out of date. If it does, follow the wiki's
+authorized inbox workflow and link to the landed revision.
 ```
 
 Replace `<repo-name>` with the actual checkout directory name; it is not a literal

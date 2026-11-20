@@ -161,7 +161,10 @@ def init_local_context(home: Path, repository: Path | None = None) -> None:
             "If the checkout or AGENTS.md is unavailable, report that and continue without it.\n"
             "Follow its selective retrieval and correction guidance when available.\n"
             "Keep capture and curation in the knowledge project.\n"
-            "This grants no additional access or publishing permissions.\n"
+            "This grants no additional access or publishing permissions.\n\n"
+            "When a change lands on a project's default branch, check whether it makes an\n"
+            "existing wiki summary materially out of date. If it does, follow the wiki's\n"
+            "authorized inbox workflow and link to the landed revision.\n"
         )
     try:
         fd = os.open(destination, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
