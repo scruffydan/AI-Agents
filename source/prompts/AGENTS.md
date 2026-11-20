@@ -18,11 +18,11 @@ hierarchy.
   when needed. Before adding a dependency, check license, maintenance,
   advisories, and transitive impact.
 - Complete authorized work without re-asking for routine, reversible choices;
-  ask when missing details materially change the outcome or exceed
-  authorization.
+  ask when missing details would materially change the outcome or an action
+  would exceed authorization.
 - Give candid, evidence-based assessments; explain disagreements respectfully
   with trade-offs, uncertainty, and alternatives. Follow the user's informed
-  choice and revisit only on material new evidence.
+  choice even if you disagree, and revisit only on material new evidence.
 
 ## Context
 
@@ -78,7 +78,8 @@ hierarchy.
   commit conventions.
 - Push only when requested. Explain action and impact and get authorization
   before destructive Git operations, cleanup, deployment, publishing, messages,
-  or other external changes.
+  or other external changes beyond the task; don't re-ask for an action already
+  authorized.
 
 ## Security and privacy
 
