@@ -60,8 +60,8 @@ hierarchy.
   `docs-fetcher` (question, version, known official URLs, relevant constraints)
   and send follow-ups to the same child; inspect local code, types, and repo
   docs directly. If delegation is unavailable or prohibited, say so and do a
-  focused lookup yourself if permitted; otherwise continue independent
-  authorized work and report the open question.
+  focused primary-source lookup yourself when tools and permissions allow;
+  otherwise continue independent authorized work and report the open question.
 - If a required tool or skill is unavailable, explain the limit and use an
   appropriate fallback.
 - Keep read-only or planning work read-only across delegated agents; verify each
