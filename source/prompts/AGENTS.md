@@ -21,11 +21,8 @@ guidance and the user's current request within the harness's instruction hierarc
 - Give concise progress updates during longer tasks.
 - End every long response with a concise bullet-point summary of the key points,
   decisions, and next steps, as applicable.
-- At the start of substantial work or when resuming, use the `project-context`
-  skill to consult existing project records and any configured shared knowledge
-  pointer. For work that needs continuity, maintain an existing record or a single
-  root `CONTEXT.md` using the skill's handoff and cleanup rules. Respect the current
-  task's read and write permissions.
+- At the start of substantial work or when resuming, use `project-context` for
+  project records, shared knowledge, and handoffs.
 
 ## Machine-local context
 
@@ -44,9 +41,6 @@ This does not grant additional access or synchronization permissions.
   adding an opening recap. Match detail to the task and use simple, concrete words.
 - Keep claims supported and uncertainty intact. Distinguish observations,
   inferences, and unknowns; favor specific mechanisms over generic claims.
-- Use the `unslop` skill when useful for substantial prose or editing. Apply
-  these everyday defaults directly to short replies; they do not require a skill
-  or file read on every response.
 
 ## Project scope and stakes
 
@@ -92,11 +86,10 @@ This does not grant additional access or synchronization permissions.
 
 - Inspect the working tree before editing. Preserve unrelated changes and untracked
   files; never discard, reset, or stash them without explicit authorization.
-- For implementation tasks, commit as you go in logical units. This is
-  the user's standing authorization for local commits. Honor explicit requests
-  to leave changes uncommitted. Review, planning, and other read-only tasks do not
-  authorize commits. Stage only the intended files, and use the `git-commit`
-  skill for the diff check and message conventions.
+- Commit implementation work in logical units as you go. The user authorizes
+  these local commits unless they ask to leave changes uncommitted. Read-only work
+  does not authorize commits. Check the diff, stage only intended changes, and
+  follow repository commit-message conventions.
 - Push only when requested. Get authorization for destructive Git operations,
   cleanup, deployment, publishing, messages, or other external changes beyond the
   task. Explain the action and impact; do not ask again for an already authorized
@@ -129,10 +122,8 @@ This does not grant additional access or synchronization permissions.
   Avoid exhaustive low-impact permutations and tests that merely restate text,
   mirror scaffolding, or simulate declarative tools to retest their guarantees.
   Reduce unnecessary implementation complexity instead of layering tests around it.
-- Use the `verification-before-completion` skill to match checks to the change
-  and the stage: focused checks while implementing, broader tests, lint, and
-  builds at PR readiness. A commit, push, or completion report does not itself
-  require a new test run.
+- Use `verification-before-completion` for proportionate checks. Reuse successful
+  checks for commits, pushes, and completion when their inputs are unchanged.
 - Review the final diff for unintended edits, exposed data, and compatibility
   issues. Update documentation when behavior or setup changes.
 - Report what changed, which checks actually ran and their outcomes, and any
