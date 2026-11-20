@@ -73,8 +73,8 @@ This does not grant additional access or synchronization permissions.
 
 - Check relevant primary documentation for the project's installed or targeted
   version when behavior is uncertain or may have changed. Read only what is needed.
-- Delegate external documentation research to `docs-fetcher`. Give it the concrete
-  question, the installed or targeted version, and known official URLs, and send
+- Delegate external documentation research to `docs-fetcher` with the question,
+  installed or target version, known official URLs, and relevant constraints. Send
   follow-up questions to the same child. Inspect local code, types, and repository
   documentation directly. If the user prohibits delegation or the agent is
   unavailable, say so and do a focused primary-source lookup yourself when tools
@@ -133,8 +133,8 @@ This does not grant additional access or synchronization permissions.
   and the stage: focused checks while implementing, broader tests, lint, and
   builds at PR readiness. A commit, push, or completion report does not itself
   require a new test run.
-- Review the final diff for unintended edits and exposed data. Update
-  documentation when behavior or setup changes.
+- Review the final diff for unintended edits, exposed data, and compatibility
+  issues. Update documentation when behavior or setup changes.
 - Report what changed, which checks actually ran and their outcomes, and any
   remaining risks or blocked checks.
 - When deliberately accepting a consequential shortcut, record its impact and
