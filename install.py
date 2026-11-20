@@ -21,6 +21,11 @@ from urllib.parse import urlsplit
 
 import build
 
+# Agents this repository used to install and no longer builds. Installing moves
+# leftover copies to the backup folder. A name the build still produces is
+# skipped, so a name can be listed before its removal lands and reused later.
+RETIRED_AGENTS = ("code-readability", "code-redundancy", "code-simplifier")
+
 
 def select_harnesses() -> list[str]:
     print("Which harnesses would you like to install?")
@@ -67,31 +72,36 @@ def same_content(source: Path, destination: Path) -> bool:
 def install(harnesses: list[str], home: Path, force: bool) -> None:
     backup_dir = None
 
-    def install_item(source: Path, destination: Path) -> None:
+    def back_up(destination: Path, action: str) -> bool:
         nonlocal backup_dir
+        if not force:
+            try:
+                answer = input(f"{action} {destination}? [y/N]: ")
+            except EOFError:
+                answer = ""
+            if answer.strip().lower() not in {"y", "yes"}:
+                print(f"Skipped: {destination}")
+                return False
+        if backup_dir is None:
+            backups = home / ".ai-agents-backups"
+            backups.mkdir(parents=True, exist_ok=True)
+            backup_dir = Path(tempfile.mkdtemp(
+                prefix=datetime.now().strftime("%Y%m%d-%H%M%S-"), dir=backups,
+            ))
+        backup = backup_dir / destination.relative_to(home)
+        backup.parent.mkdir(parents=True, exist_ok=True)
+        shutil.move(destination, backup)
+        print(f"Backed up: {destination} -> {backup}")
+        return True
+
+    def install_item(source: Path, destination: Path) -> None:
         if build.is_os_metadata(source.name):
             return
         if destination.exists() or destination.is_symlink():
             if same_content(source, destination):
                 return
-            if not force:
-                try:
-                    answer = input(f"Replace {destination}? [y/N]: ")
-                except EOFError:
-                    answer = ""
-                if answer.strip().lower() not in {"y", "yes"}:
-                    print(f"Skipped: {destination}")
-                    return
-            if backup_dir is None:
-                backups = home / ".ai-agents-backups"
-                backups.mkdir(parents=True, exist_ok=True)
-                backup_dir = Path(tempfile.mkdtemp(
-                    prefix=datetime.now().strftime("%Y%m%d-%H%M%S-"), dir=backups,
-                ))
-            backup = backup_dir / destination.relative_to(home)
-            backup.parent.mkdir(parents=True, exist_ok=True)
-            shutil.move(destination, backup)
-            print(f"Backed up: {destination} -> {backup}")
+            if not back_up(destination, "Replace"):
+                return
 
         destination.parent.mkdir(parents=True, exist_ok=True)
         if source.is_dir():
@@ -115,6 +125,13 @@ def install(harnesses: list[str], home: Path, force: bool) -> None:
         for source_dir, destination_dir in ((agents, target / "agents"), (skills, skills_target)):
             for entry in sorted(source_dir.glob("*")):
                 install_item(entry, destination_dir / entry.name)
+        suffix = Path(build.AGENT_PATHS[harness]).suffix
+        for name in RETIRED_AGENTS:
+            leftover = target / "agents" / f"{name}{suffix}"
+            if (agents / leftover.name).exists():
+                continue
+            if (leftover.exists() or leftover.is_symlink()) and back_up(leftover, "Retire"):
+                print(f"Retired: {leftover}")
 
 
 def repository_destination(source: str, home: Path) -> Path:

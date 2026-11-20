@@ -63,6 +63,39 @@ class InstallTests(unittest.TestCase):
         self.assertTrue((self.home / ".claude/skills/git-commit/SKILL.md").is_file())
         self.assertTrue((self.home / ".codex/agents/code-security.toml").is_file())
 
+    def test_retired_agents_move_to_backup_unless_still_built_or_declined(self):
+        agents = self.root / "source/agents"
+        (agents / "code-simplifier.md").unlink(missing_ok=True)
+        shutil.copy2(agents / "docs-fetcher.md", agents / "code-redundancy.md")
+        leftovers = [
+            self.home / directory / f"code-simplifier{suffix}"
+            for directory, suffix in (
+                (".claude/agents", ".md"), (".codex/agents", ".toml"),
+                (".config/opencode/agents", ".md"),
+            )
+        ]
+        for leftover in leftovers:
+            leftover.parent.mkdir(parents=True)
+            leftover.write_text("retired copy")
+
+        result = self.run_install("--all", force=False, input_text="n\nn\nn\n")
+
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual([path.read_text() for path in leftovers], ["retired copy"] * 3)
+        self.assertFalse((self.home / ".ai-agents-backups").exists())
+
+        self.install("--all")
+
+        self.assertFalse(any(path.exists() for path in leftovers))
+        backups = sorted(
+            path.relative_to(self.home / ".ai-agents-backups").parts[1:]
+            for path in (self.home / ".ai-agents-backups").rglob("*") if path.is_file()
+        )
+        self.assertEqual(
+            backups, sorted(path.relative_to(self.home).parts for path in leftovers),
+        )
+        self.assertTrue((self.home / ".claude/agents/code-redundancy.md").is_file())
+
     def test_installer_excludes_os_metadata_added_to_build(self):
         script = """
 from pathlib import Path
