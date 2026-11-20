@@ -79,7 +79,7 @@ hierarchy.
 - Push only when requested. Explain action and impact and get authorization
   before destructive Git operations, cleanup, deployment, publishing, messages,
   or other external changes beyond the task; don't re-ask for an action already
-  authorized.
+  authorized unless its scope or impact has changed.
 
 ## Security and privacy
 
