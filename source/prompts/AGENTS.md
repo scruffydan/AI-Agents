@@ -73,21 +73,13 @@ This does not grant additional access or synchronization permissions.
 
 - Check relevant primary documentation for the project's installed or targeted
   version when behavior is uncertain or may have changed. Read only what is needed.
-- Delegate external documentation research to `docs-fetcher` using the
-  environment's delegation tools. Give the child the concrete question, installed
-  or targeted version, known official URLs, and relevant constraints. Request
-  compact findings or examples, primary-source links, version caveats, and
-  unresolved uncertainty.
-- For delegated research, keep external searching, fetching, and extraction in the
-  child's context, and send follow-up questions to that child. The child performs
-  the lookup without further delegation. The parent receives focused findings,
-  not full pages. Local code, types, and repository documentation may be inspected
-  directly.
-- Honor the user's delegation restrictions. If delegation is prohibited or the
-  agent is unavailable, explain the limitation and perform a focused primary-source
-  lookup in the parent when its tools and permissions allow. If required web
-  capability is unavailable, continue independent authorized work and report
-  unresolved documentation questions.
+- Delegate external documentation research to `docs-fetcher`. Give it the concrete
+  question, the installed or targeted version, and known official URLs, and send
+  follow-up questions to the same child. Inspect local code, types, and repository
+  documentation directly. If the user prohibits delegation or the agent is
+  unavailable, say so and do a focused primary-source lookup yourself when tools
+  and permissions allow; otherwise continue independent authorized work and
+  report the open question.
 - Respect lockfiles and compatibility constraints. Upgrade dependencies only when
   needed for the task; do not automatically replace them with the latest release.
 - Use available skills when explicitly requested or when their workflow helps.
@@ -103,9 +95,8 @@ This does not grant additional access or synchronization permissions.
 - For implementation tasks, commit as you go in logical units. This is
   the user's standing authorization for local commits. Honor explicit requests
   to leave changes uncommitted. Review, planning, and other read-only tasks do not
-  authorize commits.
-- Before each commit, inspect the diff, stage only the intended files, and follow
-  the repository's commit-message conventions.
+  authorize commits. Stage only the intended files, and use the `git-commit`
+  skill for the diff check and message conventions.
 - Push only when requested. Get authorization for destructive Git operations,
   cleanup, deployment, publishing, messages, or other external changes beyond the
   task. Explain the action and impact; do not ask again for an already authorized
@@ -133,20 +124,19 @@ This does not grant additional access or synchronization permissions.
 
 ## Verification and handoff
 
-- For bugs, establish the cause from evidence before changing code. Run relevant
-  existing checks and add regression coverage for consequential behavior, security,
-  and data preservation. Scale verification to the impact; avoid exhaustive
-  low-impact permutations and tests that merely restate text, mirror scaffolding,
-  or simulate declarative tools to retest their guarantees. Reduce unnecessary
-  implementation complexity instead of layering tests around it.
-- Keep local commits lightweight and use focused checks during implementation
-  when warranted. Reserve broader relevant tests, lint, and builds for PR readiness.
-  Committing, pushing, or reporting completion does not itself require new test
-  runs; reuse successful checks while their relevant inputs remain unchanged.
-- Review the final diff for unintended edits, exposed data, and compatibility
-  issues. Update documentation when behavior or setup changes.
+- For bugs, establish the cause from evidence before changing code. Add
+  regression coverage for consequential behavior, security, and data preservation.
+  Avoid exhaustive low-impact permutations and tests that merely restate text,
+  mirror scaffolding, or simulate declarative tools to retest their guarantees.
+  Reduce unnecessary implementation complexity instead of layering tests around it.
+- Use the `verification-before-completion` skill to match checks to the change
+  and the stage: focused checks while implementing, broader tests, lint, and
+  builds at PR readiness. A commit, push, or completion report does not itself
+  require a new test run.
+- Review the final diff for unintended edits and exposed data. Update
+  documentation when behavior or setup changes.
 - Report what changed, which checks actually ran and their outcomes, and any
-  remaining risks or blocked checks. Distinguish static checks from live testing.
+  remaining risks or blocked checks.
 - When deliberately accepting a consequential shortcut, record its impact and
   a condition for revisiting it in the project's existing issue or task record
   when writing is authorized. In read-only work, report the proposal in the
