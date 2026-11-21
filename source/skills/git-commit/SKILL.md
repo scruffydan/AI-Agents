@@ -53,5 +53,5 @@ drafting, update the proposal or request a new draft. Commit only within existin
 authorization, then report the hash and verification results.
 
 Do not add an approval step when the commit is already authorized. Amend or
-rewrite history only within authorization. Pushing requires separate permission;
-use `git-push` when a push is requested.
+rewrite history only within authorization. Use `git-push` for pushes;
+pushing to the default branch still requires explicit authorization.
