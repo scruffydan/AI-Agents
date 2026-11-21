@@ -1,17 +1,36 @@
 ---
 name: file-pr
-description: Open a concise GitHub pull request whose title and description lead with the problem it solves. Use when the user asks to file, open, or create a PR; not for a plain push or for reviewing an existing PR.
+description: Open, reuse, or update a GitHub pull request. Use when asked to file a PR or update an existing PR, including its title or description. Skip plain pushes and PR reviews.
 ---
 
 # File PR
 
-Filing a PR publishes the branch and its description. Do it only when the user
-asked for a PR or the current task already authorizes one.
+Open or update a PR only within the current task's authorization.
 
-Before filing, check whether a PR for this branch already exists. Review the
-diff locally against the base branch (usually `origin/main`) to make sure its
-contents match the goal. Apply the PR guidance in
-`verification-before-completion`, and use `git-push` to publish the branch.
+## Find the PR
+
+Identify the head and base repositories and branches. Look for an open PR with
+that exact head and base. If the same head has an open PR against a different
+base, flag the mismatch and ask how to proceed before retargeting it or opening
+another PR.
+
+Review the intended diff against the actual base and apply the PR guidance in
+`verification-before-completion`. Use `git-push` to publish branch changes when
+the task calls for them.
+
+## Reuse or update an existing PR
+
+Reuse a matching open PR. Report its URL and make only the requested changes.
+A request to update the branch does not by itself authorize editing the PR title
+or description. If branch changes make the description inaccurate or incomplete,
+explain what needs to change and ask before editing it, unless the user already
+explicitly requested that description update. Continue authorized branch work
+while awaiting that decision.
+
+## Open a new PR or write authorized metadata
+
+Create a PR when no matching one exists and creation is authorized. Use the
+following writing guidance for new PRs and for authorized metadata edits.
 
 PR titles usually become commit messages, so follow the repository's title
 conventions. Look at recently merged PRs and Git history for examples. Prefer a
@@ -47,12 +66,16 @@ guessing a model.
 Before submission, check the title, description, quotes, and attachments for
 secrets and private details.
 
-Open a real PR rather than a draft so review bots run, unless the user asked
-for a draft. If `gh pr create` fails because the GraphQL rate limit is used up,
-open it through REST with
+For a new PR, open it as ready for review unless the user asked for a draft.
+If `gh pr create` fails because the GraphQL rate limit is used up, open it
+through REST with
 `gh api repos/<owner>/<repo>/pulls -f title=... -f head=... -f base=... -F body=@<file>`.
-If the user also asked to monitor the PR, use the environment's PR monitoring
-tools.
+
+## Report
+
+Confirm the PR URL and state. Say whether you opened, updated, or reused it and
+identify any pending decision about its description. If the user asked to
+monitor the PR, use the environment's PR monitoring tools.
 
 Do not post a follow-up PR comment unless it serves the user's request. When a
 comment is needed, use the `leaving-pr-comments` skill.
@@ -61,10 +84,6 @@ comment is needed, use the `leaving-pr-comments` skill.
 
 Adapted from Theo Browne's
 [tstack file-pr skill](https://github.com/t3dotgg/tstack/blob/6efae364201abc9d9f07443e9caa461f42e51090/skills/file-pr/SKILL.md).
-The title and description guidance and examples are unchanged. This adaptation
-adds the authorization sentence and hands verification and pushing to
-`verification-before-completion` and `git-push`. It defers to an attribution
-line set by user or harness instructions, allows a requested draft, and replaces
-the upstream `babysit-pr` handoff with the environment's monitoring tools. The
-description was rewritten to name what the skill covers and excludes, and this
-source note was added. The upstream MIT notice is retained in [LICENSE](LICENSE).
+This adaptation retains the title and description examples and adds explicit
+routes for new and existing PRs. The upstream MIT notice is retained in
+[LICENSE](LICENSE).

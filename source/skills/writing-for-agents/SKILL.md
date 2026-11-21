@@ -1,6 +1,6 @@
 ---
 name: writing-for-agents
-description: Author or revise agent instruction artifacts such as AGENTS.md, skill instructions, and agent prompts. Use for their triggers, structure, constraints, and completion criteria, not ordinary coding answers or general prose editing.
+description: Write, revise, or review instructions that agents follow, including AGENTS.md, SKILL.md, and agent prompts. Use for skill triggers, instruction structure, constraints, and verifiable completion criteria. Skip routine prose edits and ordinary code reviews.
 ---
 
 # Writing for Agents
