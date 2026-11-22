@@ -5,14 +5,10 @@ description: Check the outgoing commits, branch, remote, and readiness to publis
 
 # Git Push
 
-During implementation, standing authorization covers pushes to non-default
-branches. Identify the push destination repository and its actual default branch.
-Apply the authorization check to every destination ref: a push to that default
-branch requires explicit authorization, even from a local topic branch. A
-checked-in `AGENTS.md` in the destination repository that explicitly allows
-pushing to its default branch counts as that authorization for normal pushes;
-it never authorizes force pushes. Read-only tasks never authorize pushes. Inspect the working tree without disturbing
-unrelated changes.
+Identify the push destination repository and its actual default branch, then
+apply the push authorization rules from your instructions to every destination
+ref, including pushes from a local topic branch. Inspect the working tree without
+disturbing unrelated changes.
 
 Before pushing:
 
@@ -34,8 +30,7 @@ For example, from the checked topic branch use
 can select additional refs or a different remote through configuration. If
 multiple refs are in scope, specify each verified refspec explicitly.
 
-Normal push permission does not authorize force pushing. When a force push is
-explicitly authorized, use `--force-with-lease=<destination-ref>:<expected-sha>`
+When a force push is explicitly authorized, use `--force-with-lease=<destination-ref>:<expected-sha>`
 with the observed remote SHA for that ref.
 
 Report the push result. Check applicable CI or PR status within the requested
