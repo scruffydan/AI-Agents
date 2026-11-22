@@ -5,10 +5,9 @@ description: Check the outgoing commits, branch, remote, and readiness to publis
 
 # Git Push
 
-Identify the push destination repository and its actual default branch, then
-apply the push authorization rules from your instructions to every destination
-ref, including pushes from a local topic branch. Inspect the working tree without
-disturbing unrelated changes.
+Find the destination repository's default branch and apply your push
+authorization rules to every destination ref, even from a topic branch. Leave
+unrelated working-tree changes alone.
 
 Before pushing:
 
