@@ -30,8 +30,9 @@ For example, from the checked topic branch use
 can select additional refs or a different remote through configuration. If
 multiple refs are in scope, specify each verified refspec explicitly.
 
-When a force push is explicitly authorized, use `--force-with-lease=<destination-ref>:<expected-sha>`
-with the observed remote SHA for that ref.
+When a force push is explicitly authorized, use
+`--force-with-lease=<destination-ref>:<expected-sha>` with the observed remote
+SHA for that ref.
 
 Report the push result. Check applicable CI or PR status within the requested
 scope and use the environment's monitoring tools when waiting is requested.
