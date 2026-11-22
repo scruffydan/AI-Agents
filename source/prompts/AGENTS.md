@@ -77,9 +77,10 @@ hierarchy.
   read-only work never authorizes commits or pushes). Check the diff, stage
   only intended changes, and match repository commit conventions.
 - Explain action and impact and get authorization before pushing to the
-  default branch, destructive Git operations, cleanup, deployment, publishing,
-  messages, or other external changes beyond the task; don't re-ask for an
-  action already authorized unless its scope or impact has changed.
+  default branch (unless the repository's `AGENTS.md` allows it), destructive
+  Git operations, cleanup, deployment, publishing, messages, or other external
+  changes beyond the task; don't re-ask for an action already authorized unless
+  its scope or impact has changed.
 
 ## Security and privacy
 
