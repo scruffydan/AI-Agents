@@ -8,8 +8,10 @@ description: Check the outgoing commits, branch, remote, and readiness to publis
 During implementation, standing authorization covers pushes to non-default
 branches. Identify the push destination repository and its actual default branch.
 Apply the authorization check to every destination ref: a push to that default
-branch requires explicit authorization, even from a local topic branch. Read-only
-tasks never authorize pushes. Inspect the working tree without disturbing
+branch requires explicit authorization, even from a local topic branch. A
+checked-in `AGENTS.md` in the destination repository that explicitly allows
+pushing to its default branch counts as that authorization for normal pushes;
+it never authorizes force pushes. Read-only tasks never authorize pushes. Inspect the working tree without disturbing
 unrelated changes.
 
 Before pushing:

@@ -79,7 +79,9 @@ hierarchy.
 - Explain action and impact and get authorization before pushing to the
   default branch, destructive Git operations, cleanup, deployment, publishing,
   messages, or other external changes beyond the task; don't re-ask for an
-  action already authorized unless its scope or impact has changed.
+  action already authorized unless its scope or impact has changed. A
+  repository's checked-in `AGENTS.md` that explicitly allows pushing to its
+  default branch is standing authorization for normal (non-force) pushes there.
 
 ## Security and privacy
 
