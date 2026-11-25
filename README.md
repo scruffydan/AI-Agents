@@ -189,10 +189,18 @@ file has different pins.
 
 Agent model profiles refer to entries in `source/models.toml`. Each profile has
 `codex`, `claude`, and `opencode` model IDs for its targets, plus an
-`antigravity` model tier (`inherit`, `flash`, or `pro`); Antigravity
-subagents do not accept full model IDs. Optional `*_work`
-values apply with `--work`, falling back to the normal value when omitted.
-OpenCode model IDs include their reasoning variant, such as `#high`.
+`antigravity` model tier. Optional `*_work` values apply with `--work`,
+falling back to the normal value when omitted. OpenCode model IDs include
+their reasoning variant, such as `#high`.
+
+Antigravity limits model choice. Its subagent `model` field documents only the
+tiers `inherit`, `flash`, and `pro`, not model IDs, and the docs do not say
+which models `flash` and `pro` run. Every profile therefore uses `inherit`, so
+Antigravity agents run the session's model; agents cannot use different
+models there. Pick the model in the app's Orchestrator settings, with
+`agy --model`, or with `/model` in the CLI; `agy models` lists the available
+names. See the [models](https://antigravity.google/docs/models) and
+[subagents](https://antigravity.google/docs/subagents) docs.
 
 For native settings, edit `render_codex`, `render_claude`, `render_opencode`, or
 `render_antigravity` in `renderers.py`. Each function keeps its defaults and named exceptions together.
