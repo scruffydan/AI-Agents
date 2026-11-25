@@ -290,19 +290,19 @@ class BuildTests(unittest.TestCase):
                 self.assertEqual("effort: high\n" in header, effort)
 
     def test_antigravity_agents_use_only_documented_tools_and_tiers(self):
-        # Antigravity can hang on an unknown tool name and accepts only model tiers.
+        # agy 1.5.17 silently drops retired tool names; model takes only tiers.
         self.build("antigravity")
         agents = self.root / "build/antigravity/agents"
         special = {
-            "docs-fetcher": ["search_web", "read_url_content"],
-            "git-commit": ["view_file", "grep_search", "run_command"],
+            "docs-fetcher": ["search_web"],
+            "git-commit": ["read_file", "run_command"],
         }
         self.assertTrue(all((agents / f"{name}.md").exists() for name in special))
         for path in sorted(agents.glob("*.md")):
             with self.subTest(agent=path.stem):
                 header = path.read_text().split("---", 2)[1]
                 tools = re.findall(r"^  - (\S+)$", header, re.MULTILINE)
-                self.assertEqual(tools, special.get(path.stem, ["view_file", "grep_search"]))
+                self.assertEqual(tools, special.get(path.stem, ["read_file"]))
                 self.assertRegex(header, r"\nmodel: (inherit|flash|pro)\n")
                 self.assertIn("\nmainAgent: false\n", header)
 

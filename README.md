@@ -366,13 +366,15 @@ Report-only instructions apply to the agents; enforcement differs by harness:
   flags, and redirects require approval.
 - Claude reviewers have read/search tools, and `docs-fetcher` has web tools.
   `git-commit` also has Bash, which its frontmatter cannot restrict by command.
-- Antigravity reviewers have `view_file` and `grep_search`, the tool names its
-  subagent docs show. `git-commit` also has `run_command`, which its frontmatter
-  cannot restrict by command. `docs-fetcher` has `search_web` and
-  `read_url_content`; those names come from the
-  [SDK built-in tools](https://antigravity.google/docs/sdk/tools/) page, not the
-  subagent docs. Antigravity's docs warn that an unknown tool name can hang a
-  subagent, so verify these in a real install.
+- Antigravity reviewers and `brainstorm` have only `read_file`: they can read
+  files by path but cannot list directories or search, so the parent passes
+  the paths or diff to review. `git-commit` adds `run_command`, which its
+  frontmatter cannot restrict by command. `docs-fetcher` has only `search_web`,
+  so its answers come from search results rather than fetched pages. Tested
+  with `agy` 1.5.17, which silently drops retired names (`grep_search`,
+  `list_dir`, `find_by_name`, `read_url_content`) even though older changelogs
+  say custom agents keep them. Its command sandbox can also block Git config
+  files outside the workspace, such as an included global config.
 - Codex agents inherit the parent's sandbox and approval policy. Their config
   files do not establish a narrower permission boundary; report-only behavior
   also relies on their instructions.
