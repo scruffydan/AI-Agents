@@ -109,4 +109,28 @@ def render_opencode(agent: dict, model: str | None) -> str:
     )
 
 
-RENDERERS = {"codex": render_codex, "claude": render_claude, "opencode": render_opencode}
+def render_antigravity(agent: dict, model: str) -> str:
+    # Antigravity's docs warn that an unknown tool name can hang a subagent, so
+    # use only names its docs show. The web tool names come from the SDK
+    # built-in tools page, not the subagent docs; verify them in a real install.
+    tools = {
+        "docs-fetcher": ["search_web", "read_url_content"],
+        "git-commit": ["view_file", "grep_search", "run_command"],
+    }.get(agent["name"], ["view_file", "grep_search"])
+    tool_lines = "".join(f"  - {tool}\n" for tool in tools)
+    return (
+        f'---\nname: {yaml_scalar(agent["name"])}\n'
+        f'description: {yaml_scalar(agent["description"])}\n'
+        f'model: {yaml_scalar(model)}\n'
+        # Delegation only, matching the other harnesses' subagents.
+        f'mainAgent: false\nsubagent: true\n'
+        f'tools:\n{tool_lines}---\n\n{agent["body"]}\n'
+    )
+
+
+RENDERERS = {
+    "codex": render_codex,
+    "claude": render_claude,
+    "opencode": render_opencode,
+    "antigravity": render_antigravity,
+}

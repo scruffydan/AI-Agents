@@ -24,7 +24,7 @@ SKILLS = ROOT / "source" / "skills"
 MODELS_FILE = ROOT / "source" / "models.toml"
 BUILD = ROOT / "build"
 
-HARNESSES = ("codex", "claude", "opencode")
+HARNESSES = ("codex", "claude", "opencode", "antigravity")
 OPENCODE_PROVIDERS = ("openai", "opencode")
 INCLUDE_RE = re.compile(r"\{\{include:([A-Za-z0-9_.-]+)\}\}")
 NAME_RE = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*")
@@ -32,11 +32,13 @@ LAYOUT = {
     "opencode": {"base": "AGENTS.md", "skills": "skills"},
     "claude": {"base": "CLAUDE.md", "skills": "skills"},
     "codex": {"base": "AGENTS.md", "skills": ".agents/skills"},
+    "antigravity": {"base": "AGENTS.md", "skills": "skills"},
 }
 AGENT_PATHS = {
     "claude": "agents/{name}.md",
     "opencode": "agents/{name}.md",
     "codex": ".codex/agents/{name}.toml",
+    "antigravity": "agents/{name}.md",
 }
 WINDOWS_METADATA_NAMES = {"thumbs.db", "ehthumbs.db", "desktop.ini"}
 

@@ -31,6 +31,12 @@ def create_agent(name: str, description: str, profile: str, harnesses: list[str]
     with path.open("x") as handle:
         handle.write(content)
     print(f"Created: {path}")
+    if {"claude", "antigravity"} & set(harnesses):
+        # Tool grants are named exceptions in renderers.py, so say so up front.
+        print(
+            "Note: Claude Code and Antigravity give new agents read-only file tools.\n"
+            "For shell or web access, add a named exception in renderers.py."
+        )
 
 
 def create_skill(name: str, description: str) -> None:

@@ -1,7 +1,7 @@
 +++
 description = "Reports functional defects: logic errors, unhandled edge cases, broken failure paths, mismatched contracts, and changed behavior that tests do not cover. Report-only; does not edit files."
 model_profile = "deep_review"
-harnesses = ["opencode", "claude", "codex"]
+harnesses = ["opencode", "claude", "codex", "antigravity"]
 +++
 
 # Code Correctness Agent

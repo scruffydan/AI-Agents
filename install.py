@@ -32,6 +32,7 @@ def select_harnesses() -> list[str]:
     print("  1) Codex (default)")
     print("  2) Claude Code")
     print("  3) OpenCode")
+    print("  4) Antigravity")
     choices = {str(i): name for i, name in enumerate(build.HARNESSES, 1)}
     choices.update({name: name for name in build.HARNESSES})
     while True:
@@ -45,7 +46,7 @@ def select_harnesses() -> list[str]:
         for selection in selections or ["codex"]:
             if selection not in choices:
                 print(
-                    f"Invalid selection: {selection}. Choose 1, 2, 3, codex, claude, or opencode.",
+                    f"Invalid selection: {selection}. Choose 1-4, codex, claude, opencode, or antigravity.",
                     file=sys.stderr,
                 )
                 break
@@ -114,6 +115,8 @@ def install(harnesses: list[str], home: Path, force: bool) -> None:
         output = build.BUILD / harness
         target = home / {
             "codex": ".codex", "claude": ".claude", "opencode": ".config/opencode",
+            # Not ~/.gemini/GEMINI.md, which Gemini CLI also reads as its global context.
+            "antigravity": ".gemini/config",
         }[harness]
         layout = build.LAYOUT[harness]
         install_item(output / "THIRD_PARTY_NOTICES.md", target / "THIRD_PARTY_NOTICES.md")
@@ -200,7 +203,7 @@ def main(argv: list[str] | None = None) -> int:
         "harnesses", nargs="*", metavar="{" + ",".join(build.HARNESSES) + "}",
         help="Harnesses to install. Prompts for a selection when omitted (default: codex).",
     )
-    parser.add_argument("--all", action="store_true", help="Install all three harnesses.")
+    parser.add_argument("--all", action="store_true", help="Install all harnesses.")
     parser.add_argument("--work", action="store_true", help="Use work model mappings.")
     parser.add_argument(
         "--init-local", action="store_true",

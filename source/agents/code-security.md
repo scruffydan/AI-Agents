@@ -1,7 +1,7 @@
 +++
 description = "Reports security vulnerabilities involving attack surface, trust boundaries, and data exposure. Report-only; does not edit files."
 model_profile = "deep_review"
-harnesses = ["opencode", "claude", "codex"]
+harnesses = ["opencode", "claude", "codex", "antigravity"]
 +++
 
 # Code Security Agent

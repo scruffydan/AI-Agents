@@ -50,6 +50,14 @@ class AuthoringTests(unittest.TestCase):
             self.assertEqual(json.loads(line.removeprefix("description: ")), description)
         self.assertIn("tools: Read, Glob, Grep\n", claude.read_text())
 
+    def test_new_agent_warns_only_where_tools_default_to_read_only(self):
+        note = "give new agents read-only file tools"
+        self.assertIn(note, self.cli("new.py", "agent", "default-targets").stdout)
+        self.assertIn(note, self.cli("new.py", "agent", "on-antigravity",
+                                     "--harness", "antigravity").stdout)
+        self.assertNotIn(note, self.cli("new.py", "agent", "codex-only",
+                                        "--harness", "codex").stdout)
+
     def test_selected_harnesses_and_shared_skill_folder(self):
         self.cli("new.py", "agent", "database-review", "--harness", "claude")
         self.cli("new.py", "skill", "database-debugging")

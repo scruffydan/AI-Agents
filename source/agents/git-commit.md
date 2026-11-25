@@ -1,7 +1,7 @@
 +++
 description = "Draft commit messages matching repository conventions, including free-form formats. Use automatically during commit preparation to keep history analysis on the configured drafting model and outside the parent's context. Returns a proposal; the parent stages and commits."
 model_profile = "git_commit"
-harnesses = ["opencode", "claude", "codex"]
+harnesses = ["opencode", "claude", "codex", "antigravity"]
 +++
 
 # Prepare a Commit Message

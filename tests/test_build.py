@@ -35,6 +35,7 @@ class BuildTests(unittest.TestCase):
             ("codex", "AGENTS.md", ".codex/agents/code-blast-radius.toml"),
             ("claude", "CLAUDE.md", "agents/code-blast-radius.md"),
             ("opencode", "AGENTS.md", "agents/code-blast-radius.md"),
+            ("antigravity", "AGENTS.md", "agents/code-blast-radius.md"),
         ):
             with self.subTest(harness=harness):
                 output = self.root / "build" / harness
@@ -288,6 +289,23 @@ class BuildTests(unittest.TestCase):
                 self.assertIn(f"tools: {tools}\n", header)
                 self.assertEqual("effort: high\n" in header, effort)
 
+    def test_antigravity_agents_use_only_documented_tools_and_tiers(self):
+        # Antigravity can hang on an unknown tool name and accepts only model tiers.
+        self.build("antigravity")
+        agents = self.root / "build/antigravity/agents"
+        special = {
+            "docs-fetcher": ["search_web", "read_url_content"],
+            "git-commit": ["view_file", "grep_search", "run_command"],
+        }
+        self.assertTrue(all((agents / f"{name}.md").exists() for name in special))
+        for path in sorted(agents.glob("*.md")):
+            with self.subTest(agent=path.stem):
+                header = path.read_text().split("---", 2)[1]
+                tools = re.findall(r"^  - (\S+)$", header, re.MULTILINE)
+                self.assertEqual(tools, special.get(path.stem, ["view_file", "grep_search"]))
+                self.assertRegex(header, r"\nmodel: (inherit|flash|pro)\n")
+                self.assertIn("\nmainAgent: false\n", header)
+
     def test_opencode_brainstorm_keeps_interactive_behavior(self):
         self.build("opencode")
         agents = self.root / "build/opencode/agents"
@@ -341,7 +359,7 @@ class BuildTests(unittest.TestCase):
 
     def test_skill_metadata_and_links_fit_the_portable_format(self):
         # Name and description limits come from the Agent Skills specification
-        # that all three harnesses read. This repository also restricts
+        # that every harness reads. This repository also restricts
         # frontmatter to those two keys.
         link = re.compile(r"\]\(([^)\s]+)\)")
         # Check what ships, so folders the build skips are not read as skills.

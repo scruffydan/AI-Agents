@@ -1,7 +1,7 @@
 +++
 description = "Reports performance issues in algorithms, I/O, memory usage, and concurrency. Report-only; does not edit files."
 model_profile = "deep_review"
-harnesses = ["opencode", "claude", "codex"]
+harnesses = ["opencode", "claude", "codex", "antigravity"]
 +++
 
 # Code Performance Agent
