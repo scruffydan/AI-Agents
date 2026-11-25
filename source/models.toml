@@ -5,28 +5,28 @@
 
 [brainstorm]
 opencode = "openai/gpt-6.2-astra#high"
-opencode_work = "google-vertex/claude-opus-5-5#high"
+opencode_work = "google-vertex/gemini-4-neon#high"
 claude = "claude-opus-5-5"
 codex = "gpt-6.2-astra"
 antigravity = "pro"
 
 [deep_review]
 opencode = "openai/gpt-6.2-sol#high"
-opencode_work = "google-vertex/claude-opus-5-5#high"
+opencode_work = "google-vertex/gemini-4-neon#high"
 claude = "claude-opus-5-5"
 codex = "gpt-6.2-sol"
 antigravity = "pro"
 
 [docs_fetcher]
 opencode = "openai/gpt-6.1-terra#low"
-opencode_work = "google-vertex/claude-sonnet-5-5#high"
+opencode_work = "google-vertex/gemini-4-hydrogen#high"
 claude = "claude-sonnet-5-5"
 codex = "gpt-6.1-terra"
 antigravity = "flash"
 
 [git_commit]
 opencode = "openai/gpt-6.1-terra#low"
-opencode_work = "google-vertex/claude-sonnet-5-5#high"
+opencode_work = "google-vertex/gemini-4-hydrogen#high"
 claude = "claude-sonnet-5-5"
 codex = "gpt-6.1-terra"
 antigravity = "flash"

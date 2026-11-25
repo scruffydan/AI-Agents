@@ -171,7 +171,7 @@ class BuildTests(unittest.TestCase):
         brainstorm = self.root / "build/opencode/agents/brainstorm.md"
         for args, model in (
             ((), "openai/gpt-6.2-astra#high"),
-            (("--work",), "google-vertex/claude-opus-5-5#high"),
+            (("--work",), "google-vertex/gemini-4-neon#high"),
             (("--opencode-provider", "openai"), "openai/gpt-6.2-astra#high"),
             (("--opencode-provider", "opencode"), "opencode/gpt-6.2-astra#high"),
         ):
@@ -400,12 +400,12 @@ class BuildTests(unittest.TestCase):
                 self.assertNotIn("\ntemperature:", header)
                 self.assertNotIn("google-vertex-anthropic/", header)
         reviewer = (output / "agents/code-security.md").read_text()
-        self.assertIn("model: google-vertex/claude-opus-5-5#high\n", reviewer)
+        self.assertIn("model: google-vertex/gemini-4-neon#high\n", reviewer)
         self.assertIn("action: shell\n    resource: \"*\"\n    effect: ask", reviewer)
         commit = (output / "agents/git-commit.md").read_text()
-        self.assertIn("model: google-vertex/claude-sonnet-5-5#high\n", commit)
+        self.assertIn("model: google-vertex/gemini-4-hydrogen#high\n", commit)
         docs = (output / "agents/docs-fetcher.md").read_text()
-        self.assertIn("model: google-vertex/claude-sonnet-5-5#high\n", docs)
+        self.assertIn("model: google-vertex/gemini-4-hydrogen#high\n", docs)
 
 
 if __name__ == "__main__":
