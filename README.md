@@ -132,7 +132,11 @@ Edit `source/agents/database-review.md`. Its TOML frontmatter selects the
 `description`, `model_profile`, and `harnesses`; instructions go below it.
 The default profile is `deep_review`. Use `--profile` to choose another, and
 repeat `--harness` to select targets. Omitting targets selects all harnesses.
-New shared agents use each renderer's defaults without Python changes.
+New shared agents use each renderer's defaults without Python changes. On
+Claude Code and Antigravity those defaults are read-only file tools: an agent
+that needs a shell needs a named exception in `renderers.py`, and Antigravity
+has no documented web tools, so leave it out with `--harness` for web lookups.
+`new.py` prints this reminder when either harness is selected.
 
 ### Add a skill
 
