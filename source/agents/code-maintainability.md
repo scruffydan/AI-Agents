@@ -1,7 +1,7 @@
 +++
 description = "Reports maintainability issues in changed code unless instructed otherwise: unclear names and documentation, duplication and dead code, and needless complexity. Report-only; does not edit files."
 model_profile = "deep_review"
-harnesses = ["opencode", "claude", "codex"]
+harnesses = ["opencode", "claude", "codex", "antigravity"]
 +++
 
 # Code Maintainability Agent

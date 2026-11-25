@@ -1,6 +1,7 @@
 # AI harness configs
 
-Personal agents, skills, and instructions for Codex, Claude Code, and OpenCode.
+Personal agents, skills, and instructions for Codex, Claude Code, OpenCode, and
+Antigravity.
 Edit shared source files, then build and install them for the harnesses you use.
 
 Requires Python 3.11+ and OpenCode V2 for OpenCode output.
@@ -13,7 +14,7 @@ Run the picker, or name the harnesses to install:
 ```bash
 ./install.py                 # Interactive harness, local-context, and repository setup
 ./install.py codex claude    # Install selected harnesses
-./install.py --all           # Install all three
+./install.py --all           # Install all four
 ./install.py codex --init-local  # Also create an optional machine-local context template
 ```
 
@@ -40,10 +41,17 @@ installed copy.
 | Codex | `~/.codex/AGENTS.md` | `~/.codex/agents/` | `~/.agents/skills/` |
 | Claude Code | `~/.claude/CLAUDE.md` | `~/.claude/agents/` | `~/.claude/skills/` |
 | OpenCode | `~/.config/opencode/AGENTS.md` | `~/.config/opencode/agents/` | `~/.config/opencode/skills/` |
+| Antigravity | `~/.gemini/config/AGENTS.md` | `~/.gemini/config/agents/` | `~/.gemini/config/skills/` |
+
+Antigravity also reads `~/.gemini/GEMINI.md`, which Gemini CLI uses as its
+global context. The installer writes `~/.gemini/config/AGENTS.md` instead so
+these instructions stay out of Gemini CLI. If you keep rules in both files,
+Antigravity loads both, and its global rules share a 20,000-token budget.
 
 `THIRD_PARTY_NOTICES.md` is installed beside each harness's base instructions:
-`~/.codex/THIRD_PARTY_NOTICES.md`, `~/.claude/THIRD_PARTY_NOTICES.md`, and
-`~/.config/opencode/THIRD_PARTY_NOTICES.md`. It carries the full notices for
+`~/.codex/THIRD_PARTY_NOTICES.md`, `~/.claude/THIRD_PARTY_NOTICES.md`,
+`~/.config/opencode/THIRD_PARTY_NOTICES.md`, and
+`~/.gemini/config/THIRD_PARTY_NOTICES.md`. It carries the full notices for
 adapted agents and shared prompts without adding license text to model prompts.
 Skill licenses remain beside their `SKILL.md` files.
 
@@ -119,7 +127,7 @@ Rebuild and reinstall after editing. `build/` is generated.
 Edit `source/agents/database-review.md`. Its TOML frontmatter selects the
 `description`, `model_profile`, and `harnesses`; instructions go below it.
 The default profile is `deep_review`. Use `--profile` to choose another, and
-repeat `--harness` to select targets. Omitting targets selects all three.
+repeat `--harness` to select targets. Omitting targets selects all harnesses.
 New shared agents use each renderer's defaults without Python changes.
 
 ### Add a skill
@@ -172,12 +180,14 @@ file has different pins.
 ### Models and harness settings
 
 Agent model profiles refer to entries in `source/models.toml`. Each profile has
-`codex`, `claude`, and `opencode` model IDs for its targets. Optional `*_work`
+`codex`, `claude`, and `opencode` model IDs for its targets, plus an
+`antigravity` model tier (`inherit`, `flash`, or `pro`); Antigravity
+subagents do not accept full model IDs. Optional `*_work`
 values apply with `--work`, falling back to the normal value when omitted.
 OpenCode model IDs include their reasoning variant, such as `#high`.
 
-For native settings, edit `render_codex`, `render_claude`, or `render_opencode`
-in `renderers.py`. Each function keeps its defaults and named exceptions together.
+For native settings, edit `render_codex`, `render_claude`, `render_opencode`, or
+`render_antigravity` in `renderers.py`. Each function keeps its defaults and named exceptions together.
 A new primary mode needs a renderer case and a shared agent definition.
 
 Agent instructions can include shared fragments from `source/prompts/`:
@@ -227,6 +237,7 @@ push. Inspection can be sufficient for small documentation or other low-impact e
 | Codex | `$code-review` |
 | Claude Code | `/code-review` |
 | OpenCode | Load `@code-review` |
+| Antigravity | Ask for `code-review` by name |
 
 Use the `thorough-plan` skill for detailed read-only planning in any harness.
 OpenCode also provides a `brainstorm` primary agent. After
@@ -340,6 +351,11 @@ Report-only instructions apply to the agents; enforcement differs by harness:
   flags, and redirects require approval.
 - Claude reviewers have read/search tools, and `docs-fetcher` has web tools.
   `git-commit` also has Bash, which its frontmatter cannot restrict by command.
+- Antigravity agents list only the tool names its documentation shows:
+  `view_file` and `grep_search`, plus `run_command` for `git-commit`. Its docs
+  warn that an unknown tool name can hang a subagent. `docs-fetcher` is not
+  built for Antigravity because its web tool names are not documented; the
+  parent does documentation lookups itself.
 - Codex agents inherit the parent's sandbox and approval policy. Their config
   files do not establish a narrower permission boundary; report-only behavior
   also relies on their instructions.

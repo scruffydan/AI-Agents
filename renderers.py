@@ -109,4 +109,27 @@ def render_opencode(agent: dict, model: str | None) -> str:
     )
 
 
-RENDERERS = {"codex": render_codex, "claude": render_claude, "opencode": render_opencode}
+def render_antigravity(agent: dict, model: str) -> str:
+    # Antigravity's docs warn that an unknown tool name can hang a subagent, so
+    # use only names the docs show. Its web tool names are unconfirmed, which is
+    # why docs-fetcher does not target this harness.
+    tools = ["view_file", "grep_search"]
+    if agent["name"] == "git-commit":
+        tools.append("run_command")
+    tool_lines = "".join(f"  - {tool}\n" for tool in tools)
+    return (
+        f'---\nname: {yaml_scalar(agent["name"])}\n'
+        f'description: {yaml_scalar(agent["description"])}\n'
+        f'model: {yaml_scalar(model)}\n'
+        # Delegation only, matching the other harnesses' subagents.
+        f'mainAgent: false\nsubagent: true\n'
+        f'tools:\n{tool_lines}---\n\n{agent["body"]}\n'
+    )
+
+
+RENDERERS = {
+    "codex": render_codex,
+    "claude": render_claude,
+    "opencode": render_opencode,
+    "antigravity": render_antigravity,
+}

@@ -38,7 +38,7 @@ class InstallTests(unittest.TestCase):
     def test_notices_install_beside_base_instructions_for_all_harnesses(self):
         self.install("--all")
         notices = (self.root / "THIRD_PARTY_NOTICES.md").read_bytes()
-        for directory in (".codex", ".claude", ".config/opencode"):
+        for directory in (".codex", ".claude", ".config/opencode", ".gemini/config"):
             with self.subTest(directory=directory):
                 self.assertEqual(
                     (self.home / directory / "THIRD_PARTY_NOTICES.md").read_bytes(),
@@ -62,6 +62,22 @@ class InstallTests(unittest.TestCase):
         self.assertEqual(unrelated_agent.read_text(), "keep me")
         self.assertTrue((self.home / ".claude/skills/git-commit/SKILL.md").is_file())
         self.assertTrue((self.home / ".codex/agents/code-security.toml").is_file())
+
+    def test_antigravity_installs_under_its_config_dir_without_touching_gemini_cli(self):
+        gemini_cli = self.home / ".gemini/GEMINI.md"
+        gemini_cli.parent.mkdir()
+        gemini_cli.write_text("Gemini CLI context")
+
+        self.install("antigravity")
+
+        config = self.home / ".gemini/config"
+        self.assertEqual(gemini_cli.read_text(), "Gemini CLI context")
+        self.assertEqual(
+            (config / "AGENTS.md").read_bytes(),
+            (self.root / "source/prompts/AGENTS.md").read_bytes(),
+        )
+        self.assertTrue((config / "skills/git-commit/SKILL.md").is_file())
+        self.assertTrue((config / "agents/code-security.md").is_file())
 
     def test_retired_agents_move_to_backup_unless_still_built_or_declined(self):
         agents = self.root / "source/agents"

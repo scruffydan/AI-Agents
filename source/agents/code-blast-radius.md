@@ -1,7 +1,7 @@
 +++
 description = "Reports indirect impact beyond the diff, compatibility risks, and safety assumptions. Report-only; does not edit files or execute code."
 model_profile = "deep_review"
-harnesses = ["opencode", "claude", "codex"]
+harnesses = ["opencode", "claude", "codex", "antigravity"]
 +++
 
 # Code Blast Radius Agent
