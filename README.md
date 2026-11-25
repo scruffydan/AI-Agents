@@ -48,6 +48,10 @@ global context. The installer writes `~/.gemini/config/AGENTS.md` instead so
 these instructions stay out of Gemini CLI. If you keep rules in both files,
 Antigravity loads both, and its global rules share a 20,000-token budget.
 
+Google documents `~/.gemini/config/AGENTS.md` for the Antigravity App and CLI.
+Loading this file in the standalone IDE and IDE extensions is unverified. See
+[Antigravity rules by surface](https://antigravity.google/docs/rules/#configuration-by-surface).
+
 `THIRD_PARTY_NOTICES.md` is installed beside each harness's base instructions:
 `~/.codex/THIRD_PARTY_NOTICES.md`, `~/.claude/THIRD_PARTY_NOTICES.md`,
 `~/.config/opencode/THIRD_PARTY_NOTICES.md`, and
