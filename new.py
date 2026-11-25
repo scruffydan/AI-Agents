@@ -35,8 +35,7 @@ def create_agent(name: str, description: str, profile: str, harnesses: list[str]
         # Tool grants are named exceptions in renderers.py, so say so up front.
         print(
             "Note: Claude Code and Antigravity give new agents read-only file tools.\n"
-            "For shell access, add a named exception in renderers.py. Antigravity has\n"
-            "no documented web tools; leave it out with --harness for web lookups."
+            "For shell or web access, add a named exception in renderers.py."
         )
 
 

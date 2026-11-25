@@ -293,15 +293,16 @@ class BuildTests(unittest.TestCase):
         # Antigravity can hang on an unknown tool name and accepts only model tiers.
         self.build("antigravity")
         agents = self.root / "build/antigravity/agents"
-        self.assertFalse((agents / "docs-fetcher.md").exists())
+        special = {
+            "docs-fetcher": ["search_web", "read_url_content"],
+            "git-commit": ["view_file", "grep_search", "run_command"],
+        }
+        self.assertTrue(all((agents / f"{name}.md").exists() for name in special))
         for path in sorted(agents.glob("*.md")):
             with self.subTest(agent=path.stem):
                 header = path.read_text().split("---", 2)[1]
                 tools = re.findall(r"^  - (\S+)$", header, re.MULTILINE)
-                expected = ["view_file", "grep_search"]
-                if path.stem == "git-commit":
-                    expected.append("run_command")
-                self.assertEqual(tools, expected)
+                self.assertEqual(tools, special.get(path.stem, ["view_file", "grep_search"]))
                 self.assertRegex(header, r"\nmodel: (inherit|flash|pro)\n")
                 self.assertIn("\nmainAgent: false\n", header)
 

@@ -111,11 +111,12 @@ def render_opencode(agent: dict, model: str | None) -> str:
 
 def render_antigravity(agent: dict, model: str) -> str:
     # Antigravity's docs warn that an unknown tool name can hang a subagent, so
-    # use only names the docs show. Its web tool names are unconfirmed, which is
-    # why docs-fetcher does not target this harness.
-    tools = ["view_file", "grep_search"]
-    if agent["name"] == "git-commit":
-        tools.append("run_command")
+    # use only names its docs show. The web tool names come from the SDK
+    # built-in tools page, not the subagent docs; verify them in a real install.
+    tools = {
+        "docs-fetcher": ["search_web", "read_url_content"],
+        "git-commit": ["view_file", "grep_search", "run_command"],
+    }.get(agent["name"], ["view_file", "grep_search"])
     tool_lines = "".join(f"  - {tool}\n" for tool in tools)
     return (
         f'---\nname: {yaml_scalar(agent["name"])}\n'

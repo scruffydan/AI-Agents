@@ -134,8 +134,7 @@ The default profile is `deep_review`. Use `--profile` to choose another, and
 repeat `--harness` to select targets. Omitting targets selects all harnesses.
 New shared agents use each renderer's defaults without Python changes. On
 Claude Code and Antigravity those defaults are read-only file tools: an agent
-that needs a shell needs a named exception in `renderers.py`, and Antigravity
-has no documented web tools, so leave it out with `--harness` for web lookups.
+that needs a shell or web access needs a named exception in `renderers.py`.
 `new.py` prints this reminder when either harness is selected.
 
 ### Add a skill
@@ -367,11 +366,13 @@ Report-only instructions apply to the agents; enforcement differs by harness:
   flags, and redirects require approval.
 - Claude reviewers have read/search tools, and `docs-fetcher` has web tools.
   `git-commit` also has Bash, which its frontmatter cannot restrict by command.
-- Antigravity agents list only the tool names its documentation shows:
-  `view_file` and `grep_search`, plus `run_command` for `git-commit`. Its docs
-  warn that an unknown tool name can hang a subagent. `docs-fetcher` is not
-  built for Antigravity because its web tool names are not documented; the
-  parent does documentation lookups itself.
+- Antigravity reviewers have `view_file` and `grep_search`, the tool names its
+  subagent docs show. `git-commit` also has `run_command`, which its frontmatter
+  cannot restrict by command. `docs-fetcher` has `search_web` and
+  `read_url_content`; those names come from the
+  [SDK built-in tools](https://antigravity.google/docs/sdk/tools/) page, not the
+  subagent docs. Antigravity's docs warn that an unknown tool name can hang a
+  subagent, so verify these in a real install.
 - Codex agents inherit the parent's sandbox and approval policy. Their config
   files do not establish a narrower permission boundary; report-only behavior
   also relies on their instructions.

@@ -1,7 +1,7 @@
 +++
 description = "Research external library, API, and tool documentation and return focused findings with primary-source links. Use for delegated documentation lookups; report-only."
 model_profile = "docs_fetcher"
-harnesses = ["opencode", "claude", "codex"]
+harnesses = ["opencode", "claude", "codex", "antigravity"]
 +++
 
 # Documentation Fetcher
