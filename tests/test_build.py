@@ -293,16 +293,15 @@ class BuildTests(unittest.TestCase):
         # agy 1.5.17 silently drops retired tool names; model takes only tiers.
         self.build("antigravity")
         agents = self.root / "build/antigravity/agents"
-        special = {
-            "docs-fetcher": ["search_web"],
-            "git-commit": ["read_file", "run_command"],
-        }
-        self.assertTrue(all((agents / f"{name}.md").exists() for name in special))
+        self.assertTrue((agents / "docs-fetcher.md").exists())
         for path in sorted(agents.glob("*.md")):
             with self.subTest(agent=path.stem):
                 header = path.read_text().split("---", 2)[1]
                 tools = re.findall(r"^  - (\S+)$", header, re.MULTILINE)
-                self.assertEqual(tools, special.get(path.stem, ["read_file"]))
+                expected = ["search_web"] if path.stem == "docs-fetcher" else ["read_file", "run_command"]
+                self.assertEqual(tools, expected)
+                self.assertEqual("\ncommandExecutionPolicy: auto\n" in header,
+                                 path.stem == "git-commit")
                 self.assertRegex(header, r"\nmodel: (inherit|flash|pro)\n")
                 self.assertIn("\nmainAgent: false\n", header)
 
