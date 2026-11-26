@@ -106,17 +106,14 @@ overwriting your other CLI settings:
 
 The initializer detects external files referenced by your global Git config
 (includes, symlinks, XDG `~/.config/git/` files, `core.excludesfile`, and
-`core.attributesfile`) and merges them into `permissions.allow`. Pass `--allow-read PATH` (repeatable) for any
-extra read-only paths. Like `opencode-init.sh`, it asks before modifying an
-existing file, backs up with private permissions, writes with mode `600`, skips
-unchanged configs, and refuses symlink destinations; `--yes` skips confirmation
-and still backs up.
+`core.attributesfile`) and merges them into `permissions.allow`, saving a
+`settings.json.bak` copy first when updating an existing file.
 
 This applies to the standalone Antigravity CLI (`agy`). It does not configure
 the Antigravity desktop app or hosts that launch `agy acp` with an isolated
 `--gemini-dir` (such as T3 Code). Inside a Git worktree whose `.git` file points
 outside the workspace, standalone `agy --sandbox` also needs the parent
-repository's `.git` directory allowed (for example, via `--allow-read`).
+repository's `.git` directory allowed in `permissions.allow`.
 
 ## Build without installing
 
