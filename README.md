@@ -370,9 +370,13 @@ Report-only instructions apply to the agents; enforcement differs by harness:
 - Antigravity agents have `read_file` and `run_command`, because in `agy`
   1.5.17 only the shell can list or search files. Their frontmatter cannot
   restrict commands, so as on Codex, report-only behavior relies on their
-  instructions and Antigravity's command sandbox. `git-commit` uses
-  `commandExecutionPolicy: auto` because the default sandbox blocks Git config
-  files outside the workspace, such as an included global config.
+  instructions and Antigravity's command sandbox. That sandbox is set per
+  project or globally, not per agent, and it blocks files outside the
+  workspace, including a Git config that `~/.gitconfig` includes from
+  elsewhere. Plain `git` then fails, and agents may retry with
+  `GIT_CONFIG_GLOBAL=/dev/null`, ignoring your global settings. `git` could
+  still read `~/.gitconfig` itself in testing, so keeping the settings there
+  avoids this. `commandExecutionPolicy` only controls approval prompts.
   `docs-fetcher` has only `search_web`, so its answers come from search results
   rather than fetched pages. `agy` 1.5.17 silently drops retired tool names
   (`grep_search`, `list_dir`, `find_by_name`, `read_url_content`), although

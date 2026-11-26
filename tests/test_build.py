@@ -300,8 +300,8 @@ class BuildTests(unittest.TestCase):
                 tools = re.findall(r"^  - (\S+)$", header, re.MULTILINE)
                 expected = ["search_web"] if path.stem == "docs-fetcher" else ["read_file", "run_command"]
                 self.assertEqual(tools, expected)
-                self.assertEqual("\ncommandExecutionPolicy: auto\n" in header,
-                                 path.stem == "git-commit")
+                # agy 1.5.17's sandbox is per project, not per agent.
+                self.assertNotIn("commandExecutionPolicy", header)
                 self.assertRegex(header, r"\nmodel: (inherit|flash|pro)\n")
                 self.assertIn("\nmainAgent: false\n", header)
 

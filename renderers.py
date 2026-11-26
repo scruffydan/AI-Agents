@@ -114,16 +114,13 @@ def render_antigravity(agent: dict, model: str) -> str:
     # such as grep_search, list_dir, find_by_name, and read_url_content. Only
     # run_command can list or search files there, so file agents get it too.
     tools = ["search_web"] if agent["name"] == "docs-fetcher" else ["read_file", "run_command"]
-    # The default sandbox blocks Git config files outside the workspace, such
-    # as an included global config, which git-commit needs.
-    policy = "commandExecutionPolicy: auto\n" if agent["name"] == "git-commit" else ""
     tool_lines = "".join(f"  - {tool}\n" for tool in tools)
     return (
         f'---\nname: {yaml_scalar(agent["name"])}\n'
         f'description: {yaml_scalar(agent["description"])}\n'
         f'model: {yaml_scalar(model)}\n'
         # Delegation only, matching the other harnesses' subagents.
-        f'mainAgent: false\nsubagent: true\n{policy}'
+        f'mainAgent: false\nsubagent: true\n'
         f'tools:\n{tool_lines}---\n\n{agent["body"]}\n'
     )
 
