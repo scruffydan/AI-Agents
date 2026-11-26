@@ -20,179 +20,114 @@ import tempfile
 GIT_PATH_KEYS = ("core.excludesfile", "core.attributesfile")
 
 
-def _resolved(path: Path) -> Path:
-    return path.expanduser().resolve()
-
-
-def _dedupe(paths: list[Path]) -> list[Path]:
-    seen: set[Path] = set()
-    unique: list[Path] = []
-    for path in paths:
-        if path not in seen:
-            seen.add(path)
-            unique.append(path)
-    return unique
-
-
-def detect_external_git_files(home: Path) -> list[Path]:
+def external_git_files(home: Path) -> list[Path]:
     """Return resolved global Git config files outside ~/.gitconfig."""
-    default_gitconfig = home.resolve() / ".gitconfig"
-    env = {**os.environ, "HOME": str(home)}
+    default = home.resolve() / ".gitconfig"
+    env = {**os.environ, "HOME": str(home), "GIT_CONFIG_NOSYSTEM": "1"}
     paths: list[Path] = []
 
     try:
         listing = subprocess.run(
-            ["git", "config", "--global", "--includes", "--list", "--show-origin", "--name-only", "--null"],
-            env=env, capture_output=True,
+            ["git", "config", "--includes", "--list", "--show-scope", "--show-origin", "--name-only", "--null"],
+            cwd=home, env=env, capture_output=True,
         )
     except FileNotFoundError:
         return []
 
     if listing.returncode == 0:
         parts = listing.stdout.split(b"\0")
-        for index in range(0, len(parts) - 1, 2):
-            origin = os.fsdecode(parts[index])
-            if not origin.startswith("file:"):
-                continue
-            target = _resolved(Path(origin.removeprefix("file:")))
-            if target != default_gitconfig:
-                paths.append(target)
+        for i in range(0, len(parts) - 2, 3):
+            scope, origin = os.fsdecode(parts[i]), os.fsdecode(parts[i + 1])
+            if scope == "global" and origin.startswith("file:"):
+                paths.append(Path(origin.removeprefix("file:")).expanduser().resolve())
 
     for key in GIT_PATH_KEYS:
-        result = subprocess.run(
-            ["git", "config", "--global", "--includes", "--path", "--get", key],
-            env=env, capture_output=True, text=True,
+        res = subprocess.run(
+            ["git", "config", "--includes", "--show-scope", "--path", "--get-all", "--null", key],
+            cwd=home, env=env, capture_output=True,
         )
-        if result.returncode == 0:
-            raw = result.stdout.strip()
-            if raw:
-                target = _resolved(Path(raw))
-                if target != default_gitconfig:
-                    paths.append(target)
+        if res.returncode == 0:
+            parts = res.stdout.split(b"\0")
+            for i in range(0, len(parts) - 1, 2):
+                scope, raw = os.fsdecode(parts[i]), os.fsdecode(parts[i + 1]).strip()
+                if scope == "global" and raw:
+                    paths.append(Path(raw).expanduser().resolve())
 
-    return _dedupe(paths)
+    xdg_raw = os.environ.get("XDG_CONFIG_HOME", "")
+    xdg_git = (Path(xdg_raw) if xdg_raw.startswith("/") else home / ".config") / "git"
+    for name in ("ignore", "attributes"):
+        candidate = xdg_git / name
+        if candidate.exists():
+            paths.append(candidate.resolve())
+
+    return [p for p in dict.fromkeys(paths) if p != default]
 
 
-def format_rule(path: Path) -> str:
-    text = path.as_posix()
-    if any(ch in text for ch in ("\n", "\r", ")")):
-        raise ValueError(f"Unsupported characters in read_file path: {text}")
-    return f"read_file({text})"
-
-
-def load_settings(dest: Path) -> dict:
-    if not dest.exists():
-        return {}
-    try:
-        data = json.loads(dest.read_text())
-    except json.JSONDecodeError as exc:
-        raise ValueError(f"Invalid JSON in {dest}: {exc}") from None
+def merge_rules(dest: Path, rules: list[str]) -> tuple[dict, list[str]]:
+    data = json.loads(dest.read_text()) if dest.exists() else {}
     if not isinstance(data, dict):
         raise ValueError(f"Expected a JSON object in {dest}")
-    return data
-
-
-def merge_allow_rules(data: dict, rules: list[str]) -> tuple[dict, list[str]]:
-    merged = dict(data)
-    permissions = merged.get("permissions")
-    if permissions is None:
-        permissions = {}
-    elif not isinstance(permissions, dict):
+    perms = {} if data.get("permissions") is None else data["permissions"]
+    if not isinstance(perms, dict):
         raise ValueError("'permissions' in settings.json must be a JSON object")
-    else:
-        permissions = dict(permissions)
-
-    allow = permissions.get("allow")
-    if allow is None:
-        allow = []
-    elif not isinstance(allow, list) or not all(isinstance(item, str) for item in allow):
+    allow = [] if perms.get("allow") is None else perms["allow"]
+    if not isinstance(allow, list) or not all(isinstance(item, str) for item in allow):
         raise ValueError("'permissions.allow' in settings.json must be a list of strings")
-    else:
-        allow = list(allow)
 
     added = [rule for rule in rules if rule not in allow]
     if added:
-        allow.extend(added)
-        permissions["allow"] = allow
-        merged["permissions"] = permissions
-    return merged, added
+        data = {**data, "permissions": {**perms, "allow": [*allow, *added]}}
+    return data, added
 
 
 def write_private_json(dest: Path, data: dict) -> None:
     dest.parent.mkdir(parents=True, exist_ok=True)
-    body = json.dumps(data, indent=2) + "\n"
-    fd, tmp_name = tempfile.mkstemp(prefix=".settings-", suffix=".tmp", dir=dest.parent)
-    tmp_path = Path(tmp_name)
+    fd, tmp = tempfile.mkstemp(prefix=".settings-", suffix=".tmp", dir=dest.parent)
+    tmp_path = Path(tmp)
     try:
         os.fchmod(fd, 0o600)
         with os.fdopen(fd, "w", encoding="utf-8") as handle:
-            handle.write(body)
+            handle.write(json.dumps(data, indent=2) + "\n")
         os.replace(tmp_path, dest)
     except BaseException:
         tmp_path.unlink(missing_ok=True)
         raise
 
 
-def back_up(dest: Path, home: Path) -> Path:
-    backups = home / ".ai-agents-backups"
-    backups.mkdir(parents=True, exist_ok=True)
-    backup_dir = Path(tempfile.mkdtemp(
-        prefix=f"antigravity-{datetime.now().strftime('%Y%m%d-%H%M%S')}-", dir=backups,
-    ))
-    os.chmod(backup_dir, 0o700)
-    backup = backup_dir / dest.name
-    shutil.copyfile(dest, backup)
-    os.chmod(backup, 0o600)
-    return backup
-
-
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
-        description=(
-            "Merge read_file sandbox allow rules for external Git config files into "
-            "~/.gemini/antigravity-cli/settings.json without replacing other settings."
-        ),
+        description="Merge read_file rules for external Git config files into ~/.gemini/antigravity-cli/settings.json.",
     )
-    parser.add_argument(
-        "-y", "--yes", action="store_true",
-        help="Update an existing settings.json without prompting (backs up first).",
-    )
-    parser.add_argument(
-        "--allow-read", action="append", default=[], metavar="PATH",
-        help="Additional file or directory path to allow read-only inside the sandbox (repeatable).",
-    )
+    parser.add_argument("-y", "--yes", action="store_true", help="Update existing settings without prompting (backs up first).")
+    parser.add_argument("--allow-read", action="append", default=[], metavar="PATH", help="Extra read-only path to allow (repeatable).")
     args = parser.parse_args(argv)
 
     home = Path.home()
     dest = home / ".gemini" / "antigravity-cli" / "settings.json"
-
     if dest.is_symlink():
-        print(f"Error: refusing to overwrite symlink target {dest}", file=sys.stderr)
-        return 1
+        sys.exit(f"Error: refusing to overwrite symlink target {dest}")
     if dest.exists() and not dest.is_file():
-        print(f"Error: {dest} is not a regular file", file=sys.stderr)
-        return 1
+        sys.exit(f"Error: {dest} is not a regular file")
 
-    try:
-        paths = _dedupe([
-            *detect_external_git_files(home),
-            *(_resolved(Path(raw)) for raw in args.allow_read),
-        ])
-        rules = [format_rule(path) for path in paths]
-    except ValueError as exc:
-        print(f"Error: {exc}", file=sys.stderr)
-        return 1
+    paths = list(dict.fromkeys([
+        *external_git_files(home),
+        *(Path(raw).expanduser().resolve() for raw in args.allow_read),
+    ]))
+    rules = []
+    for path in paths:
+        text = path.as_posix()
+        if any(ch in text for ch in ("\n", "\r", ")")):
+            sys.exit(f"Error: unsupported characters in path: {text}")
+        rules.append(f"read_file({text})")
 
     if not rules:
         print("No external Git config files detected; nothing to add.")
         return 0
 
     try:
-        existing = load_settings(dest)
-        merged, added = merge_allow_rules(existing, rules)
+        merged, added = merge_rules(dest, rules)
     except (ValueError, OSError) as exc:
-        print(f"Error: {exc}", file=sys.stderr)
-        return 1
+        sys.exit(f"Error: {exc}")
 
     if dest.is_file() and not added:
         os.chmod(dest, 0o600)
@@ -200,26 +135,28 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     if dest.is_file() and not args.yes:
-        print(f"Rules to add to {dest}:")
-        for rule in added:
-            print(f"  {rule}")
+        print(f"Rules to add to {dest}:\n" + "\n".join(f"  {rule}" for rule in added))
         try:
             answer = input(f"Update {dest} (backup first)? [y/N]: ")
         except EOFError:
-            print("Aborted: no confirmation received.")
-            return 1
+            sys.exit("Aborted: no confirmation received.")
         if answer.strip().lower() not in {"y", "yes"}:
             print("Aborted.")
             return 0
 
     existed = dest.is_file()
     if existed:
-        backup = back_up(dest, home)
+        backups = home / ".ai-agents-backups"
+        backups.mkdir(parents=True, exist_ok=True)
+        backup_dir = Path(tempfile.mkdtemp(prefix=f"antigravity-{datetime.now():%Y%m%d-%H%M%S}-", dir=backups))
+        os.chmod(backup_dir, 0o700)
+        backup = backup_dir / dest.name
+        shutil.copyfile(dest, backup)
+        os.chmod(backup, 0o600)
         print(f"Backed up: {dest} -> {backup}")
 
     write_private_json(dest, merged)
-    action = "Updated" if existed else "Installed"
-    print(f"{action}: {dest}")
+    print(f"{'Updated' if existed else 'Installed'}: {dest}")
     for rule in added:
         print(f"  + {rule}")
     return 0

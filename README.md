@@ -105,8 +105,8 @@ overwriting your other CLI settings:
 ```
 
 The initializer detects external files referenced by your global Git config
-(includes, symlinks, `core.excludesfile`, and `core.attributesfile`) and merges
-them into `permissions.allow`. Pass `--allow-read PATH` (repeatable) for any
+(includes, symlinks, XDG `~/.config/git/` files, `core.excludesfile`, and
+`core.attributesfile`) and merges them into `permissions.allow`. Pass `--allow-read PATH` (repeatable) for any
 extra read-only paths. Like `opencode-init.sh`, it asks before modifying an
 existing file, backs up with private permissions, writes with mode `600`, skips
 unchanged configs, and refuses symlink destinations; `--yes` skips confirmation

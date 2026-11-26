@@ -808,6 +808,32 @@ install.install(list(build.HARNESSES), Path.home(), force=True)
         self.assertIn("nothing to add", result.stdout)
         self.assertFalse(config.exists())
 
+    def test_antigravity_init_detects_symlinked_and_xdg_git_configs(self):
+        dotfiles = self.home / "dotfiles/git"
+        dotfiles.mkdir(parents=True)
+        target = dotfiles / "gitconfig"
+        target.write_text("[user]\n    name = Test\n")
+        (self.home / ".gitconfig").symlink_to(target)
+        xdg = self.home / ".config/git"
+        xdg.mkdir(parents=True)
+        xdg_config = xdg / "config"
+        xdg_config.write_text("[init]\n    defaultBranch = main\n")
+        xdg_ignore = xdg / "ignore"
+        xdg_ignore.write_text("*.swp\n")
+
+        result = self.init_antigravity()
+
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        data = json.loads((self.home / ".gemini/antigravity-cli/settings.json").read_text())
+        self.assertEqual(
+            data["permissions"]["allow"],
+            [
+                f"read_file({xdg_config.resolve().as_posix()})",
+                f"read_file({target.resolve().as_posix()})",
+                f"read_file({xdg_ignore.resolve().as_posix()})",
+            ],
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
