@@ -1,5 +1,6 @@
 """Installer checks; every write stays in a temporary repository copy and HOME."""
 
+import json
 import os
 from pathlib import Path
 import shutil
@@ -678,6 +679,160 @@ install.install(list(build.HARNESSES), Path.home(), force=True)
         self.assertIn("Unchanged:", result.stdout)
         self.assertEqual(config.stat().st_mode & 0o777, 0o600)
         self.assertFalse((self.home / ".ai-agents-backups").exists())
+
+    def init_antigravity(self, *args, input_text=None):
+        shutil.copy2(REPO / "antigravity-init.py", self.root / "antigravity-init.py")
+        env = {
+            key: value for key, value in os.environ.items()
+            if key not in {"GIT_CONFIG_GLOBAL", "GIT_CONFIG_SYSTEM", "GIT_CONFIG_NOSYSTEM", "XDG_CONFIG_HOME"}
+        }
+        env["HOME"] = str(self.home)
+        return subprocess.run(
+            [sys.executable, "antigravity-init.py", *args],
+            cwd=self.root, env=env,
+            capture_output=True, text=True,
+            input=input_text,
+            stdin=subprocess.DEVNULL if input_text is None else None,
+        )
+
+    def seed_external_gitconfig(self):
+        dotfiles = self.home / "dotfiles/git"
+        dotfiles.mkdir(parents=True)
+        included = dotfiles / "gitconfig"
+        excludes = dotfiles / "gitignore_global"
+        included.write_text(f"[core]\n    excludesfile = {excludes}\n")
+        excludes.write_text(".DS_Store\n")
+        (self.home / ".gitconfig").write_text(f"[include]\n    path = {included}\n")
+        return included.resolve(), excludes.resolve()
+
+    def test_antigravity_init_help_and_unknown_options_write_nothing(self):
+        config = self.home / ".gemini/antigravity-cli/settings.json"
+        for args, code in ((("--help",), 0), (("-h",), 0), (("--bogus",), 2)):
+            with self.subTest(args=args):
+                result = self.init_antigravity(*args)
+                self.assertEqual(result.returncode, code, result.stdout + result.stderr)
+                self.assertIn("usage:", (result.stdout + result.stderr).lower())
+                self.assertFalse(config.exists())
+
+    def test_antigravity_init_detects_external_git_files_and_merges_existing_settings(self):
+        included, excludes = self.seed_external_gitconfig()
+        config = self.home / ".gemini/antigravity-cli/settings.json"
+        config.parent.mkdir(parents=True)
+        original = json.dumps({
+            "trustedWorkspaces": ["/tmp/work"],
+            "permissions": {"allow": ["command(git status)"], "deny": ["read_file(.env)"]},
+        }) + "\n"
+        config.write_text(original)
+
+        result = self.init_antigravity("--yes")
+
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        updated = json.loads(config.read_text())
+        self.assertEqual(updated["trustedWorkspaces"], ["/tmp/work"])
+        self.assertEqual(updated["permissions"]["deny"], ["read_file(.env)"])
+        self.assertEqual(
+            updated["permissions"]["allow"],
+            [
+                "command(git status)",
+                f"read_file({included.as_posix()})",
+                f"read_file({excludes.as_posix()})",
+            ],
+        )
+        self.assertEqual(config.stat().st_mode & 0o777, 0o600)
+        backups = list((self.home / ".ai-agents-backups").glob("antigravity-*/settings.json"))
+        self.assertEqual([path.read_text() for path in backups], [original])
+        self.assertEqual(backups[0].stat().st_mode & 0o777, 0o600)
+        self.assertEqual(backups[0].parent.stat().st_mode & 0o777, 0o700)
+
+    def test_antigravity_init_without_confirmation_preserves_existing_settings(self):
+        self.seed_external_gitconfig()
+        config = self.home / ".gemini/antigravity-cli/settings.json"
+        config.parent.mkdir(parents=True)
+        config.write_text('{"model": "keep"}\n')
+
+        result = self.init_antigravity()
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(config.read_text(), '{"model": "keep"}\n')
+        self.assertFalse((self.home / ".ai-agents-backups").exists())
+
+    def test_antigravity_init_refuses_symlinks_and_skips_unchanged(self):
+        included, excludes = self.seed_external_gitconfig()
+        config = self.home / ".gemini/antigravity-cli/settings.json"
+        config.parent.mkdir(parents=True)
+        target = self.home / "other.json"
+        for existing in (True, False):
+            with self.subTest(existing=existing):
+                if existing:
+                    target.write_text("keep me")
+                config.symlink_to(target)
+                result = self.init_antigravity("--yes")
+                self.assertNotEqual(result.returncode, 0)
+                self.assertTrue(config.is_symlink())
+                if existing:
+                    self.assertEqual(target.read_text(), "keep me")
+                    target.unlink()
+                else:
+                    self.assertFalse(target.exists())
+                config.unlink()
+
+        extra = self.home / "shared/docs"
+        extra.mkdir(parents=True)
+        result = self.init_antigravity("--allow-read", str(extra))
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        data = json.loads(config.read_text())
+        self.assertEqual(
+            data["permissions"]["allow"],
+            [
+                f"read_file({included.as_posix()})",
+                f"read_file({excludes.as_posix()})",
+                f"read_file({extra.resolve().as_posix()})",
+            ],
+        )
+        self.assertEqual(config.stat().st_mode & 0o777, 0o600)
+        config.chmod(0o644)
+
+        repeat = self.init_antigravity("--allow-read", str(extra))
+        self.assertEqual(repeat.returncode, 0, repeat.stdout + repeat.stderr)
+        self.assertIn("Unchanged:", repeat.stdout)
+        self.assertEqual(config.stat().st_mode & 0o777, 0o600)
+        self.assertFalse((self.home / ".ai-agents-backups").exists())
+
+    def test_antigravity_init_no_external_gitconfig_writes_nothing(self):
+        (self.home / ".gitconfig").write_text("[user]\n    name = Test\n")
+        config = self.home / ".gemini/antigravity-cli/settings.json"
+
+        result = self.init_antigravity()
+
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("nothing to add", result.stdout)
+        self.assertFalse(config.exists())
+
+    def test_antigravity_init_detects_symlinked_and_xdg_git_configs(self):
+        dotfiles = self.home / "dotfiles/git"
+        dotfiles.mkdir(parents=True)
+        target = dotfiles / "gitconfig"
+        target.write_text("[user]\n    name = Test\n")
+        (self.home / ".gitconfig").symlink_to(target)
+        xdg = self.home / ".config/git"
+        xdg.mkdir(parents=True)
+        xdg_config = xdg / "config"
+        xdg_config.write_text("[init]\n    defaultBranch = main\n")
+        xdg_ignore = xdg / "ignore"
+        xdg_ignore.write_text("*.swp\n")
+
+        result = self.init_antigravity()
+
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        data = json.loads((self.home / ".gemini/antigravity-cli/settings.json").read_text())
+        self.assertEqual(
+            data["permissions"]["allow"],
+            [
+                f"read_file({xdg_config.resolve().as_posix()})",
+                f"read_file({target.resolve().as_posix()})",
+                f"read_file({xdg_ignore.resolve().as_posix()})",
+            ],
+        )
 
 
 if __name__ == "__main__":
