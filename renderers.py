@@ -110,13 +110,10 @@ def render_opencode(agent: dict, model: str | None) -> str:
 
 
 def render_antigravity(agent: dict, model: str) -> str:
-    # Antigravity's docs warn that an unknown tool name can hang a subagent, so
-    # use only names its docs show. The web tool names come from the SDK
-    # built-in tools page, not the subagent docs; verify them in a real install.
-    tools = {
-        "docs-fetcher": ["search_web", "read_url_content"],
-        "git-commit": ["view_file", "grep_search", "run_command"],
-    }.get(agent["name"], ["view_file", "grep_search"])
+    # Tool names verified with agy 1.5.17, which silently drops retired names
+    # such as grep_search, list_dir, find_by_name, and read_url_content. Only
+    # run_command can list or search files there, so file agents get it too.
+    tools = ["search_web"] if agent["name"] == "docs-fetcher" else ["read_file", "run_command"]
     tool_lines = "".join(f"  - {tool}\n" for tool in tools)
     return (
         f'---\nname: {yaml_scalar(agent["name"])}\n'

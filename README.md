@@ -155,10 +155,11 @@ Edit `source/agents/database-review.md`. Its TOML frontmatter selects the
 `description`, `model_profile`, and `harnesses`; instructions go below it.
 The default profile is `deep_review`. Use `--profile` to choose another, and
 repeat `--harness` to select targets. Omitting targets selects all harnesses.
-New shared agents use each renderer's defaults without Python changes. On
-Claude Code and Antigravity those defaults are read-only file tools: an agent
-that needs a shell or web access needs a named exception in `renderers.py`.
-`new.py` prints this reminder when either harness is selected.
+New shared agents use each renderer's defaults without Python changes. Claude
+Code gives them read-only file tools, and Antigravity gives them `read_file`
+and `run_command`; an agent that needs other access, such as the web, needs a
+named exception in `renderers.py`. `new.py` prints this reminder when either
+harness is selected.
 
 ### Add a skill
 
@@ -389,13 +390,20 @@ Report-only instructions apply to the agents; enforcement differs by harness:
   flags, and redirects require approval.
 - Claude reviewers have read/search tools, and `docs-fetcher` has web tools.
   `git-commit` also has Bash, which its frontmatter cannot restrict by command.
-- Antigravity reviewers have `view_file` and `grep_search`, the tool names its
-  subagent docs show. `git-commit` also has `run_command`, which its frontmatter
-  cannot restrict by command. `docs-fetcher` has `search_web` and
-  `read_url_content`; those names come from the
-  [SDK built-in tools](https://antigravity.google/docs/sdk/tools/) page, not the
-  subagent docs. Antigravity's docs warn that an unknown tool name can hang a
-  subagent, so verify these in a real install.
+- Antigravity agents have `read_file` and `run_command`, because in `agy`
+  1.5.17 only the shell can list or search files. Their frontmatter cannot
+  restrict commands, so as on Codex, report-only behavior relies on their
+  instructions and Antigravity's command sandbox. That sandbox is set per
+  project or globally, not per agent, and it blocks files outside the
+  workspace, including a Git config that `~/.gitconfig` includes from
+  elsewhere. Plain `git` then fails, and agents may retry with
+  `GIT_CONFIG_GLOBAL=/dev/null`, ignoring your global settings. `git` could
+  still read `~/.gitconfig` itself in testing, so keeping the settings there
+  avoids this. `commandExecutionPolicy` only controls approval prompts.
+  `docs-fetcher` has only `search_web`, so its answers come from search results
+  rather than fetched pages. `agy` 1.5.17 silently drops retired tool names
+  (`grep_search`, `list_dir`, `find_by_name`, `read_url_content`), although
+  older changelogs say custom agents keep them.
 - Codex agents inherit the parent's sandbox and approval policy. Their config
   files do not establish a narrower permission boundary; report-only behavior
   also relies on their instructions.

@@ -50,8 +50,8 @@ class AuthoringTests(unittest.TestCase):
             self.assertEqual(json.loads(line.removeprefix("description: ")), description)
         self.assertIn("tools: Read, Glob, Grep\n", claude.read_text())
 
-    def test_new_agent_warns_only_where_tools_default_to_read_only(self):
-        note = "give new agents read-only file tools"
+    def test_new_agent_notes_default_tools_where_they_are_limited(self):
+        note = "new agents get default tools"
         self.assertIn(note, self.cli("new.py", "agent", "default-targets").stdout)
         self.assertIn(note, self.cli("new.py", "agent", "on-antigravity",
                                      "--harness", "antigravity").stdout)
