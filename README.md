@@ -31,7 +31,7 @@ The installer skips unchanged entries, asks before replacing changed entries,
 and saves replacements under `~/.ai-agents-backups/<timestamp>-<suffix>/`. Unrelated
 entries are left alone.
 
-Agents listed in `RETIRED_AGENTS` in [install.py](install.py) are moved to the
+Retired agents and skills listed in [install.py](install.py) are moved to the
 same backup folder, with the same confirmation, unless the build still produces
 them. Removing any other entry from this repository does not remove its
 installed copy.
@@ -59,19 +59,17 @@ Loading this file in the standalone IDE and IDE extensions is unverified. See
 adapted agents and shared prompts without adding license text to model prompts.
 Skill licenses remain beside their `SKILL.md` files.
 
-If previously installed, move retired `explore` and `sidebar` agents and the
-`implementation-workflow` skill out of these directories. Preserve any local
-changes you want to keep. The repository no longer generates custom commands;
-older installed commands are also left alone.
+The installer moves these retired entries to its backup folder:
 
-The `code-maintainability` agent replaces `code-readability`, `code-redundancy`,
-and `code-simplifier`. The installer moves installed copies of those three to
-its backup folder.
+- Agents `code-readability`, `code-redundancy`, and `code-simplifier`, replaced
+  by `code-maintainability`.
+- Agents `explore` and `sidebar`, and the `implementation-workflow` skill.
+- The `mode-thorough-plan` skill and OpenCode's
+  `~/.config/opencode/agents/thorough-plan.md` agent, replaced by the
+  `thorough-plan` skill.
 
-The shared planning skill is now `thorough-plan`. If previously installed,
-move the old `mode-thorough-plan` skill folders and OpenCode's retired
-`~/.config/opencode/agents/thorough-plan.md` out of their installation directories,
-preserving local changes. The installer leaves these entries alone.
+The repository no longer generates custom commands; older installed commands
+are left alone.
 
 ### OpenCode settings
 

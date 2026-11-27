@@ -21,10 +21,13 @@ from urllib.parse import urlsplit
 
 import build
 
-# Agents this repository used to install and no longer builds. Installing moves
-# leftover copies to the backup folder. A name the build still produces is
-# skipped, so a name can be listed before its removal lands and reused later.
-RETIRED_AGENTS = ("code-readability", "code-redundancy", "code-simplifier")
+# Agents and skills this repository used to install and no longer builds.
+# Installing moves leftover copies to the backup folder. A name the build still
+# produces is skipped, so a name can be listed before its removal lands and
+# reused later.
+RETIRED_AGENTS = ("code-readability", "code-redundancy", "code-simplifier", "explore", "sidebar")
+RETIRED_OPENCODE_AGENTS = ("thorough-plan",)
+RETIRED_SKILLS = ("implementation-workflow", "mode-thorough-plan")
 
 
 def select_harnesses() -> list[str]:
@@ -129,9 +132,12 @@ def install(harnesses: list[str], home: Path, force: bool) -> None:
             for entry in sorted(source_dir.glob("*")):
                 install_item(entry, destination_dir / entry.name)
         suffix = Path(build.AGENT_PATHS[harness]).suffix
-        for name in RETIRED_AGENTS:
-            leftover = target / "agents" / f"{name}{suffix}"
-            if (agents / leftover.name).exists():
+        retired_agents = RETIRED_AGENTS + (RETIRED_OPENCODE_AGENTS if harness == "opencode" else ())
+        retired = [(agents, target / "agents", f"{name}{suffix}") for name in retired_agents]
+        retired += [(skills, skills_target, name) for name in RETIRED_SKILLS]
+        for source_dir, destination_dir, name in retired:
+            leftover = destination_dir / name
+            if (source_dir / name).exists():
                 continue
             if (leftover.exists() or leftover.is_symlink()) and back_up(leftover, "Retire"):
                 print(f"Retired: {leftover}")

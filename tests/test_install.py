@@ -113,6 +113,26 @@ class InstallTests(unittest.TestCase):
         )
         self.assertTrue((self.home / ".claude/agents/code-redundancy.md").is_file())
 
+    def test_retired_skills_and_opencode_only_agents_move_to_backup(self):
+        retired = [
+            self.home / directory / "mode-thorough-plan/SKILL.md"
+            for directory in (".agents/skills", ".claude/skills", ".config/opencode/skills")
+        ] + [self.home / ".config/opencode/agents/thorough-plan.md"]
+        kept = self.home / ".claude/agents/thorough-plan.md"
+        for path in (*retired, kept):
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text("old copy")
+
+        self.install("--all")
+
+        self.assertFalse(any(path.exists() for path in retired))
+        self.assertEqual(kept.read_text(), "old copy")
+        backups = sorted(
+            path.relative_to(self.home / ".ai-agents-backups").parts[1:]
+            for path in (self.home / ".ai-agents-backups").rglob("*") if path.is_file()
+        )
+        self.assertEqual(backups, sorted(path.relative_to(self.home).parts for path in retired))
+
     def test_installer_excludes_os_metadata_added_to_build(self):
         script = """
 from pathlib import Path
